@@ -22,8 +22,7 @@ class NamePage extends StatelessWidget {
       bottomActionText: 'قم بتسجيل الدخول',
       onBottomActionPressed: () {},
       child: Directionality(
-        textDirection:
-            TextDirection.rtl, // ✅ makes errorText render RTL (right side)
+        textDirection: TextDirection.rtl,
         child: Column(
           children: [
             TextField(
@@ -31,6 +30,11 @@ class NamePage extends StatelessWidget {
               textAlign: TextAlign.right,
               keyboardType: TextInputType.name,
               onChanged: flow.setFirstName,
+              style: const TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 16,
+                color: AppColors.textPrimary,
+              ),
               decoration: InputDecoration(
                 hintText: 'الاسم الأول',
                 filled: true,
@@ -47,6 +51,11 @@ class NamePage extends StatelessWidget {
               textAlign: TextAlign.right,
               keyboardType: TextInputType.name,
               onChanged: flow.setLastName,
+              style: const TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 16,
+                color: AppColors.textPrimary,
+              ),
               decoration: InputDecoration(
                 hintText: 'الاسم الأخير',
                 filled: true,
