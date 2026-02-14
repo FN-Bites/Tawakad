@@ -7,51 +7,36 @@ class AppTheme {
 
     return base.copyWith(
       useMaterial3: true,
-
-      // Background
       scaffoldBackgroundColor: AppColors.background,
-
-      // Colors
       colorScheme: base.colorScheme.copyWith(
         primary: AppColors.primary,
         surface: AppColors.surface,
       ),
-
-      // Global typography
       textTheme: const TextTheme(
-        // Default body text
         bodyMedium: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
         ),
-
-        // Question progress text (12 Regular)
         bodySmall: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-
-        // Main question title (32 Bold)
         headlineLarge: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 36,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-
-        // "Have an account?" text (14 SemiBold)
         labelMedium: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 14,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-
-        // Button text (18 Bold)
         labelLarge: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 18,
@@ -59,16 +44,10 @@ class AppTheme {
           color: AppColors.buttonText,
         ),
       ),
-
-      // AppBar style
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        foregroundColor: AppColors.icon,
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: AppColors.textPrimary,
+        selectionHandleColor: AppColors.primary,
       ),
-
-      // Input fields
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.surface,
@@ -92,9 +71,28 @@ class AppTheme {
           borderRadius: BorderRadius.circular(30),
           borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(
+            color: AppColors.fieldErrorBorder,
+            width: 1.5,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30),
+          borderSide: const BorderSide(
+            color: AppColors.fieldErrorBorder,
+            width: 1.5,
+          ),
+        ),
+        errorStyle: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          color: AppColors.fieldErrorBorder,
+          height: 1.3,
+        ),
       ),
-
-      // Buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,

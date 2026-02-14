@@ -45,12 +45,10 @@ class AuthScaffold extends StatelessWidget {
         top: true,
         bottom: true,
         child: Padding(
-          // Restricted content area from design
           padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Header: progress centered + back button right
               SizedBox(
                 height: 24,
                 child: Stack(
@@ -87,7 +85,7 @@ class AuthScaffold extends StatelessWidget {
                         child: const Padding(
                           padding: EdgeInsets.all(8),
                           child: Icon(
-                            Icons.arrow_back_ios_new_rounded,
+                            Icons.arrow_forward_ios_rounded,
                             size: 20,
                             color: AppColors.icon,
                           ),
@@ -98,39 +96,31 @@ class AuthScaffold extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-
               Text(
                 _arabicProgressText(currentStep, totalSteps),
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),
-
               const SizedBox(height: 33.88),
               SizedBox(
                 width: 120,
                 height: 150,
                 child: mascot ?? const SizedBox(),
               ),
-
               const SizedBox(height: 16),
-
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-
               const SizedBox(height: 32),
-
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: child,
                 ),
               ),
-
               const SizedBox(height: 16),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -141,9 +131,7 @@ class AuthScaffold extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 28.5),
-
               RichText(
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,

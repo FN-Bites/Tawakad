@@ -24,4 +24,8 @@ class AppColors {
 
   // Icons
   static const icon = Color(0xFF494646);
+
+  //Errors
+  static const Color fieldErrorFill = Color(0xFFFAEBEB);
+  static const Color fieldErrorBorder = Color(0xFFD74242);
 }

@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes.dart';
+import 'features/onboarding/state/onboarding_flow_provider.dart';
 
 void main() {
-  runApp(const TawakadApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => OnboardingFlowProvider(totalSteps: 4),
+      child: const TawakadApp(),
+    ),
+  );
 }
 
 class TawakadApp extends StatelessWidget {
@@ -13,22 +20,9 @@ class TawakadApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Tawakad',
-
-      // App theme
       theme: AppTheme.light(),
-
-      // Global RTL
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        );
-      },
-
-      // Navigation system
-      initialRoute: AppRoutes.authEntry,
       routes: AppRoutes.routes,
+      initialRoute: AppRoutes.namePage,
     );
   }
 }
