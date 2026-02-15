@@ -13,6 +13,12 @@ class AppTheme {
         surface: AppColors.surface,
       ),
       textTheme: const TextTheme(
+        bodyLarge: TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textPrimary,
+        ),
         bodyMedium: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 14,
@@ -58,6 +64,18 @@ class AppTheme {
           fontWeight: FontWeight.w300,
           fontSize: 16,
           color: AppColors.placeholder,
+        ),
+        labelStyle: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textPrimary,
+        ),
+        floatingLabelStyle: const TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: AppColors.textPrimary,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),

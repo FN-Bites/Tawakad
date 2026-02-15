@@ -1,55 +1,104 @@
 import 'package:flutter/material.dart';
 
 class OnboardingFlowProvider extends ChangeNotifier {
-  final int totalSteps;
+  OnboardingFlowProvider({required int totalSteps}) : _totalSteps = totalSteps;
 
-  OnboardingFlowProvider({this.totalSteps = 4});
+  final int _totalSteps;
+  int _currentStep = 1;
 
-  int currentStep = 1;
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
 
-  String firstName = '';
-  String lastName = '';
+  String _firstName = '';
+  String _lastName = '';
+  String? _gender;
 
-  // Validation flags
-  bool submitted = false;
+  bool _nameSubmitAttempted = false;
+  bool _genderSubmitAttempted = false;
 
-  bool get firstNameInvalid => submitted && firstName.trim().isEmpty;
-  bool get lastNameInvalid => submitted && lastName.trim().isEmpty;
+  int get totalSteps => _totalSteps;
+  int get currentStep => _currentStep;
 
-  void setFirstName(String v) {
-    firstName = v;
+  String get firstName => _firstName;
+  String get lastName => _lastName;
+  String? get gender => _gender;
+
+  bool get firstNameInvalid =>
+      _nameSubmitAttempted && _firstName.trim().isEmpty;
+  bool get lastNameInvalid => _nameSubmitAttempted && _lastName.trim().isEmpty;
+  bool get genderInvalid => _genderSubmitAttempted && (_gender == null);
+
+  void setFirstName(String value) {
+    _firstName = value;
+
     notifyListeners();
   }
 
-  void setLastName(String v) {
-    lastName = v;
+  void setLastName(String value) {
+    _lastName = value;
     notifyListeners();
   }
 
-  bool validateNameStep() {
-    submitted = true;
+  void setGender(String? value) {
+    _gender = value;
+
     notifyListeners();
-    return firstName.trim().isNotEmpty && lastName.trim().isNotEmpty;
   }
 
   void nextFromNameStep() {
-    if (!validateNameStep()) return;
+    _nameSubmitAttempted = true;
 
-    // move to next step
-    if (currentStep < totalSteps) {
-      currentStep++;
-    }
+    _firstName = firstNameController.text;
+    _lastName = lastNameController.text;
 
-    // reset validation for next page
-    submitted = false;
     notifyListeners();
+
+    if (firstNameInvalid || lastNameInvalid) return;
+
+    _goToStep(_currentStep + 1);
+  }
+
+  void nextFromGenderStep() {
+    _genderSubmitAttempted = true;
+    notifyListeners();
+
+    if (genderInvalid) return;
+
+    _goToStep(_currentStep + 1);
   }
 
   void back() {
-    if (currentStep > 1) {
-      currentStep--;
-      submitted = false;
-      notifyListeners();
-    }
+    if (_currentStep <= 1) return;
+    _goToStep(_currentStep - 1);
+  }
+
+  void _goToStep(int step) {
+    final clamped = step.clamp(1, _totalSteps);
+    if (clamped == _currentStep) return;
+
+    _currentStep = clamped;
+    notifyListeners();
+  }
+
+  void reset() {
+    _currentStep = 1;
+    _firstName = '';
+    _lastName = '';
+    _gender = null;
+
+    firstNameController.text = '';
+    lastNameController.text = '';
+
+    _nameSubmitAttempted = false;
+    _genderSubmitAttempted = false;
+
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    firstNameController.dispose();
+    lastNameController.dispose();
+    super.dispose();
   }
 }

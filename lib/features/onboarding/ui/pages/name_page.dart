@@ -1,74 +1,119 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../state/onboarding_flow_provider.dart';
-import '../widgets/onboarding_scaffold.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class NamePage extends StatelessWidget {
-  const NamePage({super.key});
+class NameStepContent extends StatelessWidget {
+  const NameStepContent({super.key});
 
   @override
   Widget build(BuildContext context) {
     final flow = context.watch<OnboardingFlowProvider>();
 
-    return AuthScaffold(
-      currentStep: flow.currentStep,
-      totalSteps: flow.totalSteps,
-      title: 'ماهو اسمك؟',
-      primaryButtonText: 'التالي',
-      onPrimaryPressed: flow.nextFromNameStep,
-      onBack: flow.back,
-      bottomPrefixText: 'لديك حساب؟ ',
-      bottomActionText: 'قم بتسجيل الدخول',
-      onBottomActionPressed: () {},
-      child: Directionality(
-        textDirection: TextDirection.rtl,
-        child: Column(
-          children: [
-            TextField(
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              keyboardType: TextInputType.name,
-              onChanged: flow.setFirstName,
-              style: const TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 16,
-                color: AppColors.textPrimary,
-              ),
-              decoration: InputDecoration(
-                hintText: 'الاسم الأول',
-                filled: true,
-                fillColor: flow.firstNameInvalid
-                    ? AppColors.fieldErrorFill
-                    : AppColors.surface,
-                errorText:
-                    flow.firstNameInvalid ? 'يرجى إدخال الاسم الأول' : null,
-              ),
+    Widget field({
+      required TextEditingController controller,
+      required String hint,
+      required ValueChanged<String> onChanged,
+      required bool invalid,
+      required String errorMsg,
+    }) {
+      final theme = Theme.of(context);
+      final base =
+          const InputDecoration().applyDefaults(theme.inputDecorationTheme);
+
+      return Column(
+        children: [
+          TextField(
+            controller: controller,
+            textDirection: TextDirection.rtl,
+            textAlign: TextAlign.right,
+            keyboardType: TextInputType.name,
+            onChanged: onChanged,
+            decoration: base.copyWith(
+              hintText: hint,
+              hintTextDirection: TextDirection.rtl,
+              errorText: null,
+              fillColor: invalid ? AppColors.fieldErrorFill : AppColors.surface,
+              enabledBorder:
+                  (base.enabledBorder as OutlineInputBorder?)?.copyWith(
+                        borderSide: BorderSide(
+                          color: invalid
+                              ? AppColors.fieldErrorBorder
+                              : AppColors.fieldBorder,
+                          width: 1,
+                        ),
+                      ) ??
+                      OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(
+                          color: invalid
+                              ? AppColors.fieldErrorBorder
+                              : AppColors.fieldBorder,
+                          width: 1,
+                        ),
+                      ),
+              focusedBorder:
+                  (base.focusedBorder as OutlineInputBorder?)?.copyWith(
+                        borderSide: BorderSide(
+                          color: invalid
+                              ? AppColors.fieldErrorBorder
+                              : AppColors.primary,
+                          width: invalid ? 1.5 : 1.5,
+                        ),
+                      ) ??
+                      OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(
+                          color: invalid
+                              ? AppColors.fieldErrorBorder
+                              : AppColors.primary,
+                          width: 1.5,
+                        ),
+                      ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              keyboardType: TextInputType.name,
-              onChanged: flow.setLastName,
-              style: const TextStyle(
-                fontFamily: 'Montserrat',
-                fontSize: 16,
-                color: AppColors.textPrimary,
-              ),
-              decoration: InputDecoration(
-                hintText: 'الاسم الأخير',
-                filled: true,
-                fillColor: flow.lastNameInvalid
-                    ? AppColors.fieldErrorFill
-                    : AppColors.surface,
-                errorText:
-                    flow.lastNameInvalid ? 'يرجى إدخال الاسم الأخير' : null,
+          ),
+          if (invalid) ...[
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  errorMsg,
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  style: theme.inputDecorationTheme.errorStyle ??
+                      theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.fieldErrorBorder,
+                        fontWeight: FontWeight.w400,
+                        fontSize: 12,
+                      ),
+                ),
               ),
             ),
           ],
+        ],
+      );
+    }
+
+    return Column(
+      children: [
+        field(
+          controller: flow.firstNameController,
+          hint: 'الاسم الأول',
+          onChanged: flow.setFirstName,
+          invalid: flow.firstNameInvalid,
+          errorMsg: 'يرجى إدخال الاسم الأول',
         ),
-      ),
+        const SizedBox(height: 16),
+        field(
+          controller: flow.lastNameController,
+          hint: 'الاسم الأخير',
+          onChanged: flow.setLastName,
+          invalid: flow.lastNameInvalid,
+          errorMsg: 'يرجى إدخال الاسم الأخير',
+        ),
+      ],
     );
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../features/onboarding/ui/pages/name_page.dart';
+import '../features/onboarding/ui/pages/onboarding_page.dart';
 
 class AppRoutes {
-  static const namePage = '/';
+  static const onboarding = '/';
 
   static final routes = <String, WidgetBuilder>{
-    namePage: (_) => const NamePage(),
+    onboarding: (_) => const OnboardingPage(),
   };
 }
