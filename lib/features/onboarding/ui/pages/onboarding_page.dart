@@ -5,6 +5,7 @@ import '../widgets/onboarding_scaffold.dart';
 import 'name_page.dart';
 import 'gender_page.dart';
 import 'status_page.dart';
+import 'medication_page.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -34,6 +35,12 @@ class OnboardingPage extends StatelessWidget {
         title = 'ماهي حالتك؟';
         stepChild = const StatusStepContent();
         onNext = flow.nextFromStatusStep;
+        break;
+
+      case 4:
+        title = 'هل تتناول أي أدوية؟';
+        stepChild = const MedicationStepContent();
+        onNext = flow.nextFromMedicationStep;
         break;
 
       default:
