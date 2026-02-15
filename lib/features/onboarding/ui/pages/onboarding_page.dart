@@ -4,6 +4,7 @@ import '../../state/onboarding_flow_provider.dart';
 import '../widgets/onboarding_scaffold.dart';
 import 'name_page.dart';
 import 'gender_page.dart';
+import 'status_page.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -27,6 +28,12 @@ class OnboardingPage extends StatelessWidget {
         title = 'ماهو جنسك؟';
         stepChild = const GenderStepContent();
         onNext = flow.nextFromGenderStep;
+        break;
+
+      case 3:
+        title = 'ماهي حالتك؟';
+        stepChild = const StatusStepContent();
+        onNext = flow.nextFromStatusStep;
         break;
 
       default:

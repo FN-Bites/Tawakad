@@ -12,9 +12,11 @@ class OnboardingFlowProvider extends ChangeNotifier {
   String _firstName = '';
   String _lastName = '';
   String? _gender;
+  String? _status;
 
   bool _nameSubmitAttempted = false;
   bool _genderSubmitAttempted = false;
+  bool _statusSubmitAttempted = false;
 
   int get totalSteps => _totalSteps;
   int get currentStep => _currentStep;
@@ -22,15 +24,16 @@ class OnboardingFlowProvider extends ChangeNotifier {
   String get firstName => _firstName;
   String get lastName => _lastName;
   String? get gender => _gender;
+  String? get status => _status;
 
   bool get firstNameInvalid =>
       _nameSubmitAttempted && _firstName.trim().isEmpty;
   bool get lastNameInvalid => _nameSubmitAttempted && _lastName.trim().isEmpty;
   bool get genderInvalid => _genderSubmitAttempted && (_gender == null);
+  bool get statusInvalid => _statusSubmitAttempted && (_status == null);
 
   void setFirstName(String value) {
     _firstName = value;
-
     notifyListeners();
   }
 
@@ -41,7 +44,11 @@ class OnboardingFlowProvider extends ChangeNotifier {
 
   void setGender(String? value) {
     _gender = value;
+    notifyListeners();
+  }
 
+  void setStatus(String? value) {
+    _status = value;
     notifyListeners();
   }
 
@@ -67,6 +74,15 @@ class OnboardingFlowProvider extends ChangeNotifier {
     _goToStep(_currentStep + 1);
   }
 
+  void nextFromStatusStep() {
+    _statusSubmitAttempted = true;
+    notifyListeners();
+
+    if (statusInvalid) return;
+
+    _goToStep(_currentStep + 1);
+  }
+
   void back() {
     if (_currentStep <= 1) return;
     _goToStep(_currentStep - 1);
@@ -85,12 +101,14 @@ class OnboardingFlowProvider extends ChangeNotifier {
     _firstName = '';
     _lastName = '';
     _gender = null;
+    _status = null;
 
     firstNameController.text = '';
     lastNameController.text = '';
 
     _nameSubmitAttempted = false;
     _genderSubmitAttempted = false;
+    _statusSubmitAttempted = false;
 
     notifyListeners();
   }
