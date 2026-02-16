@@ -15,6 +15,7 @@ class AppColors {
   // Text
   static const textPrimary = Color(0xFF000000);
   static const placeholder = Color(0xFF92A8C8);
+  static const textbreak = const Color(0xFF9CA3AF); // كلمة" أو" في تسجيل
 
   // Inputs
   static const fieldBorder = Color(0xFFCFD6DE);
