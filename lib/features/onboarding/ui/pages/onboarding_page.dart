@@ -6,6 +6,7 @@ import 'name_page.dart';
 import 'gender_page.dart';
 import 'status_page.dart';
 import 'medication_page.dart';
+import '../../../../core/widgets/mascot_rive.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -59,6 +60,7 @@ class OnboardingPage extends StatelessWidget {
       bottomPrefixText: 'لديك حساب؟ ',
       bottomActionText: 'قم بتسجيل الدخول',
       onBottomActionPressed: () {},
+      mascot: MascotRive(showError: flow.showMascotError),
       child: stepChild,
     );
   }

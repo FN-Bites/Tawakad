@@ -20,8 +20,11 @@ class OnboardingFlowProvider extends ChangeNotifier {
   bool _statusSubmitAttempted = false;
   bool _medicationSubmitAttempted = false;
 
+  bool _showMascotError = false;
+
   int get totalSteps => _totalSteps;
   int get currentStep => _currentStep;
+  bool get showMascotError => _showMascotError;
 
   String get firstName => _firstName;
   String get lastName => _lastName;
@@ -36,6 +39,12 @@ class OnboardingFlowProvider extends ChangeNotifier {
   bool get statusInvalid => _statusSubmitAttempted && (_status == null);
   bool get medicationInvalid =>
       _medicationSubmitAttempted && (_takesMedication == null);
+
+  void clearMascotError() {
+    if (!_showMascotError) return;
+    _showMascotError = false;
+    notifyListeners();
+  }
 
   void setFirstName(String value) {
     _firstName = value;
@@ -68,36 +77,51 @@ class OnboardingFlowProvider extends ChangeNotifier {
     _firstName = firstNameController.text;
     _lastName = lastNameController.text;
 
+    final invalid = firstNameInvalid || lastNameInvalid;
+    _showMascotError = invalid;
+
     notifyListeners();
 
-    if (firstNameInvalid || lastNameInvalid) return;
+    if (invalid) return;
 
     _goToStep(_currentStep + 1);
   }
 
   void nextFromGenderStep() {
     _genderSubmitAttempted = true;
+
+    final invalid = genderInvalid;
+    _showMascotError = invalid;
+
     notifyListeners();
 
-    if (genderInvalid) return;
+    if (invalid) return;
 
     _goToStep(_currentStep + 1);
   }
 
   void nextFromStatusStep() {
     _statusSubmitAttempted = true;
+
+    final invalid = statusInvalid;
+    _showMascotError = invalid;
+
     notifyListeners();
 
-    if (statusInvalid) return;
+    if (invalid) return;
 
     _goToStep(_currentStep + 1);
   }
 
   void nextFromMedicationStep() {
     _medicationSubmitAttempted = true;
+
+    final invalid = medicationInvalid;
+    _showMascotError = invalid;
+
     notifyListeners();
 
-    if (medicationInvalid) return;
+    if (invalid) return;
 
     _goToStep(currentStep + 1);
   }
@@ -112,6 +136,7 @@ class OnboardingFlowProvider extends ChangeNotifier {
     if (clamped == _currentStep) return;
 
     _currentStep = clamped;
+    _showMascotError = false;
     notifyListeners();
   }
 
@@ -130,6 +155,8 @@ class OnboardingFlowProvider extends ChangeNotifier {
     _genderSubmitAttempted = false;
     _statusSubmitAttempted = false;
     _medicationSubmitAttempted = false;
+
+    _showMascotError = false;
 
     notifyListeners();
   }

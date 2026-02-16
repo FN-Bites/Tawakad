@@ -28,7 +28,10 @@ class NameStepContent extends StatelessWidget {
             textDirection: TextDirection.rtl,
             textAlign: TextAlign.right,
             keyboardType: TextInputType.name,
-            onChanged: onChanged,
+            onChanged: (v) {
+              onChanged(v);
+              flow.clearMascotError();
+            },
             decoration: base.copyWith(
               hintText: hint,
               hintTextDirection: TextDirection.rtl,
@@ -58,7 +61,7 @@ class NameStepContent extends StatelessWidget {
                           color: invalid
                               ? AppColors.fieldErrorBorder
                               : AppColors.primary,
-                          width: invalid ? 1.5 : 1.5,
+                          width: 1.5,
                         ),
                       ) ??
                       OutlineInputBorder(

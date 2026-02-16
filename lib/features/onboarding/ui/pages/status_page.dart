@@ -11,13 +11,18 @@ class StatusStepContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final flow = context.watch<OnboardingFlowProvider>();
 
+    void select(String? v) {
+      flow.setStatus(v);
+      flow.clearMascotError();
+    }
+
     return Column(
       children: [
         RadioOption(
           label: 'طالب',
           value: 'student',
           groupValue: flow.status,
-          onChanged: flow.setStatus,
+          onChanged: select,
           hasError: flow.statusInvalid,
         ),
         const SizedBox(height: 16),
@@ -25,7 +30,7 @@ class StatusStepContent extends StatelessWidget {
           label: 'موظف',
           value: 'employee',
           groupValue: flow.status,
-          onChanged: flow.setStatus,
+          onChanged: select,
           hasError: flow.statusInvalid,
         ),
         const SizedBox(height: 16),
@@ -33,7 +38,7 @@ class StatusStepContent extends StatelessWidget {
           label: 'متفرغ',
           value: 'free',
           groupValue: flow.status,
-          onChanged: flow.setStatus,
+          onChanged: select,
           hasError: flow.statusInvalid,
         ),
         const SizedBox(height: 16),
@@ -41,7 +46,7 @@ class StatusStepContent extends StatelessWidget {
           label: 'أخرى',
           value: 'other',
           groupValue: flow.status,
-          onChanged: flow.setStatus,
+          onChanged: select,
           hasError: flow.statusInvalid,
         ),
         if (flow.statusInvalid) ...[

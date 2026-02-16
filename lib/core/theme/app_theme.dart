@@ -6,7 +6,6 @@ class AppTheme {
     final base = ThemeData.light();
 
     return base.copyWith(
-      useMaterial3: true,
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: base.colorScheme.copyWith(
         primary: AppColors.primary,

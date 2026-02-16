@@ -101,12 +101,22 @@ class AuthScaffold extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 33.88),
+              const SizedBox(height: 24),
               SizedBox(
                 width: 120,
                 height: 150,
-                child: mascot ?? const SizedBox(),
+                child: OverflowBox(
+                  maxWidth: 180,
+                  maxHeight: 240,
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: 160,
+                    height: 240,
+                    child: mascot ?? const SizedBox(),
+                  ),
+                ),
               ),
+              const SizedBox(height: 24),
               const SizedBox(height: 16),
               Text(
                 title,

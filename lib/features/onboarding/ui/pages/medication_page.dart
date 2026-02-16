@@ -17,7 +17,10 @@ class MedicationStepContent extends StatelessWidget {
           label: 'نعم',
           value: 'yes',
           groupValue: flow.takesMedication,
-          onChanged: flow.setTakesMedication,
+          onChanged: (v) {
+            flow.setTakesMedication(v);
+            flow.clearMascotError();
+          },
           hasError: flow.medicationInvalid,
         ),
         const SizedBox(height: 16),
@@ -25,7 +28,10 @@ class MedicationStepContent extends StatelessWidget {
           label: 'لا',
           value: 'no',
           groupValue: flow.takesMedication,
-          onChanged: flow.setTakesMedication,
+          onChanged: (v) {
+            flow.setTakesMedication(v);
+            flow.clearMascotError();
+          },
           hasError: flow.medicationInvalid,
         ),
         if (flow.medicationInvalid) ...[

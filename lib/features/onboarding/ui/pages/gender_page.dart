@@ -17,7 +17,10 @@ class GenderStepContent extends StatelessWidget {
           label: 'ذكر',
           value: 'male',
           groupValue: flow.gender,
-          onChanged: flow.setGender,
+          onChanged: (v) {
+            flow.setGender(v);
+            flow.clearMascotError();
+          },
           hasError: flow.genderInvalid,
         ),
         const SizedBox(height: 16),
@@ -25,7 +28,10 @@ class GenderStepContent extends StatelessWidget {
           label: 'أنثى',
           value: 'female',
           groupValue: flow.gender,
-          onChanged: flow.setGender,
+          onChanged: (v) {
+            flow.setGender(v);
+            flow.clearMascotError();
+          },
           hasError: flow.genderInvalid,
         ),
         if (flow.genderInvalid) ...[
