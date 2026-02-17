@@ -41,7 +41,13 @@ class OnboardingPage extends StatelessWidget {
       case 4:
         title = 'هل تتناول أي أدوية؟';
         stepChild = const MedicationStepContent();
-        onNext = flow.nextFromMedicationStep;
+        onNext = () {
+          flow.nextFromMedicationStep();
+
+          if (!flow.showMascotError) {
+            Navigator.pushReplacementNamed(context, '/signup');
+          }
+        };
         break;
 
       default:

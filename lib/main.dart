@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes.dart';
 import 'features/onboarding/state/onboarding_flow_provider.dart';
-import 'features/singUp/state/singup_flow_provider.dart';
+import 'features/signUp/state/signup_flow_provider.dart';
 
 void main() {
   runApp(
@@ -30,8 +30,7 @@ class TawakadApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routes: AppRoutes.routes,
-      //initialRoute: AppRoutes.onboarding,
-      initialRoute: AppRoutes.signup,
+      initialRoute: AppRoutes.onboarding,
     );
   }
 }

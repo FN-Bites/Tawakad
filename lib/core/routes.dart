@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../features/onboarding/ui/pages/onboarding_page.dart';
-import '../features/singUp/ui/pages/singUp_page.dart';
+import '../features/signUp/ui/pages/signUp_page.dart';
 
 class AppRoutes {
   static const onboarding = '/';

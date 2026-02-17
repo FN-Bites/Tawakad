@@ -93,6 +93,7 @@ flutter:
 
   assets:
     - assets/toki.riv
+    - assets/Icons/Google.png
   fonts:
     - family: Montserrat
       fonts:
