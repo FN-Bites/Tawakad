@@ -6,6 +6,7 @@ import 'name_page.dart';
 import 'gender_page.dart';
 import 'status_page.dart';
 import 'medication_page.dart';
+import '../../../../core/widgets/entry_bottom_action_text.dart';
 import '../../../../core/widgets/mascot_rive.dart';
 
 class OnboardingPage extends StatelessWidget {
@@ -56,18 +57,20 @@ class OnboardingPage extends StatelessWidget {
         onNext = null;
     }
 
-    return AuthScaffold(
+    return OnboardingScaffold(
       currentStep: flow.currentStep,
       totalSteps: flow.totalSteps,
       title: title,
       primaryButtonText: 'التالي',
       onPrimaryPressed: onNext,
       onBack: flow.back,
-      bottomPrefixText: 'لديك حساب؟ ',
-      bottomActionText: 'قم بتسجيل الدخول',
-      onBottomActionPressed: () {},
       mascot: MascotRive(showError: flow.showMascotError),
       child: stepChild,
+      bottom: EntryBottomActionText(
+        prefixText: 'لديك حساب؟ ',
+        actionText: 'قم بتسجيل الدخول',
+        onTap: () {},
+      ),
     );
   }
 }

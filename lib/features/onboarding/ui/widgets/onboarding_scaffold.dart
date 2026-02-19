@@ -1,8 +1,24 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/entry_header.dart';
 
-class AuthScaffold extends StatelessWidget {
+import 'onboarding_progress_bar.dart';
+import 'onboarding_progress_text.dart';
+
+class OnboardingScaffold extends StatelessWidget {
+  const OnboardingScaffold({
+    super.key,
+    required this.currentStep,
+    required this.totalSteps,
+    this.onBack,
+    required this.title,
+    required this.child,
+    required this.primaryButtonText,
+    this.onPrimaryPressed,
+    this.mascot,
+    this.bottom,
+  });
+
   final int currentStep; // 1-based
   final int totalSteps;
 
@@ -13,26 +29,9 @@ class AuthScaffold extends StatelessWidget {
   final String primaryButtonText;
   final VoidCallback? onPrimaryPressed;
 
-  final String bottomPrefixText; // "لديك حساب؟ "
-  final String bottomActionText; // "قم بتسجيل الدخول"
-  final VoidCallback? onBottomActionPressed;
-
   final Widget? mascot;
 
-  const AuthScaffold({
-    super.key,
-    required this.currentStep,
-    required this.totalSteps,
-    this.onBack,
-    required this.title,
-    required this.child,
-    required this.primaryButtonText,
-    this.onPrimaryPressed,
-    required this.bottomPrefixText,
-    required this.bottomActionText,
-    this.onBottomActionPressed,
-    this.mascot,
-  });
+  final Widget? bottom;
 
   @override
   Widget build(BuildContext context) {
@@ -56,50 +55,19 @@ class AuthScaffold extends StatelessWidget {
                   children: [
                     Align(
                       alignment: Alignment.center,
-                      child: Transform.translate(
-                        offset: const Offset(0, 5),
-                        child: SizedBox(
-                          width: 210,
-                          height: 16,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(999),
-                            child: Directionality(
-                              textDirection: TextDirection.rtl,
-                              child: LinearProgressIndicator(
-                                value: progress,
-                                backgroundColor: AppColors.progressBackground,
-                                valueColor: const AlwaysStoppedAnimation(
-                                  AppColors.primary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                      child: OnboardingProgressBar(progress: progress),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: InkWell(
-                        onTap: onBack ?? () => Navigator.maybePop(context),
-                        borderRadius: BorderRadius.circular(24),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8),
-                          child: Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 20,
-                            color: AppColors.icon,
-                          ),
-                        ),
-                      ),
+                      child: EntryHeader(onBack: onBack),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                _arabicProgressText(currentStep, totalSteps),
-                style: Theme.of(context).textTheme.bodySmall,
-                textAlign: TextAlign.center,
+              OnboardingProgressText(
+                currentStep: currentStep,
+                totalSteps: totalSteps,
               ),
               const SizedBox(height: 24),
               SizedBox(
@@ -141,49 +109,14 @@ class AuthScaffold extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 28.5),
-              RichText(
-                textAlign: TextAlign.center,
-                textDirection: TextDirection.rtl,
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: bottomPrefixText,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: AppColors.linkSoft,
-                          ),
-                    ),
-                    TextSpan(
-                      text: bottomActionText,
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = onBottomActionPressed,
-                    ),
-                  ],
-                ),
-              ),
+              if (bottom != null) ...[
+                const SizedBox(height: 28.5),
+                bottom!,
+              ],
             ],
           ),
         ),
       ),
     );
-  }
-
-  String _arabicProgressText(int current, int total) {
-    return 'سؤال ${_toArabicIndic(current)} من ${_toArabicIndic(total)}';
-  }
-
-  String _toArabicIndic(int n) {
-    const map = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    final s = n.toString();
-    final buf = StringBuffer();
-    for (final ch in s.split('')) {
-      final digit = int.tryParse(ch);
-      buf.write(digit == null ? ch : map[digit]);
-    }
-    return buf.toString();
   }
 }
