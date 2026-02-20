@@ -20,7 +20,7 @@ class AppTheme {
         ),
         bodyMedium: TextStyle(
           fontFamily: 'Montserrat',
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
         ),

@@ -12,7 +12,7 @@ class MascotRive extends StatefulWidget {
 
 class _MascotRiveState extends State<MascotRive> {
   late final rive.FileLoader fileLoader = rive.FileLoader.fromAsset(
-    'assets/toki.riv',
+    'assets/animation/toki.riv',
     riveFactory: rive.Factory.rive,
   );
 
@@ -50,8 +50,9 @@ class _MascotRiveState extends State<MascotRive> {
       fileLoader: fileLoader,
       builder: (context, state) {
         if (state is rive.RiveLoading) return const SizedBox.shrink();
-        if (state is rive.RiveFailed)
+        if (state is rive.RiveFailed) {
           return Text('Rive failed: ${state.error}');
+        }
 
         if (state is rive.RiveLoaded) {
           _controller = state.controller;

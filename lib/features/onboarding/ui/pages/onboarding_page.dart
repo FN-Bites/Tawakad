@@ -7,7 +7,7 @@ import 'gender_page.dart';
 import 'status_page.dart';
 import 'medication_page.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
-import '../../../../core/widgets/mascot_rive.dart';
+import '../../../../core/widgets/animation/mascot_rive.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
