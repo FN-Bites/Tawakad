@@ -95,6 +95,7 @@ flutter:
     - assets/animation/toki.riv
     - assets/animation/mail-send.riv
     - assets/animation/shield.riv
+    - assets/animation/splash.riv
     - assets/Icons/Google.png
   fonts:
     - family: Montserrat

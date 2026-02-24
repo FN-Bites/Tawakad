@@ -30,7 +30,7 @@ class TawakadApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routes: AppRoutes.routes,
-      initialRoute: AppRoutes.onboarding,
+      initialRoute: AppRoutes.splashScreen,
     );
   }
 }
