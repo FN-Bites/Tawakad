@@ -12,6 +12,12 @@ class AppTheme {
         surface: AppColors.surface,
       ),
       textTheme: const TextTheme(
+        displayLarge: TextStyle(
+          fontFamily: 'NotoSan',
+          fontSize: 80,
+          fontWeight: FontWeight.w700,
+          color: AppColors.primary,
+        ),
         bodyLarge: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 16,
@@ -115,6 +121,24 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.buttonText,
           minimumSize: const Size.fromHeight(48),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF596070),
+          minimumSize: const Size.fromHeight(48),
+          side: const BorderSide(
+            color: Color(0xFFB5BAC4),
+            width: 1.5,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
           ),

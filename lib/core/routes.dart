@@ -3,7 +3,7 @@ import '../features/onboarding/ui/pages/onboarding_page.dart';
 import '../features/signUp/ui/pages/signUp_page.dart';
 import '../features/signUp/ui/pages/verify_email_page.dart';
 import '../features/signUp/ui/pages/email_verified_success_page.dart';
-import 'package:tawakad_app/features/landing/ui/pages/splash.dart';
+import 'package:tawakad_app/features/landing/ui/pages/splash_page.dart';
 
 class AppRoutes {
   static const onboarding = '/';
@@ -19,6 +19,6 @@ class AppRoutes {
     signup: (_) => const SingupPage(),
     verifyEmail: (_) => const VerifyEmailPage(),
     emailVerifiedSuccess: (_) => const EmailVerifiedSuccessPage(),
-    splashScreen: (_) => const Splash(),
+    splashScreen: (_) => const SplashPage(),
   };
 }

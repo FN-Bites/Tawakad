@@ -96,6 +96,7 @@ flutter:
     - assets/animation/mail-send.riv
     - assets/animation/shield.riv
     - assets/animation/splash.riv
+    - assets/animation/tawakad_phone.riv
     - assets/Icons/Google.png
   fonts:
     - family: Montserrat
@@ -108,3 +109,6 @@ flutter:
           weight: 600
         - asset: assets/fonts/Montserrat-Bold.ttf
           weight: 700
+    - family: NotoSan
+      fonts:
+        - asset: assets/fonts/alfont_com_NotoSansArabic-Bold.ttf
