@@ -63,7 +63,13 @@ class OnboardingPage extends StatelessWidget {
       title: title,
       primaryButtonText: 'التالي',
       onPrimaryPressed: onNext,
-      onBack: flow.back,
+      onBack: () {
+        if (flow.currentStep == 1) {
+          Navigator.pop(context);
+          return;
+        }
+        flow.back();
+      },
       mascot: MascotRive(showError: flow.showMascotError),
       child: stepChild,
       bottom: EntryBottomActionText(

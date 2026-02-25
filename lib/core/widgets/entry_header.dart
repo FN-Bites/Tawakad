@@ -9,18 +9,21 @@ class EntryHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 24,
+      height: 20,
       child: Align(
         alignment: Alignment.centerRight,
         child: InkWell(
           onTap: onBack ?? () => Navigator.maybePop(context),
-          borderRadius: BorderRadius.circular(24),
-          child: const Padding(
-            padding: EdgeInsets.all(8),
-            child: Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 20,
-              color: AppColors.icon,
+          customBorder: const CircleBorder(),
+          child: const SizedBox(
+            width: 20,
+            height: 20,
+            child: Center(
+              child: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 20,
+                color: AppColors.icon,
+              ),
             ),
           ),
         ),
