@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../ui/pages/forget_the_password.dart';
+import '../ui/pages/create_new_password.dart';
 
-class SignupFlowProvider extends ChangeNotifier {
+class SignInFlowProvider extends ChangeNotifier {
   // ---------- Controllers ----------
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -16,6 +18,18 @@ class SignupFlowProvider extends ChangeNotifier {
   bool _passwordSubmitAttempted = false;
   bool _confirmPasswordSubmitAttempted = false;
 
+  bool _isButtonEnabled = true; // حالة الزر
+
+  // ---------- Server-side error ----------
+  String? _serverError;
+
+  // ---------- Getters ----------
+  String get email => _email;
+  String get password => _password;
+  String get confirmPassword => _confirmPassword;
+  String? get serverError => _serverError;
+  bool get isButtonEnabled => _isButtonEnabled;
+
   // ---------- Password strength ----------
   bool _hasUppercase = false;
   bool _hasLowercase = false;
@@ -23,11 +37,7 @@ class SignupFlowProvider extends ChangeNotifier {
   bool _hasMinLength = false;
   bool _hasSpecialChar = false;
 
-  // ---------- Getters ----------
-  String get email => _email;
-  String get password => _password;
-  String get confirmPassword => _confirmPassword;
-
+  // ---------- Validation Getters ----------
   String? get emailError {
     if (!_emailSubmitAttempted) return null;
     if (_email.isEmpty) return 'البريد الإلكتروني مطلوب';
@@ -37,18 +47,18 @@ class SignupFlowProvider extends ChangeNotifier {
 
   String? get passwordError {
     if (!_passwordSubmitAttempted) return null;
-    if (!_validatePassword(_password)) return 'كلمة المرور لا تتوافق مع الشروط';
+    if (_password.isEmpty) return 'كلمة المرور مطلوبة';
     return null;
   }
 
   String? get confirmPasswordError {
     if (!_confirmPasswordSubmitAttempted) return null;
-    if (_confirmPassword != _password || _confirmPassword.isEmpty) {
-      return 'كلمة المرور غير متطابقة';
-    }
+    if (_confirmPassword.isEmpty) return 'تأكيد كلمة المرور مطلوب';
+    if (_confirmPassword != _password) return 'كلمة المرور غير متطابقة';
     return null;
   }
 
+// ---------- Getters for password strength ----------
   bool get hasUppercase => _hasUppercase;
   bool get hasLowercase => _hasLowercase;
   bool get hasNumber => _hasNumber;
@@ -57,11 +67,10 @@ class SignupFlowProvider extends ChangeNotifier {
 
   bool get emailInvalid =>
       _emailSubmitAttempted && (_email.isEmpty || !_validateEmail(_email));
-  bool get passwordInvalid =>
-      _passwordSubmitAttempted && !_validatePassword(_password);
+  bool get passwordInvalid => _passwordSubmitAttempted && _password.isEmpty;
   bool get confirmPasswordInvalid =>
       _confirmPasswordSubmitAttempted &&
-      (_confirmPassword != _password || _confirmPassword.isEmpty);
+      (_confirmPassword.isEmpty || _confirmPassword != _password);
 
   // ---------- Setters ----------
   void setEmail(String value) {
@@ -80,6 +89,11 @@ class SignupFlowProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearServerError() {
+    _serverError = null;
+    notifyListeners();
+  }
+
   void _updatePasswordStrength(String password) {
     _hasUppercase = RegExp(r'[A-Z]').hasMatch(password);
     _hasLowercase = RegExp(r'[a-z]').hasMatch(password);
@@ -88,36 +102,64 @@ class SignupFlowProvider extends ChangeNotifier {
     _hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>-_]').hasMatch(password);
   }
 
+  // ---------- Validation ----------
   bool _validateEmail(String email) {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  bool _validatePassword(String password) {
-    return _hasUppercase &&
-        _hasLowercase &&
-        _hasNumber &&
-        _hasMinLength &&
-        _hasSpecialChar;
-  }
-
+  bool isTestMode = true;
   // ---------- Submit ----------
-  void submit() {
+  void submit(BuildContext context) {
+    if (!_isButtonEnabled) return;
+
+    _isButtonEnabled = false;
     _emailSubmitAttempted = true;
     _passwordSubmitAttempted = true;
     _confirmPasswordSubmitAttempted = true;
+    _serverError = null;
 
     _email = emailController.text.trim();
     _password = passwordController.text;
     _confirmPassword = confirmPasswordController.text;
-
-    _updatePasswordStrength(_password);
-
     notifyListeners();
 
-    if (emailInvalid || passwordInvalid || confirmPasswordInvalid) return;
+    // تحقق من صحة الحقول
+    if (emailInvalid || passwordInvalid || confirmPasswordInvalid) {
+      Future.delayed(const Duration(seconds: 30), () {
+        _isButtonEnabled = true;
+        notifyListeners();
+      });
+      return;
+    }
 
-    // هنا يمكنك تنفيذ عملية التسجيل الفعلية مثل استدعاء API
-    print('تم التسجيل بنجاح: $_email');
+    if (isTestMode) {
+      const testEmail = 'test@example.com';
+      const testPassword = '123456';
+
+      if (_email != testEmail) {
+        _serverError = 'البريد الإلكتروني غير مسجل';
+      } else if (_password != testPassword) {
+        _serverError = 'كلمة السر غير صحيحة';
+      } else {
+        print("نسخة تجريبية: الانتقال مباشرة لصفحة إعادة التعيين");
+
+        // ✅ هنا استخدام context الممرر من Widget
+        Navigator.of(context, rootNavigator: true).push(
+          MaterialPageRoute(
+            builder: (_) => const CreateNewPasswordPage(),
+          ),
+        );
+      }
+    } else {
+      // نسخة Firebase لاحقًا
+    }
+
+    Future.delayed(const Duration(seconds: 30), () {
+      _isButtonEnabled = true;
+      notifyListeners();
+    });
+
+    notifyListeners();
   }
 
   // ---------- Reset ----------
@@ -125,6 +167,7 @@ class SignupFlowProvider extends ChangeNotifier {
     _email = '';
     _password = '';
     _confirmPassword = '';
+    _serverError = null;
 
     emailController.clear();
     passwordController.clear();
@@ -133,12 +176,6 @@ class SignupFlowProvider extends ChangeNotifier {
     _emailSubmitAttempted = false;
     _passwordSubmitAttempted = false;
     _confirmPasswordSubmitAttempted = false;
-
-    _hasUppercase = false;
-    _hasLowercase = false;
-    _hasNumber = false;
-    _hasMinLength = false;
-    _hasSpecialChar = false;
 
     notifyListeners();
   }

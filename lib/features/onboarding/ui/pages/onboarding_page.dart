@@ -69,7 +69,9 @@ class OnboardingPage extends StatelessWidget {
       bottom: EntryBottomActionText(
         prefixText: 'لديك حساب؟ ',
         actionText: 'قم بتسجيل الدخول',
-        onTap: () {},
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/signin');
+        },
       ),
     );
   }
