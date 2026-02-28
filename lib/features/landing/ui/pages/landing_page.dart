@@ -19,11 +19,11 @@ class LandingPage extends StatelessWidget {
             children: [
               const SizedBox(height: 100),
               const SizedBox(
-                width: 280,
-                height: 280,
+                width: 340,
+                height: 340,
                 child: PhoneRive(),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 54),
               Text(
                 'توكد',
                 textAlign: TextAlign.center,

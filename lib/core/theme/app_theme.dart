@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'package:tawakad_app/core/navigation/right_to_left_page_transition.dart';
 
 class AppTheme {
   static ThemeData light() {
@@ -148,6 +149,16 @@ class AppTheme {
             fontWeight: FontWeight.w700,
           ),
         ),
+      ),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: RightToLeftPageTransitionsBuilder(),
+          TargetPlatform.iOS: RightToLeftPageTransitionsBuilder(),
+          TargetPlatform.macOS: RightToLeftPageTransitionsBuilder(),
+          TargetPlatform.windows: RightToLeftPageTransitionsBuilder(),
+          TargetPlatform.linux: RightToLeftPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: RightToLeftPageTransitionsBuilder(),
+        },
       ),
     );
   }

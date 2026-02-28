@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'core/routes.dart';
 import 'features/onboarding/state/onboarding_flow_provider.dart';
 import 'features/signUp/state/signup_flow_provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(
@@ -31,6 +32,13 @@ class TawakadApp extends StatelessWidget {
       theme: AppTheme.light(),
       routes: AppRoutes.routes,
       initialRoute: AppRoutes.splashScreen,
+      locale: const Locale('ar'),
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
     );
   }
 }
