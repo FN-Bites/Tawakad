@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/animation/phone_rive.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_page.dart';
+import 'package:tawakad_app/core/theme/app_liquid_buttons.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -43,28 +44,20 @@ class LandingPage extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 54),
                 child: Column(
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const OnboardingPage()),
-                          );
-                        },
-                        child: const Text('ابدأ'),
-                      ),
+                    AppLiquidButtons.primary(
+                      label: 'ابدأ',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const OnboardingPage()),
+                        );
+                      },
                     ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: OutlinedButton(
-                        onPressed: () {},
-                        child: const Text('تسجيل دخول'),
-                      ),
+                    AppLiquidButtons.secondary(
+                      label: 'تسجيل دخول',
+                      onPressed: () {},
                     ),
                   ],
                 ),

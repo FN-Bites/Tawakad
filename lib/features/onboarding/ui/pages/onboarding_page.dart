@@ -8,7 +8,6 @@ import 'status_page.dart';
 import 'medication_page.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
 import '../../../../core/widgets/animation/mascot_rive.dart';
-import '../../../../core/navigation/right_to_left_page_transition.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -72,7 +71,6 @@ class OnboardingPage extends StatelessWidget {
         flow.back();
       },
       mascot: MascotRive(showError: flow.showMascotError),
-      child: stepChild,
       bottom: EntryBottomActionText(
         prefixText: 'لديك حساب؟ ',
         actionText: 'قم بتسجيل الدخول',
@@ -80,6 +78,7 @@ class OnboardingPage extends StatelessWidget {
           Navigator.pushReplacementNamed(context, '/signin');
         },
       ),
+      child: stepChild,
     );
   }
 }

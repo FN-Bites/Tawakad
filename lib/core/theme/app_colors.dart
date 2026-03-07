@@ -6,7 +6,7 @@ class AppColors {
   static const surface = Color(0xFFFFFFFF);
 
   // Brand
-  static const primary = Color(0xFF2770C9);
+  static const primary = Color(0xFF0091FF);
   static const linkSoft = Color(0xFF639FE8);
 
   // Progress
