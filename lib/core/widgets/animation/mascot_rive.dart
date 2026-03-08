@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart' as rive;
 
-class MascotRive extends StatefulWidget {
-  final bool showError;
+enum MascotState {
+  idle,
+  error,
+  chat,
+  noInternet,
+  download,
+}
 
-  const MascotRive({super.key, required this.showError});
+class MascotRive extends StatefulWidget {
+  final MascotState state;
+
+  const MascotRive({
+    super.key,
+    this.state = MascotState.idle,
+  });
 
   @override
   State<MascotRive> createState() => _MascotRiveState();
@@ -17,23 +28,51 @@ class _MascotRiveState extends State<MascotRive> {
   );
 
   rive.RiveWidgetController? _controller;
-  bool _last = false;
+  MascotState? _lastState;
 
   @override
   void initState() {
     super.initState();
-    _last = widget.showError;
+    _lastState = widget.state;
   }
 
   @override
   void didUpdateWidget(covariant MascotRive oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.showError != _last) {
-      _last = widget.showError;
+    if (widget.state != _lastState) {
+      _lastState = widget.state;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _controller?.stateMachine.boolean('Error')?.value = _last;
+        _applyState(widget.state);
       });
+    }
+  }
+
+  void _applyState(MascotState state) {
+    final sm = _controller?.stateMachine;
+    if (sm == null) return;
+
+    sm.boolean('Error')?.value = false;
+    sm.boolean('Chat')?.value = false;
+    sm.boolean('No Internet')?.value = false;
+    sm.number('Download')?.value = 0;
+    sm.boolean('Reset')?.value = false;
+
+    switch (state) {
+      case MascotState.idle:
+        break;
+      case MascotState.error:
+        sm.boolean('Error')?.value = true;
+        break;
+      case MascotState.chat:
+        sm.boolean('Chat')?.value = true;
+        break;
+      case MascotState.noInternet:
+        sm.boolean('No Internet')?.value = true;
+        break;
+      case MascotState.download:
+        sm.number('Download')?.value = 1;
+        break;
     }
   }
 
@@ -49,14 +88,20 @@ class _MascotRiveState extends State<MascotRive> {
     return rive.RiveWidgetBuilder(
       fileLoader: fileLoader,
       builder: (context, state) {
-        if (state is rive.RiveLoading) return const SizedBox.shrink();
+        if (state is rive.RiveLoading) {
+          return const SizedBox.shrink();
+        }
+
         if (state is rive.RiveFailed) {
-          return Text('Rive failed: ${state.error}');
+          return Text(
+            'Rive failed: ${state.error}',
+            textAlign: TextAlign.center,
+          );
         }
 
         if (state is rive.RiveLoaded) {
           _controller = state.controller;
-          _controller?.stateMachine.boolean('Error')?.value = widget.showError;
+          _applyState(widget.state);
 
           return rive.RiveWidget(
             controller: state.controller,

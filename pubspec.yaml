@@ -101,6 +101,9 @@ flutter:
     - assets/animation/shield.riv
     - assets/animation/splash.riv
     - assets/animation/tawakad_phone.riv
+    - assets/animation/logo_glitter.riv
+    - assets/animation/lists.riv
+    - assets/animation/scanning.riv
     - assets/Icons/Google.png
   fonts:
     - family: Montserrat

@@ -7,7 +7,7 @@ import 'gender_page.dart';
 import 'status_page.dart';
 import 'medication_page.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
-import '../../../../core/widgets/animation/mascot_rive.dart';
+import 'package:tawakad_app/core/widgets/animation/mascot_rive.dart';
 
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
@@ -70,7 +70,7 @@ class OnboardingPage extends StatelessWidget {
         }
         flow.back();
       },
-      mascot: MascotRive(showError: flow.showMascotError),
+      mascot: const MascotRive(state: MascotState.error),
       bottom: EntryBottomActionText(
         prefixText: 'لديك حساب؟ ',
         actionText: 'قم بتسجيل الدخول',

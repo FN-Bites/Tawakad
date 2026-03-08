@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/animation/splash_rive.dart';
 import 'package:tawakad_app/features/landing/ui/transitions/circular_reveal.dart';
-import 'package:tawakad_app/features/landing/ui/pages/landing_page.dart';
+import 'package:tawakad_app/features/landing/ui/pages/onboarding_screens/onboarding_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -21,7 +21,7 @@ class _SplashPageState extends State<SplashPage> {
 
       Navigator.of(context).pushReplacement(
         CircularRevealRoute(
-          page: const LandingPage(),
+          page: const OnboardingPage(),
           centerAlignment: Alignment.center,
           duration: const Duration(milliseconds: 750),
         ),

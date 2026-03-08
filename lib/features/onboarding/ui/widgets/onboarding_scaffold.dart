@@ -4,7 +4,7 @@ import '../../../../core/widgets/entry_header.dart';
 
 import 'onboarding_progress_bar.dart';
 import 'onboarding_progress_text.dart';
-import 'package:tawakad_app/core/theme/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
 
 class OnboardingScaffold extends StatelessWidget {
   const OnboardingScaffold({

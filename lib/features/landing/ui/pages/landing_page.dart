@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/animation/phone_rive.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_page.dart';
-import 'package:tawakad_app/core/theme/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});
@@ -18,13 +18,14 @@ class LandingPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              const SizedBox(height: 100),
+              // ── Animation ──────────────────────────────────────────────
               const SizedBox(
-                width: 340,
-                height: 340,
+                height: 40,
+                width: 40,
                 child: PhoneRive(),
               ),
-              const SizedBox(height: 54),
+
+              // ── Title + subtitle ───────────────────────────────────────
               Text(
                 'توكد',
                 textAlign: TextAlign.center,
@@ -39,7 +40,10 @@ class LandingPage extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const Spacer(),
+
+              const SizedBox(height: 96),
+
+              // ── Buttons ────────────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.only(bottom: 54),
                 child: Column(
