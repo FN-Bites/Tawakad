@@ -1,105 +1,81 @@
 import 'package:flutter/material.dart';
-import '../ui/pages/forget_the_password.dart';
-import '../ui/pages/create_new_password.dart';
+// -----------------------------------------------------------------------------
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../core/services/auth/email_auth_service.dart';
+import '../../../core/services/auth/google_auth_service.dart';
+// -----------------------------------------------------------------------------
 
 class SignInFlowProvider extends ChangeNotifier {
+// -----------------------------------------------------------------------------
+  final EmailAuthService _emailAuthService = EmailAuthService();
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
+// -----------------------------------------------------------------------------
+
   // ---------- Controllers ----------
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
 
   // ---------- Internal state ----------
   String _email = '';
   String _password = '';
-  String _confirmPassword = '';
 
   bool _emailSubmitAttempted = false;
   bool _passwordSubmitAttempted = false;
-  bool _confirmPasswordSubmitAttempted = false;
 
-  bool _isButtonEnabled = true; // حالة الزر
-
+// -----------------------------------------------------------------------------
+  bool _isLoading = false; // حالة الزر
   // ---------- Server-side error ----------
-  String? _serverError;
+  String? _emailServerError;
+  String? _passwordServerError;
+// -----------------------------------------------------------------------------
 
   // ---------- Getters ----------
   String get email => _email;
   String get password => _password;
-  String get confirmPassword => _confirmPassword;
-  String? get serverError => _serverError;
-  bool get isButtonEnabled => _isButtonEnabled;
-
-  // ---------- Password strength ----------
-  bool _hasUppercase = false;
-  bool _hasLowercase = false;
-  bool _hasNumber = false;
-  bool _hasMinLength = false;
-  bool _hasSpecialChar = false;
+// -----------------------------------------------------------------------------
+  String? get emailServerError => _emailServerError;
+  String? get passwordServerError => _passwordServerError;
+  bool get isLoading => _isLoading;
+// -----------------------------------------------------------------------------
 
   // ---------- Validation Getters ----------
   String? get emailError {
     if (!_emailSubmitAttempted) return null;
-    if (_email.isEmpty) return 'البريد الإلكتروني مطلوب';
+    if (_email.isEmpty) return 'يرجى إدخال البريد الإلكتروني';
     if (!_validateEmail(_email)) return 'البريد الإلكتروني غير صالح';
+// -----------------------------------------------------------------------------
+    if (_emailServerError != null) return _emailServerError;
+// -----------------------------------------------------------------------------
     return null;
   }
 
   String? get passwordError {
     if (!_passwordSubmitAttempted) return null;
-    if (_password.isEmpty) return 'كلمة المرور مطلوبة';
+    if (_password.isEmpty) return 'يرجى إدخال كلمة المرور';
+// -----------------------------------------------------------------------------
+    if (_passwordServerError != null) return _passwordServerError;
+// -----------------------------------------------------------------------------
     return null;
   }
-
-  String? get confirmPasswordError {
-    if (!_confirmPasswordSubmitAttempted) return null;
-    if (_confirmPassword.isEmpty) return 'تأكيد كلمة المرور مطلوب';
-    if (_confirmPassword != _password) return 'كلمة المرور غير متطابقة';
-    return null;
-  }
-
-// ---------- Getters for password strength ----------
-  bool get hasUppercase => _hasUppercase;
-  bool get hasLowercase => _hasLowercase;
-  bool get hasNumber => _hasNumber;
-  bool get hasMinLength => _hasMinLength;
-  bool get hasSpecialChar => _hasSpecialChar;
-
-  bool get emailInvalid =>
-      _emailSubmitAttempted && (_email.isEmpty || !_validateEmail(_email));
-  bool get passwordInvalid => _passwordSubmitAttempted && _password.isEmpty;
-  bool get confirmPasswordInvalid =>
-      _confirmPasswordSubmitAttempted &&
-      (_confirmPassword.isEmpty || _confirmPassword != _password);
-
+// -----------------------------------------------------------------------------
+  bool get emailInvalid => _emailSubmitAttempted && (_email.isEmpty || !_validateEmail(_email) || _emailServerError != null);
+  bool get passwordInvalid => _passwordSubmitAttempted && (_password.isEmpty || _passwordServerError != null);
+// -----------------------------------------------------------------------------
   // ---------- Setters ----------
   void setEmail(String value) {
     _email = value.trim();
+// -----------------------------------------------------------------------------
+    _emailServerError = null;
+// -----------------------------------------------------------------------------
     notifyListeners();
   }
 
   void setPassword(String value) {
     _password = value;
-    _updatePasswordStrength(value);
+// -----------------------------------------------------------------------------
+    _passwordServerError = null;
+// -----------------------------------------------------------------------------
     notifyListeners();
-  }
-
-  void setConfirmPassword(String value) {
-    _confirmPassword = value;
-    notifyListeners();
-  }
-
-  void clearServerError() {
-    _serverError = null;
-    notifyListeners();
-  }
-
-  void _updatePasswordStrength(String password) {
-    _hasUppercase = RegExp(r'[A-Z]').hasMatch(password);
-    _hasLowercase = RegExp(r'[a-z]').hasMatch(password);
-    _hasNumber = RegExp(r'[0-9]').hasMatch(password);
-    _hasMinLength = password.length >= 8;
-    _hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>-_]').hasMatch(password);
   }
 
   // ---------- Validation ----------
@@ -107,75 +83,97 @@ class SignInFlowProvider extends ChangeNotifier {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  bool isTestMode = true;
   // ---------- Submit ----------
-  void submit(BuildContext context) {
-    if (!_isButtonEnabled) return;
-
-    _isButtonEnabled = false;
+// -----------------------------------------------------------------------------
+  Future<bool> signInWithEmail() async {
     _emailSubmitAttempted = true;
     _passwordSubmitAttempted = true;
-    _confirmPasswordSubmitAttempted = true;
-    _serverError = null;
 
     _email = emailController.text.trim();
     _password = passwordController.text;
-    _confirmPassword = confirmPasswordController.text;
+
+    _emailServerError = null;
+    _passwordServerError = null;
+
     notifyListeners();
 
-    // تحقق من صحة الحقول
-    if (emailInvalid || passwordInvalid || confirmPasswordInvalid) {
-      Future.delayed(const Duration(seconds: 30), () {
-        _isButtonEnabled = true;
-        notifyListeners();
-      });
-      return;
+    if (emailInvalid || passwordInvalid) {
+      return false;
     }
 
-    if (isTestMode) {
-      const testEmail = 'test@example.com';
-      const testPassword = '123456';
+    _isLoading = true;
+    notifyListeners();
 
-      if (_email != testEmail) {
-        _serverError = 'البريد الإلكتروني غير مسجل';
-      } else if (_password != testPassword) {
-        _serverError = 'كلمة السر غير صحيحة';
+    try {
+      await _emailAuthService.signInWithEmail(
+        email: _email,
+        password: _password,
+      );
+
+      return true;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        _emailServerError = 'البريد الإلكتروني غير مسجل';
+      } else if (e.code == 'wrong-password') {
+        _passwordServerError = 'كلمة المرور غير صحيحة';
+      } else if (e.code == 'invalid-credential') {
+        _passwordServerError = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+      } else if (e.code == 'email-not-verified') {
+        _emailServerError = 'يرجى التحقق من بريدك الإلكتروني والنقر على رابط التفعيل';
       } else {
-        print("نسخة تجريبية: الانتقال مباشرة لصفحة إعادة التعيين");
-
-        // ✅ هنا استخدام context الممرر من Widget
-        Navigator.of(context, rootNavigator: true).push(
-          MaterialPageRoute(
-            builder: (_) => const CreateNewPasswordPage(),
-          ),
-        );
+        _passwordServerError = 'حدث خطأ أثناء تسجيل الدخول، حاول مرة أخرى';
       }
-    } else {
-      // نسخة Firebase لاحقًا
-    }
+      return false;
 
-    Future.delayed(const Duration(seconds: 30), () {
-      _isButtonEnabled = true;
+    } finally {
+      _isLoading = false;
       notifyListeners();
-    });
+    }
+  }
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+  Future<bool> signInWithGoogle() async {
+    _emailServerError = null;
+    _passwordServerError = null;
+    _isLoading = true;
 
     notifyListeners();
+
+    try {
+      await _googleAuthService.signInWithGoogle();
+
+      return true;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'account-exists-with-different-credential') {
+        _emailServerError = 'هذا البريد مسجل بطريقة مختلفة، قم بتسجيل الدخول المناسب';
+      } else if (e.code == 'sign-in-cancelled') {
+        return false;
+      } else {
+        _passwordServerError = 'فشل تسجيل الدخول باستخدام Google';
+      }
+      return false;
+
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
+// -----------------------------------------------------------------------------
 
   // ---------- Reset ----------
   void reset() {
     _email = '';
     _password = '';
-    _confirmPassword = '';
-    _serverError = null;
-
+// -----------------------------------------------------------------------------
+    _emailServerError = null;
+    _passwordServerError = null;
+// -----------------------------------------------------------------------------
     emailController.clear();
     passwordController.clear();
-    confirmPasswordController.clear();
 
     _emailSubmitAttempted = false;
     _passwordSubmitAttempted = false;
-    _confirmPasswordSubmitAttempted = false;
 
     notifyListeners();
   }
@@ -184,7 +182,6 @@ class SignInFlowProvider extends ChangeNotifier {
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
-    confirmPasswordController.dispose();
     super.dispose();
   }
 }

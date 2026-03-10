@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
-
-import '../../../../core/widgets/entry_header.dart';
-import '../../../../core/widgets/entry_bottom_action_text.dart';
-
 import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/entry_bottom_action_text.dart';
+import '../../../../core/widgets/entry_header.dart';
 
 class SignUpScaffold extends StatelessWidget {
   final String title;
   final Widget child;
+
   final String primaryButtonText;
   final VoidCallback? onPrimaryPressed;
+
+  final VoidCallback? onGooglePressed;
 
   final String bottomPrefixText; // "لديك حساب؟ "
   final String bottomActionText; // "سجل دخول"
@@ -26,17 +25,21 @@ class SignUpScaffold extends StatelessWidget {
     required this.child,
     required this.primaryButtonText,
     this.onPrimaryPressed,
+    this.onGooglePressed,
     required this.bottomPrefixText,
     required this.bottomActionText,
     this.onBottomActionPressed,
-    this.onBack,
+    this.onBack, 
   });
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        top: true,
+        bottom: true,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
           child: Column(
@@ -47,18 +50,7 @@ class SignUpScaffold extends StatelessWidget {
                 height: 24,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: InkWell(
-                    onTap: onBack ?? () => Navigator.maybePop(context),
-                    borderRadius: BorderRadius.circular(28),
-                    child: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        size: 20,
-                        color: AppColors.icon,
-                      ),
-                    ),
-                  ),
+                  child: EntryHeader(onBack: onBack),
                 ),
               ),
               const SizedBox(height: 24),
@@ -78,7 +70,7 @@ class SignUpScaffold extends StatelessWidget {
                   child: child,
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // زر أساسي
               SizedBox(
@@ -91,8 +83,12 @@ class SignUpScaffold extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 24),
 
-              const SizedBox(height: 32),
+              GoogleSignInButton(
+                onPressed: onGooglePressed,
+              ),
+              const SizedBox(height: 16), 
 
               // الفوتر باستخدام EntryBottomActionText
               EntryBottomActionText(

@@ -1,115 +1,65 @@
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
-import '../../state/signup_flow_provider.dart';
+import '../../../signUp/state/signup_flow_provider.dart';
+import '../../../onboarding/state/onboarding_flow_provider.dart';
+import '../../../signUp/ui/widgets/sign_up_content.dart';
+import '../../../signUp/ui/widgets/sign_up_scaffold.dart';
 
-import '../../../../core/widgets/auth_text_field.dart';
-import '../../../../core/widgets/entry_bottom_action_text.dart';
-
-import '../../../../core/widgets/singin_singup/password_strength_hints.dart';
-import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
-import '../../../../core/theme/app_colors.dart';
-
-class SignupPage extends StatelessWidget {
-  const SignupPage({super.key});
+class SingupPage extends StatelessWidget {
+  const SingupPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     final flow = context.watch<SignupFlowProvider>();
+    final onboardingFlow = context.read<OnboardingFlowProvider>();
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // العنوان
-              Text(
-                'إنشاء حساب جديد',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-              const SizedBox(height: 32),
+    return SignUpScaffold(
+      onBack: () => Navigator.pushReplacementNamed(context, '/'),
 
-              // الحقول
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: [
-                      AuthTextField(
-                        hint: 'البريد الإلكتروني',
-                        controller: flow.emailController,
-                        invalid: flow.emailInvalid,
-                        errorMsg: flow.emailError ?? '',
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: flow.setEmail,
-                      ),
-                      const SizedBox(height: 16),
-                      AuthTextField(
-                        hint: 'كلمة المرور',
-                        controller: flow.passwordController,
-                        invalid: flow.passwordInvalid,
-                        errorMsg: flow.passwordError ?? '',
-                        onChanged: flow.setPassword,
-                        keyboardType: TextInputType.visiblePassword,
-                      ),
-                      const SizedBox(height: 16),
-                      AuthTextField(
-                        hint: 'تأكيد كلمة المرور',
-                        controller: flow.confirmPasswordController,
-                        invalid: flow.confirmPasswordInvalid,
-                        errorMsg: flow.confirmPasswordError ?? '',
-                        onChanged: flow.setConfirmPassword,
-                        keyboardType: TextInputType.visiblePassword,
-                      ),
-                      const SizedBox(height: 16),
-                      // قوة كلمة المرور
-                      PasswordStrengthHints(
-                        hasMinLength: flow.hasMinLength,
-                        hasNumber: flow.hasNumber,
-                        hasUppercase: flow.hasUppercase,
-                        hasLowercase: flow.hasLowercase,
-                        hasSpecialChar: flow.hasSpecialChar,
-                      ),
-                      const SizedBox(height: 24),
-                      // زر إنشاء الحساب
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: flow.submit,
-                          child: Text(
-                            'إنشاء حساب',
-                            style: Theme.of(context).textTheme.labelLarge,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+      title: 'إنشاء حساب جديد',
 
-              const SizedBox(height: 24),
-              // زر تسجيل الدخول باستخدام Google
-              GoogleSignInButton(
-                onPressed: () {
-                  print("تسجيل الدخول باستخدام Google");
-                },
-              ),
-              const SizedBox(height: 16),
-              // الفوتر
-              EntryBottomActionText(
-                prefixText: 'لديك حساب؟ ',
-                actionText: 'قم بتسجيل الدخول',
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, '/signin');
-                },
-              ),
-            ],
-          ),
-        ),
+      primaryButtonText: 'إنشاء حساب',
+      onPrimaryPressed: flow.isLoading
+          ? null
+          : () async {
+              final success =
+                  await flow.signUpWithEmail(onboardingFlow.answers);
+              if (success && context.mounted) {
+                Navigator.pushReplacementNamed(context, '/verify-email');
+              }
+            },
+
+      onGooglePressed: flow.isLoading
+          ? null
+          : () async {
+              final success =
+                  await flow.signInWithGoogle(onboardingFlow.answers);
+              if (success && context.mounted) {
+                Navigator.pushReplacementNamed(context, '/auth-success');
+              }
+            },
+
+      bottomPrefixText: 'لديك حساب؟ ',
+      bottomActionText: 'قم بتسجيل الدخول',
+      onBottomActionPressed: () => Navigator.pushReplacementNamed(context, '/signin'),
+
+      child: SignUpContent(
+        emailController: flow.emailController,
+        passwordController: flow.passwordController,
+        confirmPasswordController: flow.confirmPasswordController,
+        emailError: flow.emailError,
+        passwordError: flow.passwordError,
+        confirmPasswordError: flow.confirmPasswordError,
+        registrationError: flow.registrationError,
+        onEmailChanged: flow.setEmail,
+        onPasswordChanged: flow.setPassword,
+        onConfirmPasswordChanged: flow.setConfirmPassword,
+        hasUppercase: flow.hasUppercase,
+        hasLowercase: flow.hasLowercase,
+        hasNumber: flow.hasNumber,
+        hasMinLength: flow.hasMinLength,
+        hasSpecialChar: flow.hasSpecialChar,
+        isPasswordEmpty: flow.password.isEmpty,
       ),
     );
   }

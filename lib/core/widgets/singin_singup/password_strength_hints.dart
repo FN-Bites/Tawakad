@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/app_theme.dart';
 
 class PasswordStrengthHints extends StatelessWidget {
   final bool hasUppercase;
@@ -8,6 +6,10 @@ class PasswordStrengthHints extends StatelessWidget {
   final bool hasMinLength;
   final bool hasSpecialChar;
   final bool hasLowercase;
+// -----------------------------------------------------------------------------
+  final bool isPasswordEmpty;
+// -----------------------------------------------------------------------------
+
 
   const PasswordStrengthHints({
     super.key,
@@ -16,37 +18,42 @@ class PasswordStrengthHints extends StatelessWidget {
     required this.hasUppercase,
     required this.hasLowercase,
     required this.hasSpecialChar,
+// -----------------------------------------------------------------------------
+    required this.isPasswordEmpty,
+// -----------------------------------------------------------------------------
   });
-
+// -----------------------------------------------------------------------------
   Widget _buildRow(String text, bool ok) {
+    Color color;
+    IconData icon;
+
+    if (isPasswordEmpty) {
+      color = const Color(0xFF9E9E9E); // رمادي
+      icon = Icons.remove_circle_outline;
+    } else if (ok) {
+      color = const Color(0xFF27AE60); // أخضر
+      icon = Icons.check_circle;
+    } else {
+      color = const Color(0xFFEB5757); // أحمر
+      icon = Icons.cancel;
+    }
+
     return Row(
       textDirection: TextDirection.rtl,
       children: [
-        Icon(
-          ok ? Icons.check_circle : Icons.cancel,
-          size: 16,
-          color: text.isEmpty
-              ? const Color(0x6A7282) // رمادي
-              : ok
-                  ? const Color(0xFF27AE60)
-                  : const Color(0xFFEB5757),
-        ),
+        Icon(icon, size: 16, color: color),
         const SizedBox(width: 6),
         Text(
           text,
           style: TextStyle(
             fontSize: 14,
-            color: text.isEmpty
-                ? const Color(0x6A7282) // رمادي
-                : ok
-                    ? const Color(0xFF27AE60)
-                    : const Color(0xFFEB5757),
+            color: color,
           ),
         ),
       ],
     );
   }
-
+// -----------------------------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     return Column(

@@ -37,8 +37,17 @@ class OnboardingFlowProvider extends ChangeNotifier {
   bool get lastNameInvalid => _nameSubmitAttempted && _lastName.trim().isEmpty;
   bool get genderInvalid => _genderSubmitAttempted && (_gender == null);
   bool get statusInvalid => _statusSubmitAttempted && (_status == null);
-  bool get medicationInvalid =>
-      _medicationSubmitAttempted && (_takesMedication == null);
+  bool get medicationInvalid => _medicationSubmitAttempted && (_takesMedication == null);
+
+// -----------------------------------------------------------------------------
+  List<String> get answers => [
+        _firstName,
+        _lastName,
+        _gender ?? '',
+        _status ?? '',
+        _takesMedication ?? '',
+      ];
+// -----------------------------------------------------------------------------
 
   void clearMascotError() {
     if (!_showMascotError) return;

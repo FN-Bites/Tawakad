@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class OnboardingProgressBar extends StatelessWidget {
   const OnboardingProgressBar({super.key, required this.progress});

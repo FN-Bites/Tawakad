@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/entry_header.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
+import 'package:tawakad_app/core/widgets/entry_header.dart';
 
 import 'onboarding_progress_bar.dart';
 import 'onboarding_progress_text.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
 
 class OnboardingScaffold extends StatelessWidget {
   const OnboardingScaffold({
@@ -102,9 +101,12 @@ class OnboardingScaffold extends StatelessWidget {
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                child: AppLiquidButtons.primary(
+                child: ElevatedButton(
                   onPressed: onPrimaryPressed,
-                  label: primaryButtonText,
+                  child: Text(
+                    primaryButtonText,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
                 ),
               ),
               if (bottom != null) ...[

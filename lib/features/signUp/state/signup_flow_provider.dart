@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+// -----------------------------------------------------------------------------
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../core/services/auth/email_auth_service.dart';
+import '../../../core/services/auth/google_auth_service.dart';
+import '../../../core/services/user_service.dart';
+// -----------------------------------------------------------------------------
 
 class SignupFlowProvider extends ChangeNotifier {
+// -----------------------------------------------------------------------------
+  final EmailAuthService _emailAuthService = EmailAuthService();
+  final GoogleAuthService _googleAuthService = GoogleAuthService();
+  final UserService _userService = UserService();
+// -----------------------------------------------------------------------------
+
   // ---------- Controllers ----------
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -23,6 +35,13 @@ class SignupFlowProvider extends ChangeNotifier {
   bool _hasMinLength = false;
   bool _hasSpecialChar = false;
 
+// -----------------------------------------------------------------------------
+  bool _isLoading = false;
+  String? _registrationError;
+  bool get isLoading => _isLoading;
+  String? get registrationError => _registrationError;
+// -----------------------------------------------------------------------------
+
   // ---------- Getters ----------
   String get email => _email;
   String get password => _password;
@@ -30,22 +49,26 @@ class SignupFlowProvider extends ChangeNotifier {
 
   String? get emailError {
     if (!_emailSubmitAttempted) return null;
-    if (_email.isEmpty) return 'البريد الإلكتروني مطلوب';
+    if (_email.isEmpty) return 'يرجى إدخال البريد الإلكتروني';
     if (!_validateEmail(_email)) return 'البريد الإلكتروني غير صالح';
+// -----------------------------------------------------------------------------
+    if (_registrationError != null) return _registrationError;
+// -----------------------------------------------------------------------------
     return null;
   }
 
   String? get passwordError {
     if (!_passwordSubmitAttempted) return null;
+    if (_password.isEmpty) return 'يرجى إدخال كلمة المرور';
     if (!_validatePassword(_password)) return 'كلمة المرور لا تتوافق مع الشروط';
     return null;
   }
 
   String? get confirmPasswordError {
     if (!_confirmPasswordSubmitAttempted) return null;
-    if (_confirmPassword != _password || _confirmPassword.isEmpty) {
-      return 'كلمة المرور غير متطابقة';
-    }
+    if (_confirmPassword.isEmpty) return 'يرجى إدخال تأكيد كلمة المرور';
+    if (_confirmPassword != _password)
+      return 'كلمة المرور وتأكيدها غير متطابقة';
     return null;
   }
 
@@ -56,9 +79,11 @@ class SignupFlowProvider extends ChangeNotifier {
   bool get hasSpecialChar => _hasSpecialChar;
 
   bool get emailInvalid =>
-      _emailSubmitAttempted && (_email.isEmpty || !_validateEmail(_email));
+      _emailSubmitAttempted &&
+      (_email.isEmpty || !_validateEmail(_email) || _registrationError != null);
   bool get passwordInvalid =>
-      _passwordSubmitAttempted && !_validatePassword(_password);
+      _passwordSubmitAttempted &&
+      (_password.isEmpty || !_validatePassword(_password));
   bool get confirmPasswordInvalid =>
       _confirmPasswordSubmitAttempted &&
       (_confirmPassword != _password || _confirmPassword.isEmpty);
@@ -66,6 +91,9 @@ class SignupFlowProvider extends ChangeNotifier {
   // ---------- Setters ----------
   void setEmail(String value) {
     _email = value.trim();
+// -----------------------------------------------------------------------------
+    _registrationError = null;
+// -----------------------------------------------------------------------------
     notifyListeners();
   }
 
@@ -85,7 +113,7 @@ class SignupFlowProvider extends ChangeNotifier {
     _hasLowercase = RegExp(r'[a-z]').hasMatch(password);
     _hasNumber = RegExp(r'[0-9]').hasMatch(password);
     _hasMinLength = password.length >= 8;
-    _hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>-_]').hasMatch(password);
+    _hasSpecialChar = RegExp(r'[^\w\s]').hasMatch(password);
   }
 
   bool _validateEmail(String email) {
@@ -101,7 +129,10 @@ class SignupFlowProvider extends ChangeNotifier {
   }
 
   // ---------- Submit ----------
-  void submit() {
+// -----------------------------------------------------------------------------
+  Future<bool> signUpWithEmail(List<String> onboardingAnswers) async {
+    _registrationError = null;
+
     _emailSubmitAttempted = true;
     _passwordSubmitAttempted = true;
     _confirmPasswordSubmitAttempted = true;
@@ -111,14 +142,77 @@ class SignupFlowProvider extends ChangeNotifier {
     _confirmPassword = confirmPasswordController.text;
 
     _updatePasswordStrength(_password);
-
     notifyListeners();
 
-    if (emailInvalid || passwordInvalid || confirmPasswordInvalid) return;
+    if (emailInvalid || passwordInvalid || confirmPasswordInvalid) {
+      return false;
+    }
 
-    // هنا يمكنك تنفيذ عملية التسجيل الفعلية مثل استدعاء API
-    print('تم التسجيل بنجاح: $_email');
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final user = await _emailAuthService.signUpWithEmail(
+        email: _email,
+        password: _password,
+      );
+
+      await _userService.saveUserData(
+        user: user,
+        password: _password,
+        answers: onboardingAnswers,
+      );
+
+      return true;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == "email-already-in-use") {
+        _registrationError = 'البريد الإلكتروني مسجل مسبقًا. قم بتسجيل الدخول';
+      } else {
+        _registrationError = 'حدث خطأ أثناء التسجيل، حاول مرة أخرى';
+      }
+      return false;
+    } catch (_) {
+      _registrationError ??= 'حدث خطأ غير متوقع ';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+  Future<bool> signInWithGoogle(List<String> onboardingAnswers) async {
+    _registrationError = null;
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final user = await _googleAuthService.signInWithGoogle();
+
+      await _userService.saveUserData(
+        user: user,
+        password: _password,
+        answers: onboardingAnswers,
+      );
+
+      return true;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'account-exists-with-different-credential') {
+        _registrationError =
+            'هذا البريد مسجل بطريقة مختلفة، قم بالتسجيل المناسب';
+      } else if (e.code == 'sign-in-cancelled') {
+        return false;
+      } else {
+        _registrationError = 'فشل التسجيل باستخدام Google';
+      }
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+// -----------------------------------------------------------------------------
 
   // ---------- Reset ----------
   void reset() {
@@ -139,6 +233,10 @@ class SignupFlowProvider extends ChangeNotifier {
     _hasNumber = false;
     _hasMinLength = false;
     _hasSpecialChar = false;
+
+// -----------------------------------------------------------------------------
+    _registrationError = null;
+// -----------------------------------------------------------------------------
 
     notifyListeners();
   }
