@@ -15,9 +15,7 @@ class SingupPage extends StatelessWidget {
 
     return SignUpScaffold(
       onBack: () => Navigator.pushReplacementNamed(context, '/'),
-
       title: 'إنشاء حساب جديد',
-
       primaryButtonText: 'إنشاء حساب',
       onPrimaryPressed: flow.isLoading
           ? null
@@ -28,7 +26,6 @@ class SingupPage extends StatelessWidget {
                 Navigator.pushReplacementNamed(context, '/verify-email');
               }
             },
-
       onGooglePressed: flow.isLoading
           ? null
           : () async {
@@ -38,11 +35,10 @@ class SingupPage extends StatelessWidget {
                 Navigator.pushReplacementNamed(context, '/auth-success');
               }
             },
-
       bottomPrefixText: 'لديك حساب؟ ',
       bottomActionText: 'قم بتسجيل الدخول',
-      onBottomActionPressed: () => Navigator.pushReplacementNamed(context, '/signin'),
-
+      onBottomActionPressed: () =>
+          Navigator.pushReplacementNamed(context, '/signin'),
       child: SignUpContent(
         emailController: flow.emailController,
         passwordController: flow.passwordController,

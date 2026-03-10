@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/animation/shield_rive.dart';
+import '../animation/shield_rive.dart';
 
 class EmailVerifiedSuccessPage extends StatelessWidget {
   const EmailVerifiedSuccessPage({super.key});
@@ -52,4 +52,3 @@ class EmailVerifiedSuccessPage extends StatelessWidget {
     );
   }
 }
-

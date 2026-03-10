@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
-import 'package:tawakad_app/core/widgets/animation/logo_glitter_rive.dart';
-import 'package:tawakad_app/core/widgets/animation/lists_rive.dart';
-import 'package:tawakad_app/core/widgets/animation/mascot_rive.dart';
-import 'package:tawakad_app/core/widgets/animation/scanning_rive.dart';
+import 'package:tawakad_app/features/onboarding/ui/animation/logo_glitter_rive.dart';
+import 'package:tawakad_app/features/onboarding/ui/animation/lists_rive.dart';
+import 'package:tawakad_app/features/onboarding/ui/animation/mascot_rive.dart';
+import 'package:tawakad_app/features/onboarding/ui/animation/scanning_rive.dart';
 import 'onboarding_data.dart';
 
 class OnboardingContent extends StatelessWidget {
@@ -27,8 +27,8 @@ class OnboardingContent extends StatelessWidget {
         );
       case OnboardingAnimation.mascot:
         return SizedBox(
-          width: size * 0.72,
-          height: size * 0.72,
+          width: size * 0.85,
+          height: size * 0.85,
           child: const MascotRive(state: MascotState.chat),
         );
       case OnboardingAnimation.scanning:
@@ -60,7 +60,7 @@ class OnboardingContent extends StatelessWidget {
             Positioned(
               left: 24,
               right: 24,
-              bottom: 96,
+              bottom: 56,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

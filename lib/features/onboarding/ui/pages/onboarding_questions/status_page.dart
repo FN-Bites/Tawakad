@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tawakad_app/features/onboarding/state/onboarding_flow_provider.dart';
 import 'package:tawakad_app/features/onboarding/ui/widgets/radio_option.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
+import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class StatusStepContent extends StatelessWidget {
   const StatusStepContent({super.key});
@@ -16,7 +17,7 @@ class StatusStepContent extends StatelessWidget {
       flow.clearMascotError();
     }
 
-    return Column(
+    return FieldCard(
       children: [
         RadioOption(
           label: 'طالب',
@@ -25,7 +26,6 @@ class StatusStepContent extends StatelessWidget {
           onChanged: select,
           hasError: flow.statusInvalid,
         ),
-        const SizedBox(height: 16),
         RadioOption(
           label: 'موظف',
           value: 'employee',
@@ -33,7 +33,6 @@ class StatusStepContent extends StatelessWidget {
           onChanged: select,
           hasError: flow.statusInvalid,
         ),
-        const SizedBox(height: 16),
         RadioOption(
           label: 'متفرغ',
           value: 'free',
@@ -41,7 +40,6 @@ class StatusStepContent extends StatelessWidget {
           onChanged: select,
           hasError: flow.statusInvalid,
         ),
-        const SizedBox(height: 16),
         RadioOption(
           label: 'أخرى',
           value: 'other',
@@ -50,7 +48,6 @@ class StatusStepContent extends StatelessWidget {
           hasError: flow.statusInvalid,
         ),
         if (flow.statusInvalid) ...[
-          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(

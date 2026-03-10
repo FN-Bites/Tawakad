@@ -65,7 +65,7 @@ void main() async {
       navigatorKey.currentState?.pushNamed(
         AppRoutes.createNewPassword,
         arguments: CreateNewPasswordArgs(
-        oobCode: data.oobCode,
+          oobCode: data.oobCode,
         ),
       );
     }

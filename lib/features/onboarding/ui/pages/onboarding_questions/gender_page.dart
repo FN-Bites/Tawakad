@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tawakad_app/features/onboarding/state/onboarding_flow_provider.dart';
 import 'package:tawakad_app/features/onboarding/ui/widgets/radio_option.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
+import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class GenderStepContent extends StatelessWidget {
   const GenderStepContent({super.key});
@@ -11,7 +12,8 @@ class GenderStepContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final flow = context.watch<OnboardingFlowProvider>();
 
-    return Column(
+    return FieldCard(
+      gap: 12,
       children: [
         RadioOption(
           label: 'ذكر',
@@ -23,7 +25,6 @@ class GenderStepContent extends StatelessWidget {
           },
           hasError: flow.genderInvalid,
         ),
-        const SizedBox(height: 16),
         RadioOption(
           label: 'أنثى',
           value: 'female',
@@ -34,12 +35,11 @@ class GenderStepContent extends StatelessWidget {
           },
           hasError: flow.genderInvalid,
         ),
-        if (flow.genderInvalid) ...[
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: Alignment.centerRight,
+        if (flow.genderInvalid)
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 'يرجى اختيار الجنس',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -50,7 +50,6 @@ class GenderStepContent extends StatelessWidget {
               ),
             ),
           ),
-        ],
       ],
     );
   }

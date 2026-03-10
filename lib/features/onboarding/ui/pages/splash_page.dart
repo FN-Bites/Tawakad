@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
-import 'package:tawakad_app/core/widgets/animation/splash_rive.dart';
+import 'package:tawakad_app/features/onboarding/ui/animation/splash_rive.dart';
 import 'package:tawakad_app/features/onboarding/ui/transitions/circular_reveal.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_screens/onboarding_page.dart';
 

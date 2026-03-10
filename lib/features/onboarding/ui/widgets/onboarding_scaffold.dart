@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
-import 'package:tawakad_app/core/widgets/entry_header.dart';
-
+import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
 import 'onboarding_progress_bar.dart';
 import 'onboarding_progress_text.dart';
 
@@ -19,18 +19,14 @@ class OnboardingScaffold extends StatelessWidget {
     this.bottom,
   });
 
-  final int currentStep; // 1-based
+  final int currentStep;
   final int totalSteps;
-
   final VoidCallback? onBack;
   final String title;
   final Widget child;
-
   final String primaryButtonText;
   final VoidCallback? onPrimaryPressed;
-
   final Widget? mascot;
-
   final Widget? bottom;
 
   @override
@@ -44,27 +40,26 @@ class OnboardingScaffold extends StatelessWidget {
         top: true,
         bottom: true,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SizedBox(
-                height: 24,
+                height: 44,
                 child: Stack(
-                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
                   children: [
-                    Align(
-                      alignment: Alignment.center,
+                    SizedBox(
+                      width: 186,
                       child: OnboardingProgressBar(progress: progress),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
-                      child: EntryHeader(onBack: onBack),
+                      child: GlassBackButton(onPressed: onBack),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
               OnboardingProgressText(
                 currentStep: currentStep,
                 totalSteps: totalSteps,
@@ -84,7 +79,6 @@ class OnboardingScaffold extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
               const SizedBox(height: 16),
               Text(
                 title,
@@ -99,15 +93,9 @@ class OnboardingScaffold extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: onPrimaryPressed,
-                  child: Text(
-                    primaryButtonText,
-                    style: Theme.of(context).textTheme.labelLarge,
-                  ),
-                ),
+              AppLiquidButtons.primary(
+                label: primaryButtonText,
+                onPressed: onPrimaryPressed ?? () {},
               ),
               if (bottom != null) ...[
                 const SizedBox(height: 28.5),

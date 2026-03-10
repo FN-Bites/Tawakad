@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:tawakad_app/features/onboarding/state/onboarding_flow_provider.dart';
 import 'package:tawakad_app/features/onboarding/ui/widgets/radio_option.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
+import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class MedicationStepContent extends StatelessWidget {
   const MedicationStepContent({super.key});
@@ -11,7 +12,7 @@ class MedicationStepContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final flow = context.watch<OnboardingFlowProvider>();
 
-    return Column(
+    return FieldCard(
       children: [
         RadioOption(
           label: 'نعم',
@@ -23,7 +24,6 @@ class MedicationStepContent extends StatelessWidget {
           },
           hasError: flow.medicationInvalid,
         ),
-        const SizedBox(height: 16),
         RadioOption(
           label: 'لا',
           value: 'no',
@@ -35,7 +35,6 @@ class MedicationStepContent extends StatelessWidget {
           hasError: flow.medicationInvalid,
         ),
         if (flow.medicationInvalid) ...[
-          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(

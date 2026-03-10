@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tawakad_app/features/onboarding/state/onboarding_flow_provider.dart';
 import 'package:tawakad_app/core/widgets/auth_text_field.dart';
+import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class NameStepContent extends StatelessWidget {
   const NameStepContent({super.key});
@@ -10,7 +11,7 @@ class NameStepContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final flow = context.watch<OnboardingFlowProvider>();
 
-    return Column(
+    return FieldCard(
       children: [
         AuthTextField(
           controller: flow.firstNameController,
@@ -21,7 +22,6 @@ class NameStepContent extends StatelessWidget {
           errorMsg: 'يرجى إدخال الاسم الأول',
           onAnyChange: flow.clearMascotError,
         ),
-        const SizedBox(height: 16),
         AuthTextField(
           controller: flow.lastNameController,
           hint: 'الاسم الأخير',

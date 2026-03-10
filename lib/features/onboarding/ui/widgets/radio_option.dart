@@ -66,10 +66,11 @@ class _RadioOptionState extends State<RadioOption> {
           hoverColor: Colors.transparent,
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            height: 54,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               color: background,
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(30),
               border: Border.all(
                 color: borderColor,
                 width: borderWidth,

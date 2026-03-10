@@ -8,22 +8,49 @@ class OnboardingProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: const Offset(0, 5),
-      child: SizedBox(
-        width: 210,
-        height: 16,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.progressBackground,
-              valueColor: const AlwaysStoppedAnimation(AppColors.primary),
-            ),
-          ),
-        ),
+    return SizedBox(
+      width: 200,
+      height: 16,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: progress),
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        builder: (context, value, _) {
+          return Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.progressBackground,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              FractionallySizedBox(
+                widthFactor: value,
+                alignment: Alignment.centerRight,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(999),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF60B8FF),
+                        AppColors.primary,
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withOpacity(0.5),
+                        blurRadius: 20,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

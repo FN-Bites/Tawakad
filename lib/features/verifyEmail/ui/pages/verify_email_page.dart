@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/animation/mail_sent_rive.dart';
+import '../animation/mail_sent_rive.dart';
 // -----------------------------------------------------------------------------
 import 'package:provider/provider.dart';
-import '../../state/verifyEmail_flow_provider.dart'; 
+import '../../state/verifyEmail_flow_provider.dart';
 // -----------------------------------------------------------------------------
 
 class VerifyEmailPage extends StatelessWidget {
@@ -60,19 +60,20 @@ class VerifyEmailPage extends StatelessWidget {
               const SizedBox(height: 18),
 // -----------------------------------------------------------------------------
               Text(
-                  'لم يصلك البريد؟',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
+                'لم يصلك البريد؟',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: theme.colorScheme.primary,
+                ),
               ),
-// -----------------------------------------------------------------------------              
+// -----------------------------------------------------------------------------
 
               const SizedBox(height: 14),
 // -----------------------------------------------------------------------------
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: flow.canResend ? flow.resendVerificationEmail : null,
+                  onPressed:
+                      flow.canResend ? flow.resendVerificationEmail : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: flow.canResend
                         ? theme.colorScheme.primary
