@@ -29,4 +29,7 @@ class AppColors {
   //Errors
   static const Color fieldErrorFill = Color(0xFFFAEBEB);
   static const Color fieldErrorBorder = Color(0xFFD74242);
+
+  // Speech bubble
+  static const Color speechBubble = Color(0xFF5E57F5);
 }

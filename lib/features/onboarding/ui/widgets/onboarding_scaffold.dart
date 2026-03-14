@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
+import 'package:tawakad_app/features/onboarding/ui/animation/mascot_rive.dart';
+import 'package:tawakad_app/features/onboarding/ui/widgets/mascot_with_bubble.dart';
 import 'onboarding_progress_bar.dart';
 import 'onboarding_progress_text.dart';
 
@@ -15,7 +17,10 @@ class OnboardingScaffold extends StatelessWidget {
     required this.child,
     required this.primaryButtonText,
     this.onPrimaryPressed,
-    this.mascot,
+    required this.mascotState,
+    required this.mascotMessage,
+    this.isError = false,
+    this.showBubble = true,
     this.bottom,
   });
 
@@ -26,7 +31,12 @@ class OnboardingScaffold extends StatelessWidget {
   final Widget child;
   final String primaryButtonText;
   final VoidCallback? onPrimaryPressed;
-  final Widget? mascot;
+
+  final MascotState mascotState;
+  final String mascotMessage;
+  final bool isError;
+  final bool showBubble;
+
   final Widget? bottom;
 
   @override
@@ -64,26 +74,22 @@ class OnboardingScaffold extends StatelessWidget {
                 currentStep: currentStep,
                 totalSteps: totalSteps,
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: 120,
-                height: 150,
-                child: OverflowBox(
-                  maxWidth: 180,
-                  maxHeight: 240,
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    width: 160,
-                    height: 240,
-                    child: mascot ?? const SizedBox(),
-                  ),
-                ),
+              const SizedBox(height: 8),
+              MascotWithBubble(
+                mascotState: mascotState,
+                message: mascotMessage,
+                isError: isError,
+                showBubble: showBubble,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineLarge,
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.black,
+                ),
               ),
               const SizedBox(height: 32),
               Expanded(
