@@ -12,8 +12,8 @@ class CreateNewPasswordPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    final args = ModalRoute.of(context)!.settings.arguments as CreateNewPasswordArgs;
+    final args =
+        ModalRoute.of(context)!.settings.arguments as CreateNewPasswordArgs;
     final flow = context.watch<CreateNewPasswordFlowProvider>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -30,27 +30,20 @@ class CreateNewPasswordPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-
               const EntryHeader(),
-
               const SizedBox(height: 16),
-
               Text(
                 'إنشاء كلمة مرور جديدة',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 'يرجى إدخال كلمة مرور جديدة لحسابك',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.labelMedium,
               ),
-
               const SizedBox(height: 16),
-
               if (flow.codeError != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
@@ -63,7 +56,6 @@ class CreateNewPasswordPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -97,7 +89,7 @@ class CreateNewPasswordPage extends StatelessWidget {
                           if (flow.codeValid) {
                             flow.setConfirmPassword(value);
                           }
-                        }, 
+                        },
                       ),
 
                       const SizedBox(height: 16),
@@ -117,21 +109,23 @@ class CreateNewPasswordPage extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-
-                          onPressed: flow.isButtonEnabled 
+                          onPressed: flow.isButtonEnabled
                               ? () async {
                                   final success = await flow.submit(
                                     oobCode: args.oobCode,
                                   );
                                   if (success && context.mounted) {
-                                    Navigator.pushReplacementNamed(context, '/signin',);
+                                    Navigator.pushReplacementNamed(
+                                      context,
+                                      '/signin',
+                                    );
                                   }
                                 }
                               : null,
-
                           style: ButtonStyle(
                             backgroundColor:
-                                MaterialStateProperty.resolveWith<Color>((states) {
+                                MaterialStateProperty.resolveWith<Color>(
+                                    (states) {
                               if (states.contains(MaterialState.disabled)) {
                                 return AppColors.linkSoft;
                               }
@@ -140,7 +134,6 @@ class CreateNewPasswordPage extends StatelessWidget {
                             foregroundColor:
                                 MaterialStateProperty.all(Colors.white),
                           ),
-
                           child: flow.isLoading
                               ? const SizedBox(
                                   height: 20,

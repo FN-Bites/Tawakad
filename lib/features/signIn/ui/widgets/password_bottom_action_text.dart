@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 
-
 class PasswordBottomActionText extends StatelessWidget {
   const PasswordBottomActionText({
     super.key,

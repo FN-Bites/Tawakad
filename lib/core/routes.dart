@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import '../features/signUp/ui/pages/signUp_page.dart';
 import '../features/verifyEmail/ui/pages/verify_email_page.dart';
 import '../features/verifyEmail/ui/pages/email_verified_success_page.dart';
-import '../features/singIn/ui/pages/sing_in_page.dart';
+import '../features/signIn/ui/pages/sign_in_page.dart';
 import '../features/forgotPassword/ui/pages/forgot_password_page.dart';
 import '../features/createNewPassword/ui/pages/create_new_password_page.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/splash_page.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_questions/onboarding_questions_page.dart';
 // -----------------------------------------------------------------------------
-import 'package:tawakad_app/features/singIn/ui/pages/auth_success_page.dart';
+import 'package:tawakad_app/features/signIn/ui/pages/auth_success_page.dart';
 // -----------------------------------------------------------------------------
 
 class AppRoutes {

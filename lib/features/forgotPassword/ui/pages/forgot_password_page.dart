@@ -69,7 +69,8 @@ class ForgetPasswordPage extends StatelessWidget {
                           onPressed: flow.isButtonEnabled && !flow.isLoading
                               ? () async {
                                   await flow.sendPasswordResetEmail();
-                                  if (context.mounted && flow.serverError == null) {
+                                  if (context.mounted &&
+                                      flow.serverError == null) {
                                     ScaffoldMessenger.of(
                                       context,
                                     ).showSnackBar(
@@ -81,7 +82,7 @@ class ForgetPasswordPage extends StatelessWidget {
                                     );
                                   }
                                 }
-                                : null,
+                              : null,
                           style: ButtonStyle(
                             backgroundColor:
                                 MaterialStateProperty.resolveWith<Color>(
@@ -99,8 +100,7 @@ class ForgetPasswordPage extends StatelessWidget {
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child:
-                                      CircularProgressIndicator(
+                                  child: CircularProgressIndicator(
                                     strokeWidth: 2,
                                     color: Colors.white,
                                   ),
@@ -109,9 +109,7 @@ class ForgetPasswordPage extends StatelessWidget {
                                   flow.isButtonEnabled
                                       ? 'إرسال'
                                       : 'إعادة إرسال بعد ${flow.resendSeconds} ثانية',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelLarge,
+                                  style: Theme.of(context).textTheme.labelLarge,
                                 ),
                         ),
                       ),

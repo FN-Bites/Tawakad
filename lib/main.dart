@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tawakad_app/features/singIn/state/signIn_flow_provider.dart';
+import 'package:tawakad_app/features/signIn/state/signIn_flow_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes.dart';
 import 'features/onboarding/state/onboarding_flow_provider.dart';

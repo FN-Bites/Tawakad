@@ -3,7 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/entry_header.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
 import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
-import '../widgets/password_bottom_action_text.dart';
+import 'password_bottom_action_text.dart';
 
 class SignInScaffold extends StatelessWidget {
   final String title;
@@ -40,7 +40,6 @@ class SignInScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -104,7 +103,7 @@ class SignInScaffold extends StatelessWidget {
               GoogleSignInButton(
                 onPressed: onGooglePressed,
               ),
-              const SizedBox(height: 16), 
+              const SizedBox(height: 16),
 
               // الفوتر باستخدام EntryBottomActionText
               EntryBottomActionText(
