@@ -14,6 +14,7 @@ import 'features/createNewPassword/state/createNewPassword_flow_provider.dart';
 import 'firebase_options.dart';
 import 'core/services/deep_link_service.dart';
 import 'features/createNewPassword/ui/widgets/create_new_password_args.dart';
+
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
@@ -105,7 +106,7 @@ class TawakadApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routes: AppRoutes.routes,
-      initialRoute: AppRoutes.splashScreen,
+      initialRoute: AppRoutes.homePage,
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: const [

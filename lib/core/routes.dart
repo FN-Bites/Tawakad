@@ -7,6 +7,7 @@ import '../features/forgotPassword/ui/pages/forgot_password_page.dart';
 import '../features/createNewPassword/ui/pages/create_new_password_page.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/splash_page.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_questions/onboarding_questions_page.dart';
+import 'package:tawakad_app/features/home/ui/pages/home_page.dart';
 // -----------------------------------------------------------------------------
 import 'package:tawakad_app/features/signIn/ui/pages/auth_success_page.dart';
 // -----------------------------------------------------------------------------
@@ -20,6 +21,7 @@ class AppRoutes {
   static const forgetPassword = '/forget-password';
   static const createNewPassword = '/create-new-password';
   static const splashScreen = '/splash';
+  static const homePage = '/home';
 // -----------------------------------------------------------------------------
   static const authSuccess = '/auth-success';
 // -----------------------------------------------------------------------------
@@ -33,6 +35,7 @@ class AppRoutes {
     forgetPassword: (_) => const ForgetPasswordPage(),
     createNewPassword: (_) => const CreateNewPasswordPage(),
     splashScreen: (_) => const SplashPage(),
+    homePage: (_) => HomePage(),
 // -----------------------------------------------------------------------------
     authSuccess: (_) => const AuthSuccessPage(),
 // -----------------------------------------------------------------------------
