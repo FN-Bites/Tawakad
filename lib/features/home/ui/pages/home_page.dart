@@ -19,7 +19,15 @@ class _HomeState extends State<HomePage> {
 
   void _openAddPackList() {
     showModalBottomSheet(
-        context: context, builder: (ctx) => const Text("Modal bottom sheet"));
+        isScrollControlled: true,
+        context: context,
+        builder: (ctx) => const Text("Modal bottom sheet"));
+  }
+
+  void _removePackList(PackList packlist) {
+    setState(() {
+      _registeredList.remove(packlist);
+    });
   }
 
   @override
@@ -40,7 +48,10 @@ class _HomeState extends State<HomePage> {
           const SizedBox(height: 30),
           const Text("The filters"),
           Expanded(
-            child: PackListCard(packList: _registeredList),
+            child: PackListCard(
+              packList: _registeredList,
+              onRemoveList: _removePackList,
+            ),
           ),
         ],
       ),
