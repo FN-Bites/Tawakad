@@ -3,6 +3,7 @@ import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'pack_list.dart';
 import '../widgets/pack_list/pack_list_card.dart';
 import '../widgets/buttons/pack_list_icon_badge.dart';
+import '../widgets/pack_list_card_theme.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -14,8 +15,18 @@ class HomePage extends StatefulWidget {
 class _HomeState extends State<HomePage> {
   //Dummy data
   final List<PackList> _registeredList = [
-    PackList(title: 'Gym', itemCount: 23, date: DateTime.now()),
-    PackList(title: 'Uni', itemCount: 19, date: DateTime.now()),
+    PackList(
+      title: 'الجيم',
+      itemCount: 9,
+      date: DateTime.now(),
+      cardTheme: PackListCardTheme.pink,
+    ),
+    PackList(
+      title: 'جامعة',
+      itemCount: 5,
+      date: DateTime.now(),
+      cardTheme: PackListCardTheme.blue,
+    )
   ];
 
   void _openAddPackList() {
@@ -65,8 +76,13 @@ class _HomeState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         automaticallyImplyLeading: false,
+        toolbarHeight: kToolbarHeight + 40,
         actions: [
-          const PackListIconBadge(icon: Icons.person),
+          const SizedBox(width: 24),
+          const PackListIconBadge(
+            icon: Icons.person,
+            iconColor: Colors.black,
+          ),
           const SizedBox(
             width: 16,
           ),
@@ -76,14 +92,28 @@ class _HomeState extends State<HomePage> {
           ),
           const Spacer(),
           PackListIconBadge(
-              onPressed: _openAddPackList, icon: Icons.add, bold: true)
+            onPressed: _openAddPackList,
+            icon: Icons.add,
+            bold: true,
+            iconColor: Colors.black,
+          ),
+          const SizedBox(width: 24),
         ],
       ),
       body: Column(
         children: [
           const SizedBox(height: 30),
           const Text("The filters"),
-          Expanded(child: mainContent),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 40,
+              ),
+              child: mainContent,
+            ),
+          ),
         ],
       ),
     );

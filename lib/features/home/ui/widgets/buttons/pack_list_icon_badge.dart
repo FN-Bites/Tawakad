@@ -7,19 +7,21 @@ class PackListIconBadge extends StatelessWidget {
     required this.icon,
     this.onPressed,
     this.bold = false,
+    this.iconColor = Colors.white,
   });
 
   final IconData icon;
   final VoidCallback? onPressed;
   final bool bold;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
     return AppLiquidButtons.icon(
       icon: icon,
       onPressed: onPressed,
-      iconColor: const Color.fromARGB(255, 0, 0, 0),
-      iconSize: 22,
+      iconColor: iconColor,
+      iconSize: 24,
       bold: bold,
     );
   }
