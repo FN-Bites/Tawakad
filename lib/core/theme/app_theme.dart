@@ -21,8 +21,8 @@ class AppTheme {
         ),
         bodyLarge: TextStyle(
           fontFamily: 'Montserrat',
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
+          fontSize: 24,
+          fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         bodyMedium: TextStyle(

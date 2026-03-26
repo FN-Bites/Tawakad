@@ -46,12 +46,11 @@ class TawakadApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       routes: AppRoutes.routes,
-      initialRoute: AppRoutes.splashScreen,
+      initialRoute: AppRoutes.homePage,
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: const [
@@ -62,4 +61,3 @@ class TawakadApp extends StatelessWidget {
     );
   }
 }
-

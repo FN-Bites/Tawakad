@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'pack_list.dart';
 import '../widgets/pack_list/pack_list_card.dart';
+import '../widgets/buttons/pack_list_icon_badge.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -29,6 +30,7 @@ class _HomeState extends State<HomePage> {
     setState(() {
       _registeredList.remove(packlist);
     });
+    //Undo remove button
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 2),
@@ -64,9 +66,17 @@ class _HomeState extends State<HomePage> {
         backgroundColor: AppColors.background,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.person)),
+          const PackListIconBadge(icon: Icons.person),
+          const SizedBox(
+            width: 16,
+          ),
+          Text(
+            'الرئيسية',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
           const Spacer(),
-          IconButton(onPressed: _openAddPackList, icon: const Icon(Icons.add)),
+          PackListIconBadge(
+              onPressed: _openAddPackList, icon: Icons.add, bold: true)
         ],
       ),
       body: Column(

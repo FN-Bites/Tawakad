@@ -16,38 +16,54 @@ class AppLiquidButtons {
   }) =>
       _LiquidButton(label: label, onPressed: onPressed, isPrimary: false);
 
+  static Widget custom({
+    required Widget child,
+    required VoidCallback? onPressed,
+    double height = 44,
+  }) =>
+      _SmallGlassButton(onPressed: onPressed, child: child, height: height);
+
   static Widget small({
     required String label,
     required VoidCallback? onPressed,
+    TextStyle? textStyle,
   }) =>
       _SmallGlassButton(
           onPressed: onPressed,
           child: Text(
             label,
-            style: const TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1C1C1E),
-            ),
+            style: textStyle ??
+                const TextStyle(
+                  fontFamily: 'Montserrat',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1C1C1E),
+                ),
           ));
 
-  /// Small frosted glass button with an icon (e.g. arrow, back, etc.).
-  /// Fixed 44×44 square — same height as [small].
   static Widget icon({
     required IconData icon,
     required VoidCallback? onPressed,
     Color iconColor = const Color(0xFF1C1C1E),
     double iconSize = 18,
+    bool bold = false,
   }) =>
       _SmallGlassButton(
         onPressed: onPressed,
         isSquare: true,
-        child: Icon(icon, color: iconColor, size: iconSize),
+        child: bold
+            ? CustomPaint(
+                size: Size(iconSize, iconSize),
+                painter: _BoldIconPainter(
+                  icon: icon,
+                  color: iconColor,
+                  size: iconSize,
+                  strokeExtra: 1,
+                ),
+              )
+            : Icon(icon, color: iconColor, size: iconSize),
       );
 }
-
-// ─── FULL-WIDTH BUTTON (PRIMARY + SECONDARY) ──────────────────────────────────
 
 class _LiquidButton extends StatefulWidget {
   final String label;
@@ -111,8 +127,6 @@ class _LiquidButtonState extends State<_LiquidButton>
   }
 }
 
-// ─── PRIMARY ──────────────────────────────────────────────────────────────────
-
 class _PrimaryGlass extends StatelessWidget {
   final bool pressed;
   final String label;
@@ -128,94 +142,35 @@ class _PrimaryGlass extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3C8EFF).withOpacity(0.50),
-            blurRadius: 12,
+            color: const Color(0xFF3C8EFF).withOpacity(0.40),
+            blurRadius: 100,
             spreadRadius: 0,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: const Color(0xFF3C8EFF).withOpacity(0.30),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 0),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(32),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Container(color: const Color(0xFF3C8EFF)),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 22,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.white.withOpacity(0.15),
-                      Colors.white.withOpacity(0.0),
-                    ],
-                  ),
-                ),
+        child: _GlassFill(
+          pressed: pressed,
+          borderRadius: 32,
+          tint: const Color(0xFF3C8EFF).withOpacity(1),
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 14,
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.10),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _GlassRimPainter(
-                  borderRadius: 32,
-                  topColor: Colors.white.withOpacity(0.55),
-                  bottomColor: Colors.white.withOpacity(0.10),
-                ),
-              ),
-            ),
-            if (pressed)
-              Positioned.fill(
-                child: Container(color: Colors.black.withOpacity(0.08)),
-              ),
-            Center(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
-
-// ─── SECONDARY ────────────────────────────────────────────────────────────────
 
 class _SecondaryGlass extends StatelessWidget {
   final bool pressed;
@@ -232,8 +187,8 @@ class _SecondaryGlass extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.07),
-            blurRadius: 8,
+            color: const Color.fromARGB(255, 235, 230, 230).withOpacity(0.1),
+            blurRadius: 100,
             spreadRadius: 0,
             offset: const Offset(0, 2),
           ),
@@ -261,17 +216,17 @@ class _SecondaryGlass extends StatelessWidget {
   }
 }
 
-// ─── SMALL GLASS BUTTON (SKIP / ICON) ─────────────────────────────────────────
-
 class _SmallGlassButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Widget child;
   final bool isSquare;
+  final double height;
 
   const _SmallGlassButton({
     required this.onPressed,
     required this.child,
     this.isSquare = false,
+    this.height = 44,
   });
 
   @override
@@ -318,10 +273,10 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
       child: ScaleTransition(
         scale: _scale,
         child: Container(
-          height: 44,
-          width: widget.isSquare ? 44 : null,
+          height: widget.height,
+          width: widget.isSquare ? widget.height : null,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(widget.height / 2),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.07),
@@ -332,10 +287,10 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(widget.height / 2),
             child: _GlassFill(
               pressed: _pressed,
-              borderRadius: 22,
+              borderRadius: widget.height / 2,
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: widget.isSquare ? 0 : 18,
@@ -350,17 +305,17 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
   }
 }
 
-// ─── SHARED GLASS FILL (frosted white layers) ─────────────────────────────────
-
 class _GlassFill extends StatelessWidget {
   final bool pressed;
   final double borderRadius;
   final Widget child;
+  final Color? tint;
 
   const _GlassFill({
     required this.pressed,
     required this.borderRadius,
     required this.child,
+    this.tint,
   });
 
   @override
@@ -369,36 +324,27 @@ class _GlassFill extends StatelessWidget {
       children: [
         Positioned.fill(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: const SizedBox.expand(),
           ),
         ),
         Positioned.fill(
           child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withOpacity(0.88),
-                  Colors.white.withOpacity(0.75),
-                ],
-              ),
-            ),
+            color: tint ?? Colors.white.withOpacity(0.62),
           ),
         ),
         Positioned(
           top: 0,
           left: 0,
           right: 0,
-          height: 18,
+          height: 14,
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.white.withOpacity(0.70),
+                  Colors.white.withOpacity(0.45),
                   Colors.white.withOpacity(0.0),
                 ],
               ),
@@ -409,22 +355,20 @@ class _GlassFill extends StatelessWidget {
           child: CustomPaint(
             painter: _GlassRimPainter(
               borderRadius: borderRadius,
-              topColor: Colors.white.withOpacity(0.90),
-              bottomColor: const Color(0xFFDDE0E5).withOpacity(0.60),
+              topColor: Colors.white.withOpacity(0.80),
+              bottomColor: Colors.white.withOpacity(0.20),
             ),
           ),
         ),
         if (pressed)
           Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.04)),
+            child: Container(color: Colors.black.withOpacity(0.06)),
           ),
         child,
       ],
     );
   }
 }
-
-// ─── GLASS RIM PAINTER ────────────────────────────────────────────────────────
 
 class _GlassRimPainter extends CustomPainter {
   final double borderRadius;
@@ -459,4 +403,45 @@ class _GlassRimPainter extends CustomPainter {
       old.topColor != topColor ||
       old.bottomColor != bottomColor ||
       old.borderRadius != borderRadius;
+}
+
+class _BoldIconPainter extends CustomPainter {
+  final IconData icon;
+  final Color color;
+  final double size;
+  final double strokeExtra;
+
+  const _BoldIconPainter({
+    required this.icon,
+    required this.color,
+    required this.size,
+    this.strokeExtra = 2.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size canvasSize) {
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    for (double dx = -strokeExtra / 2; dx <= strokeExtra / 2; dx += 0.5) {
+      for (double dy = -strokeExtra / 2; dy <= strokeExtra / 2; dy += 0.5) {
+        textPainter.text = TextSpan(
+          text: String.fromCharCode(icon.codePoint),
+          style: TextStyle(
+            fontSize: size,
+            fontFamily: icon.fontFamily,
+            package: icon.fontPackage,
+            color: color,
+          ),
+        );
+        textPainter.layout();
+        textPainter.paint(canvas, Offset(dx, dy));
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BoldIconPainter old) =>
+      old.icon != icon ||
+      old.color != color ||
+      old.size != size ||
+      old.strokeExtra != strokeExtra;
 }

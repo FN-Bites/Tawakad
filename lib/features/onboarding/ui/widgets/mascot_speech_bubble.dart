@@ -20,7 +20,7 @@ class MascotSpeechBubble extends StatelessWidget {
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 140),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: const BoxDecoration(
         color: AppColors.speechBubble,
         borderRadius: BorderRadius.only(
