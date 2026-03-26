@@ -6,6 +6,7 @@ import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_screens/onboarding_page.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_screens/onboarding_data.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_questions/onboarding_questions_page.dart';
+import 'package:tawakad_app/features/signIn/ui/pages/sign_in_page.dart';
 
 class AuthEntryPage extends StatelessWidget {
   const AuthEntryPage({super.key});
@@ -67,7 +68,12 @@ class AuthEntryPage extends StatelessWidget {
               const SizedBox(height: 12),
               AppLiquidButtons.secondary(
                 label: 'تسجيل دخول',
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignInPage()),
+                  );
+                },
               ),
               const SizedBox(height: 40),
             ],

@@ -49,6 +49,13 @@ class AppTheme {
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
+        labelSmall: TextStyle(
+          fontFamily: 'Montserrat',
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+          height: 1.5,
+        ),
         labelLarge: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 18,

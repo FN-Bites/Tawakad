@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/singin_singup/sign_auth_text_field.dart';
+import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class SignInContent extends StatelessWidget {
   final TextEditingController emailController;
@@ -28,7 +29,7 @@ class SignInContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    return Column(
+    return FieldCard(
       children: [
 
         SignAuthTextField(
@@ -38,7 +39,7 @@ class SignInContent extends StatelessWidget {
           externalError: emailServerError,
           onChanged: onEmailChanged,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         SignAuthTextField(
           hint: 'كلمة المرور',
           controller: passwordController,
@@ -48,7 +49,6 @@ class SignInContent extends StatelessWidget {
           externalError: passwordServerError,
           onChanged: onPasswordChanged,
         ),
-        const SizedBox(height: 16),
       ],
     );
   }

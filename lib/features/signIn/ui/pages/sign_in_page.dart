@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tawakad_app/features/singIn/ui/widgets/sing_in_content.dart';
-import 'package:tawakad_app/features/singIn/ui/widgets/sing_in_scaffold.dart';
+import 'package:tawakad_app/features/signIn/ui/widgets/sign_in_content.dart';
+import 'package:tawakad_app/features/signIn/ui/widgets/sign_in_scaffold.dart';
 import '../../state/signIn_flow_provider.dart';
 
 class SignInPage extends StatelessWidget {
@@ -17,7 +17,7 @@ class SignInPage extends StatelessWidget {
       title: 'تسجيل الدخول',
 
       forgotPasswordText: 'هل نسيت كلمة المرور؟',
-      onForgotPasswordPressed: () => Navigator.pushReplacementNamed(context, '/forget-password'),
+      onForgotPasswordPressed: () => Navigator.pushReplacementNamed(context, '/forgot-password'),
 
       primaryButtonText: 'تسجيل الدخول',
       onPrimaryPressed: flow.isLoading
@@ -25,7 +25,7 @@ class SignInPage extends StatelessWidget {
           : () async {
               final success = await flow.signInWithEmail();
               if (success && context.mounted) {
-                Navigator.pushReplacementNamed(context, '/auth-success');
+                Navigator.pushReplacementNamed(context, '/home');
               }
             },
 
@@ -34,7 +34,7 @@ class SignInPage extends StatelessWidget {
           : () async {
               final success = await flow.signInWithGoogle();
               if (success && context.mounted) {
-                Navigator.pushReplacementNamed(context, '/auth-success');
+                Navigator.pushReplacementNamed(context, '/home');
               }
             },
 

@@ -42,43 +42,51 @@ class GoogleSignInButton extends StatelessWidget {
           ],
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
         /// زر Google
         SizedBox(
           width: double.infinity,
-          height: 52,
-          child: OutlinedButton(
-            onPressed: onPressed,
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              side: const BorderSide(
-                color: Color(0xFFBDBDBD),
-                width: 1.2,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset(
-                  'assets/Icons/Google.png',
-                  height: 20,
-                ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Google تسجيل الدخول باستخدام",
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 83, 85, 97),
+          height: 45,
+          child: Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            elevation: 2, 
+            shadowColor: Colors.black.withOpacity(0.08),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(30),
+              onTap: onPressed,
+              splashColor: Colors.black.withOpacity(0.04),
+              highlightColor: Colors.transparent,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: const Color(0xFFD1D5DB), 
+                    width: 1,
                   ),
                 ),
-              ],
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "تسجيل الدخول بإستخدام Google",
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF374151),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Image.asset(
+                      'assets/Icons/Google.png',
+                      height: 20,
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

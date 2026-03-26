@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>إنشاء كلمة مرور جديدة</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+
+body{
+font-family: 'Cairo', sans-serif;
+background:#F4F6FA;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.container {
+width:400px;
+background:white;
+padding:40px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.05);
+transition: all 0.4s ease;
+}
+
+.title{
+text-align:center;
+color: #1A1A1A;
+font-size:22px;
+font-weight:700;
+line-height: 1.6;
+margin-bottom: 10px;
+}
+
+.subtitle{
+text-align:center;
+color:#606060;
+font-size:14px;
+line-height: 1.5;
+margin-bottom:30px;
+}
+
+.inputBox {
+margin-bottom: 7px;
+position: relative;
+}
+
+input{
+width:100%;
+padding:14px 45px 14px 14px;
+border:1px solid #E5E7EB;
+border-radius:14px;
+font-size:14px;
+outline:none;
+box-sizing:border-box;
+}
+
+input:focus{
+border-color:#2f6bff;
+box-shadow:0 0 0 3px rgba(47,107,255,.15);
+transform:scale(1.01);
+transition:all .15s ease;
+}
+
+.eye{
+position:absolute;
+left: 12px;
+top: 50%;
+transform: translateY(-50%);
+cursor:pointer;
+color: #888;
+font-size:21px;
+display:flex;
+align-items:center;
+}
+
+.checkList{
+font-size:13px;
+margin-top:16px;
+line-height:1.5;
+color: #999;
+padding-right:5px;
+}
+
+.checkList div{
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.valid{
+color:#34C759;
+}
+
+.invalid{
+color:#FF3B30;
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:30px;
+border:none;
+border-radius:30px;
+background:linear-gradient(90deg,#2f6bff,#3b82f6);
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+opacity:.5;
+transition:all .2s ease;
+box-shadow:0 4px 10px rgba(47,107,255,.25);
+}
+
+button.active{
+opacity:1;
+}
+
+button:hover{
+transform:translateY(-1px);
+box-shadow:0 6px 14px rgba(47,107,255,.35);
+}
+
+button:active{
+transform:scale(.98)
+}
+
+.error{
+color:#FF3B30;
+font-size:12px;
+text-align: right;
+}
+
+@keyframes fadeInScale {
+from { opacity: 0; transform: scale(0.9); }
+to { opacity: 1; transform: scale(1); }
+}
+
+#success-content {
+display: none; 
+animation: fadeInScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+text-align: center;
+}
+
+.checkmark-circle {
+width: 100px;
+height: 100px;
+background-color: #34C759;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+margin: 0 auto 20px;
+box-shadow: 0 4px 15px rgba(52, 199, 89, 0.3);
+}
+
+.checkmark-circle span {
+color: white;
+font-size: 50px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container" id="mainContainer">
+
+<div id="form-content">
+<div class="title">إنشاء كلمة مرور جديدة</div>
+<div class="subtitle">يرجى إدخال كلمة مرور جديدة لحسابك</div>
+
+<div id="mainError" class="error"></div>
+
+<div class="inputBox">
+<input id="password" type="password" placeholder="كلمة المرور الجديدة">
+<span class="eye" onclick="togglePassword('password','passwordEye')">
+<span id="passwordEye" class="material-icons">visibility</span>
+</span>
+</div>
+
+<div id="passwordError" class="error"></div>
+
+<div class="inputBox">
+<input id="confirmPassword" type="password" placeholder="تأكيد كلمة المرور الجديدة">
+<span class="eye" onclick="togglePassword('confirmPassword','confirmEye')">
+<span id="confirmEye" class="material-icons">visibility</span>
+</span>
+</div>
+
+<div id="confirmError" class="error"></div>
+
+<div class="checkList">
+<div id="length">- ثمانية أحرف على الأقل</div>
+<div id="number">- رقم واحد على الأقل</div>
+<div id="lower">- حرف صغير واحد على الأقل</div>
+<div id="upper">- حرف كبير واحد على الأقل</div>
+<div id="symbol">- رمز خاص واحد على الأقل</div>
+</div>
+
+<button id="submitBtn" disabled>تعيين كلمة المرور</button>
+</div>
+
+<div id="success-content">
+<div class="checkmark-circle">
+<span class="material-icons">check</span>
+</div>
+
+<div class="title" style="color: #34C759;">تم التحديث بنجاح</div>
+<div class="subtitle" style="margin-top: 20px;"> 
+  لقد تم تغيير كلمة المرور الخاصة بك بنجاح<br><br>
+  يمكنك الآن العودة الى التطبيق وتسجيل الدخول باستخدام كلمة المرور الجديدة
+</div>
+</div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, verifyPasswordResetCode, confirmPasswordReset } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyDVHSMk4YuVjhhaUIOvWykqZ_DMAZHlI7k",
+authDomain: "signupapp-e1252.firebaseapp.com",
+projectId: "signupapp-e1252",
+storageBucket: "signupapp-e1252.firebasestorage.app",
+messagingSenderId: "287910848295",
+appId: "1:287910848295:web:14ac76cc5232a46f302b02",
+measurementId: "G-84Q335J5WM"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+const params=new URLSearchParams(window.location.search);
+const oobCode=params.get("oobCode");
+
+const passwordInput=document.getElementById("password");
+const confirmInput=document.getElementById("confirmPassword");
+const submitBtn=document.getElementById("submitBtn");
+
+passwordInput.addEventListener("input",validate);
+confirmInput.addEventListener("input",validate);
+submitBtn.addEventListener("click",submitPassword);
+
+window.togglePassword = function(inputId, iconId) {
+const field=document.getElementById(inputId);
+const icon=document.getElementById(iconId);
+if(field.type==="password"){
+field.type="text";
+icon.innerText="visibility_off";
+}
+else{
+field.type="password";
+icon.innerText="visibility";
+}
+}
+
+function setRule(element,isValid){
+const text = element.innerText.replace("✔ ","").replace("✖ ","").replace("- ","");
+if(isValid){
+element.classList.remove("invalid");
+element.classList.add("valid");
+element.innerText="✔ "+text;
+}else{
+element.classList.remove("valid");
+element.classList.add("invalid");
+element.innerText="✖ "+text;
+}
+}
+
+function validate(){
+const password=passwordInput.value;
+const confirm=confirmInput.value;
+
+const length=document.getElementById("length");
+const number=document.getElementById("number");
+const lower=document.getElementById("lower");
+const upper=document.getElementById("upper");
+const symbol=document.getElementById("symbol");
+
+const hasLength=password.length>=8;
+const hasNumber=/[0-9]/.test(password);
+const hasLower=/[a-z]/.test(password);
+const hasUpper=/[A-Z]/.test(password);
+const hasSymbol=/[^\w\s]/.test(password);
+
+setRule(length,hasLength);
+setRule(number,hasNumber);
+setRule(lower,hasLower);
+setRule(upper,hasUpper);
+setRule(symbol,hasSymbol);
+
+const validPassword=hasLength&&hasNumber&&hasLower&&hasUpper&&hasSymbol;
+
+if(!validPassword){
+document.getElementById("passwordError").innerText="كلمة المرور لا تتوافق مع الشروط";
+}else{
+document.getElementById("passwordError").innerText="";
+}
+
+if(password!==confirm){
+document.getElementById("confirmError").innerText="كلمة المرور وتأكيدها غير متطابقة";
+}
+else{
+document.getElementById("confirmError").innerText="";
+}
+
+if(validPassword && password===confirm){
+submitBtn.disabled=false;
+submitBtn.classList.add("active");
+}else{
+submitBtn.disabled=true;
+submitBtn.classList.remove("active");
+}
+}
+
+async function hashPassword(password, email) {
+    const encoder = new TextEncoder();
+    const salt = email.toLowerCase().trim(); 
+    const secretKey = "Tawakad_Secure";
+    const data = encoder.encode(password + salt + secretKey);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function submitPassword(){
+const password=passwordInput.value;
+submitBtn.disabled = true;
+submitBtn.innerText = "جاري التحديث ...";
+submitBtn.classList.remove("active");
+
+try{
+const email=await verifyPasswordResetCode(auth, oobCode);
+const q = query(
+collection(db, "users"),
+where("email", "==", email),
+limit(1));
+const snapshot = await getDocs(q);
+
+if (!snapshot.empty) {
+const history = snapshot.docs[0].data().passwordHistory || [];
+const newHash = await hashPassword(password, email);
+ 
+if (history.includes(newHash)) {
+document.getElementById("passwordError").innerText = "لا يمكن استخدام كلمة مرور تم استخدامها سابقاً";
+submitBtn.disabled = false;
+submitBtn.innerText = "تعيين كلمة المرور";
+submitBtn.classList.remove("active");
+return;
+}
+}
+
+await confirmPasswordReset(auth,oobCode,password);
+
+const formContent = document.getElementById('form-content');
+const successContent = document.getElementById('success-content');
+const container = document.getElementById('mainContainer');
+
+if (formContent && successContent) {
+formContent.style.opacity = '0';
+formContent.style.transition = 'opacity 0.3s ease';
+            
+setTimeout(() => {
+formContent.style.display = 'none'; 
+successContent.style.display = 'block'; 
+                
+if(container) container.style.height = 'auto'; 
+}, 300);
+}
+}
+catch(e){
+document.getElementById("mainError").innerText="";
+console.error("Error:", e);
+submitBtn.disabled = false;
+submitBtn.innerText = "تعيين كلمة المرور";
+submitBtn.classList.add("active");
+
+if(e.code==="auth/expired-action-code"){
+document.getElementById("mainError").innerText="انتهت صلاحية رابط إعادة التعيين";
+}
+
+else if(e.code==="auth/invalid-action-code"){
+document.getElementById("mainError").innerText="رابط إعادة التعيين غير صالح";
+}
+
+else{
+document.getElementById("mainError").innerText="حدث خطأ أثناء تغيير كلمة المرور";
+}
+}
+}
+
+</script>
+
+</body>
+</html>
