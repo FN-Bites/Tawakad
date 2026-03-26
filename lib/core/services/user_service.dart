@@ -12,73 +12,53 @@ class UserService {
     required String password,
     required List<String> answers,
   }) async {
+    final passwordHash = _generatePasswordHash(password, user.email ?? "");
 
-    final passwordHash = _generatePasswordHash(password);
-
-    await _firestore.collection('users') .doc(user.uid).set({
-        "uid": user.uid,
-        "email": user.email,
-        "passwordHistory": [passwordHash],
-        "answers": answers,
-        "createdAt": Timestamp.now(),
+    await _firestore.collection('users').doc(user.uid).set({
+      "uid": user.uid,
+      "email": user.email,
+      "passwordHistory": [passwordHash],
+      "answers": answers,
+      "createdAt": Timestamp.now(),
     });
   }
-
-  Future<String> getUserIdByEmail(String email) async {
-    final query = await _firestore
-      .collection('users')
-      .where('email', isEqualTo: email)
-      .limit(1)
-      .get();
-
-    return query.docs.first.id;
-  }
-
-  Future<void> checkPasswordReuse({
-    required String userId,
-    required String newPassword,
+  // Update password history after sign in
+  Future<void> updatePasswordHistoryIfChanged({
+    required String uid,
+    required String email,
+    required String currentPassword,
   }) async {
+    try {
+      final userDoc = _firestore.collection('users').doc(uid);
+      final snapshot = await userDoc.get();
 
-    final docRef = _firestore.collection('users').doc(userId);
+      if (snapshot.exists) {
+        List<dynamic> history = snapshot.data()?['passwordHistory'] ?? [];
+        final String currentHash = _generatePasswordHash(currentPassword, email);
 
-    final snapshot = await docRef.get();
+        if (history.isEmpty || history.last != currentHash) {
+          history.add(currentHash);
 
-    final history = snapshot.data()?['passwordHistory'] ?? [];
+          if (history.length > 5) {
+            history = history.sublist(history.length - 5);
+          }
 
-    final newHash = _generatePasswordHash(newPassword);
-
-    if (history.contains(newHash)) {
-      throw Exception('PASSWORD_ALREADY_USED');
+          await userDoc.update({
+            'passwordHistory': history,
+          });
+          print("✅ Password history updated successfully in Firestore.");
+        }
+      }
+    } catch (e) {
+      print("❌ Error updating password history: $e");
     }
   }
-
-  Future<void> updatePasswordHistory({
-    required String userId,
-    required String newPassword,
-  }) async {
-
-    final docRef = _firestore.collection('users').doc(userId);
-
-    final snapshot = await docRef.get();
-
-    List history = snapshot.data()?['passwordHistory'] ?? [];
-
-    final newHash = _generatePasswordHash(newPassword);
-
-    history.add(newHash);
-
-    if (history.length > 5) {
-      history = history.sublist(history.length - 5);
-    }
-
-    await docRef.update({
-      "passwordHistory": history,
-    });
-  }
-
   // Hash password before storing in history
-  String _generatePasswordHash (String password) {
-    final bytes = utf8.encode(password);
+  String _generatePasswordHash(String password, String email) {
+    final String salt = email.toLowerCase().trim();
+    const String secretKey = "Tawakad_Secure";
+    final String combinedData = password + salt + secretKey;
+    final bytes = utf8.encode(combinedData);
     final digest = sha256.convert(bytes);
     return digest.toString();
   }

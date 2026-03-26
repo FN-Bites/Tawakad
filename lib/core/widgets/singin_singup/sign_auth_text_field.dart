@@ -98,7 +98,7 @@ class _SignAuthTextFieldState extends State<SignAuthTextField> {
             suffixIcon: widget.enableToggle
                 ? IconButton(
                     icon: Icon(
-                      _obscure ? Icons.visibility_off : Icons.visibility,
+                      _obscure ? Icons.visibility : Icons.visibility_off,
                       color:
                           _obscure ? AppColors.fieldBorder : AppColors.primary,
                     ),

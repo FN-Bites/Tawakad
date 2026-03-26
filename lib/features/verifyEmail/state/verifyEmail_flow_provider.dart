@@ -11,7 +11,7 @@ class VerifyEmailFlowProvider extends ChangeNotifier {
   static const int _initialSeconds = 30;
 
   int _secondsRemaining = _initialSeconds;
-  bool _canResend = false;
+  bool _canResend = true;
   bool _isEmailVerified = false;
 
   int get secondsRemaining => _secondsRemaining;
@@ -49,7 +49,7 @@ class VerifyEmailFlowProvider extends ChangeNotifier {
   void _startEmailVerificationCheck() {
     _checkTimer?.cancel();
     _checkTimer = Timer.periodic(
-      const Duration(seconds: 3),
+      const Duration(seconds: 2),
       (_) => _checkEmailVerified(),
     );
   }
@@ -57,7 +57,7 @@ class VerifyEmailFlowProvider extends ChangeNotifier {
   Future<void> _checkEmailVerified() async {
     await _auth.currentUser!.reload();
     final user = _auth.currentUser;
-
+    
     if (user != null && user.emailVerified) {
       _checkTimer?.cancel();
       _countdownTimer?.cancel();

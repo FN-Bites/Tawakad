@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/entry_header.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
 import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
 import 'password_bottom_action_text.dart';
+import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
 
 class SignInScaffold extends StatelessWidget {
   final String title;
@@ -40,6 +40,7 @@ class SignInScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -52,13 +53,13 @@ class SignInScaffold extends StatelessWidget {
             children: [
               // زر الرجوع
               SizedBox(
-                height: 24,
+                height: 40,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: EntryHeader(onBack: onBack),
+                  child: GlassBackButton(onPressed: onBack),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
               // العنوان
               Text(
@@ -66,44 +67,58 @@ class SignInScaffold extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
 
-              // المحتوى الأساسي
+               // المحتوى الأساسي + زر نسيت كلمة المرور
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  child: child,
+                  child: Column(
+                    children: [
+                      child, 
+                      const SizedBox(height: 10), 
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: PasswordBottomActionText(
+                          actionText: forgotPasswordText,
+                          onTap: onForgotPasswordPressed,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // زر نسيت كلمة المرور
-              Align(
-                alignment: Alignment.centerLeft,
-                child: PasswordBottomActionText(
-                  actionText: forgotPasswordText,
-                  onTap: onForgotPasswordPressed,
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 30),
 
               // زر أساسي
               SizedBox(
                 width: double.infinity,
+                height: 45,
                 child: ElevatedButton(
                   onPressed: onPrimaryPressed,
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                      (states) {
+                        if (states.contains(MaterialState.disabled)) {
+                          return AppColors.linkSoft.withOpacity(0.6);
+                        }
+                        return AppColors.primary;
+                      },
+                    ),
+                    foregroundColor: MaterialStateProperty.all(Colors.white),
+                  ),
                   child: Text(
                     primaryButtonText,
-                    style: Theme.of(context).textTheme.labelLarge,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
               GoogleSignInButton(
                 onPressed: onGooglePressed,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 30), 
 
               // الفوتر باستخدام EntryBottomActionText
               EntryBottomActionText(

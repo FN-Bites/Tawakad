@@ -5,116 +5,97 @@ import 'package:firebase_auth/firebase_auth.dart';
 class ForgotPasswordFlowProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final emailController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  String _email = '';
+  bool _emailSubmitAttempted = false;
 
-  bool emailInvalid = false;
-  String? emailError;
-  String? serverError;
+  bool _isLoading = false;
+  String? _serverError;
 
-  bool isLoading = false;
-
-  bool isButtonEnabled = true;
-  int resendSeconds = 30;
+  bool _isButtonEnabled = true;
+  int _resendSeconds = 30;
   Timer? _timer;
 
+  String get email => _email;
+  String? get serverError => _serverError;
+  bool get isLoading => _isLoading;
+  bool get isButtonEnabled => _isButtonEnabled;
+  int get resendSeconds => _resendSeconds;
+
+  String? get emailError {
+    if (!_emailSubmitAttempted) return null;
+    if (_email.isEmpty) return 'يرجى إدخال البريد الإلكتروني';
+    if (!_validateEmail(_email)) return 'صيغة البريد الإلكتروني غير صحيحة';
+    if (_serverError != null) return _serverError;
+    return null;
+  }
+
+  bool get emailInvalid => _emailSubmitAttempted && (_email.isEmpty || !_validateEmail(_email) || _serverError != null);
+
   void setEmail(String value) {
-    emailInvalid = false;
-    emailError = null;
-    serverError = null;
+    _email = value.trim();
+    _serverError = null;
     notifyListeners();
   }
 
-  bool validateEmail() {
-    final email = emailController.text.trim();
-
-    if (email.isEmpty) {
-      emailInvalid = true;
-      emailError = 'يرجى إدخال البريد الإلكتروني';
-      notifyListeners();
-      return false;
-    }
-
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-
-    if (!emailRegex.hasMatch(email)) {
-      emailInvalid = true;
-      emailError = 'البريد الإلكتروني غير صالح';
-      notifyListeners();
-      return false;
-    }
-
-    return true;
+  bool _validateEmail(String email) {
+    return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
-  // إرسال رابط إعادة تعيين كلمة المرور
-  Future<void> sendPasswordResetEmail() async {
-    serverError = null;
+  Future<bool> sendPasswordResetEmail() async {
+    _emailSubmitAttempted = true;
+    _email = emailController.text.trim();
 
-    if (!validateEmail()) return;
+    _serverError = null;
+    notifyListeners();
 
-    final userEmail = emailController.text.trim();
+    if (emailInvalid) return false;
+
+    _isLoading = true;
+    notifyListeners();
 
     try {
-      isLoading = true;
-      notifyListeners();
-
+      
       await _auth.sendPasswordResetEmail(
-        email: userEmail,
-        actionCodeSettings: ActionCodeSettings(
-          url: 'https://signupapp-e1252.firebaseapp.com/reset',
-          handleCodeInApp: true,
-          androidPackageName: 'com.example.tawakad_app',
-          androidInstallApp: true,
-        ),
+        email: _email,
       );
 
-      isLoading = false;
-
       _startResendTimer();
-
-      notifyListeners();
+      return true;
     } on FirebaseAuthException catch (e) {
-      isLoading = false;
-
       if (e.code == 'user-not-found') {
-        emailInvalid = true;
-        serverError = 'هذا البريد الإلكتروني غير مسجل مسبقا';
+        _serverError = 'هذا البريد الإلكتروني غير مسجل مسبقا';
       } else {
-        serverError = 'تعذر إرسال البريد حالياً، حاول مرة أخرى';
+        _serverError = 'تعذر إرسال البريد حالياً، حاول مرة أخرى';
       }
-
-      notifyListeners();
+      return false;
     } catch (e) {
-      isLoading = false;
-      serverError = 'حدث خطأ غير متوقع';
-
+      _serverError = 'حدث خطأ غير متوقع';
+      return false;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
 
-  // مؤقت إعادة الإرسال
   void _startResendTimer() {
-    isButtonEnabled = false;
-    resendSeconds = 30;
-
+    _isButtonEnabled = false;
+    _resendSeconds = 30;
     notifyListeners();
 
     _timer?.cancel();
-
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      resendSeconds--;
-
-      if (resendSeconds <= 0) {
-        isButtonEnabled = true;
-
+      if (_resendSeconds == 0) {
+        _isButtonEnabled = true;
         timer.cancel();
+        notifyListeners();
+      } else {
+        _resendSeconds--;
+        notifyListeners();
       }
-
-      notifyListeners();
     });
   }
 
-  // تنظيف الموارد
   @override
   void dispose() {
     emailController.dispose();

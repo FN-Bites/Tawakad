@@ -33,3 +33,4 @@ class AppColors {
   // Speech bubble
   static const Color speechBubble = Color(0xFF5E57F5);
 }
+

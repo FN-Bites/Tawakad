@@ -7,17 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:287910848295:android:42404003c760b42a302b02",
+        "mobilesdk_app_id": "1:287910848295:android:60df572ba7b06c67302b02",
         "android_client_info": {
-          "package_name": "com.example.googleSignupApp"
+          "package_name": "com.example.tawakad_app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "287910848295-stjf77r6akrb5olouvds73r743ovg876.apps.googleusercontent.com",
+          "client_id": "287910848295-p2kj22o9u4sp9girdkisuo5mt40vagek.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.googleSignupApp",
+            "package_name": "com.example.tawakad_app",
             "certificate_hash": "23bd29d79c2ef146bef3c0bbf170d3fcd2d855e5"
           }
         },
@@ -35,43 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "287910848295-rbu67ls72vikf6i2ju7ih41bs9t3sgjr.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "287910848295-gei4tdg83u04gt9dodo2stmf5bhb0jgk.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.tawakadApp"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:287910848295:android:60df572ba7b06c67302b02",
-        "android_client_info": {
-          "package_name": "com.example.tawakad_app"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "287910848295-rbu67ls72vikf6i2ju7ih41bs9t3sgjr.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAQiN0S01oI7-woLiCACKDuLfzCWYknkFE"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "287910848295-rbu67ls72vikf6i2ju7ih41bs9t3sgjr.apps.googleusercontent.com",
+              "client_id": "287910848295-1717jtjt8ms4sgv44pt7caehfq27eohk.apps.googleusercontent.com",
               "client_type": 3
             },
             {
