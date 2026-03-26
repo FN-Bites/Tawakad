@@ -25,13 +25,39 @@ class _HomeState extends State<HomePage> {
   }
 
   void _removePackList(PackList packlist) {
+    final listIndex = _registeredList.indexOf(packlist);
     setState(() {
       _registeredList.remove(packlist);
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 2),
+        content: const Text('تم حذف القائمة'),
+        action: SnackBarAction(
+          label: 'رجوع',
+          onPressed: () {
+            setState(() {
+              _registeredList.insert(listIndex, packlist);
+            });
+          },
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    Widget mainContent = const Center(
+      child: Text("لا يوجد اي قوائم لديك قم بالاضافة"),
+    );
+
+    if (_registeredList.isNotEmpty) {
+      mainContent = PackListCard(
+        packList: _registeredList,
+        onRemoveList: _removePackList,
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -47,12 +73,7 @@ class _HomeState extends State<HomePage> {
         children: [
           const SizedBox(height: 30),
           const Text("The filters"),
-          Expanded(
-            child: PackListCard(
-              packList: _registeredList,
-              onRemoveList: _removePackList,
-            ),
-          ),
+          Expanded(child: mainContent),
         ],
       ),
     );
