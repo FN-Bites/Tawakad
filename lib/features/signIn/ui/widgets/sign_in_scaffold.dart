@@ -3,7 +3,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
 import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
 import 'password_bottom_action_text.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 
 class SignInScaffold extends StatelessWidget {
   final String title;
@@ -40,7 +40,6 @@ class SignInScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -69,14 +68,14 @@ class SignInScaffold extends StatelessWidget {
               ),
               const SizedBox(height: 20),
 
-               // المحتوى الأساسي + زر نسيت كلمة المرور
+              // المحتوى الأساسي + زر نسيت كلمة المرور
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: [
-                      child, 
-                      const SizedBox(height: 10), 
+                      child,
+                      const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: PasswordBottomActionText(
@@ -109,7 +108,10 @@ class SignInScaffold extends StatelessWidget {
                   ),
                   child: Text(
                     primaryButtonText,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge
+                        ?.copyWith(color: Colors.white),
                   ),
                 ),
               ),
@@ -118,7 +120,7 @@ class SignInScaffold extends StatelessWidget {
               GoogleSignInButton(
                 onPressed: onGooglePressed,
               ),
-              const SizedBox(height: 30), 
+              const SizedBox(height: 30),
 
               // الفوتر باستخدام EntryBottomActionText
               EntryBottomActionText(

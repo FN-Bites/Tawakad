@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import '../animation/mail_sent_rive.dart';
 import 'package:provider/provider.dart';
 import '../../state/verifyEmail_flow_provider.dart';
@@ -29,7 +29,6 @@ class VerifyEmailPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             children: [
-
               SizedBox(
                 height: 40,
                 child: Align(
@@ -43,28 +42,24 @@ class VerifyEmailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 80),
-
               const SizedBox(
                 width: 130,
                 height: 130,
                 child: MailSendRive(),
               ),
               const SizedBox(height: 40),
-
               Text(
                 'تحقق من بريدك الالكتروني',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineLarge?.copyWith(fontSize: 30),
               ),
               const SizedBox(height: 20),
-
               Text(
                 ' أرسلنا رابط التحقق إلى ${flow.email}\nاضغط على الرابط لإكمال التحقق',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
               ),
               const SizedBox(height: 25),
-
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -73,19 +68,22 @@ class VerifyEmailPage extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.info_outline, color: Colors.amber, size: 20),
+                    const Icon(Icons.info_outline,
+                        color: Colors.amber, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'ملاحظة: يرجى التحقق من الرسائل غير المرغوب فيها (Spam) في حال لم تجد الرسالة في الوارد',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.amber[700]),
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(color: Colors.amber[700]),
                       ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 25),
-
               Text(
                 'لم يصلك البريد؟',
                 style: theme.textTheme.labelMedium?.copyWith(
@@ -93,7 +91,6 @@ class VerifyEmailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -111,11 +108,12 @@ class VerifyEmailPage extends StatelessWidget {
                     foregroundColor: MaterialStateProperty.all(Colors.white),
                   ),
                   child: Text(
-                      flow.canResend
+                    flow.canResend
                         ? 'إعادة إرسال'
                         : 'إعادة الإرسال بعد ${flow.secondsRemaining} ثانية',
-                      style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
-                      ),
+                    style: theme.textTheme.labelLarge
+                        ?.copyWith(color: Colors.white),
+                  ),
                 ),
               ),
               const Spacer(),

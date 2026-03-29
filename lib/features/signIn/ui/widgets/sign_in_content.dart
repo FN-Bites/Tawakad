@@ -13,25 +13,23 @@ class SignInContent extends StatelessWidget {
 
   final ValueChanged<String> onEmailChanged;
   final ValueChanged<String> onPasswordChanged;
-  
+
   const SignInContent({
-    super.key, 
-    required this.emailController, 
-    required this.passwordController, 
-    required this.emailError, 
-    required this.passwordError, 
-    required this.onEmailChanged, 
-    required this.onPasswordChanged, 
-    required this.emailServerError, 
+    super.key,
+    required this.emailController,
+    required this.passwordController,
+    required this.emailError,
+    required this.passwordError,
+    required this.onEmailChanged,
+    required this.onPasswordChanged,
+    required this.emailServerError,
     required this.passwordServerError,
-    });
+  });
 
   @override
   Widget build(BuildContext context) {
-
     return FieldCard(
       children: [
-
         SignAuthTextField(
           hint: 'البريد الإلكتروني',
           controller: emailController,

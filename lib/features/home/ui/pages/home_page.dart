@@ -4,6 +4,7 @@ import 'pack_list.dart';
 import '../widgets/pack_list/pack_list_card.dart';
 import '../widgets/buttons/pack_list_icon_badge.dart';
 import '../widgets/pack_list_card_theme.dart';
+import '../widgets/buttons/filter_bar.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -102,8 +103,16 @@ class _HomeState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 30),
-          const Text("The filters"),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Align(
+              alignment: Alignment.topRight,
+              child: GlassFilterBar(
+                initialFilter: FilterOption.today,
+                onFilterChanged: (filter) {},
+              ),
+            ),
+          ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.only(

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/features/onboarding/ui/animation/phone_rive.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_screens/onboarding_page.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_screens/onboarding_data.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/onboarding_questions/onboarding_questions_page.dart';

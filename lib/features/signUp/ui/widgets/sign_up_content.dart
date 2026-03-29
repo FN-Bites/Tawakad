@@ -40,7 +40,7 @@ class SignUpContent extends StatelessWidget {
     required this.onEmailChanged,
     required this.onPasswordChanged,
     required this.onConfirmPasswordChanged,
-    required this.registrationError, 
+    required this.registrationError,
     required this.isPasswordEmpty,
   });
 

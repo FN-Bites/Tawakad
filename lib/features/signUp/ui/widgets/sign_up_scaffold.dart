@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
@@ -29,12 +29,11 @@ class SignUpScaffold extends StatelessWidget {
     required this.bottomPrefixText,
     required this.bottomActionText,
     this.onBottomActionPressed,
-    this.onBack, 
+    this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -91,7 +90,10 @@ class SignUpScaffold extends StatelessWidget {
                   ),
                   child: Text(
                     primaryButtonText,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.white),
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge
+                        ?.copyWith(color: Colors.white),
                   ),
                 ),
               ),
@@ -100,7 +102,7 @@ class SignUpScaffold extends StatelessWidget {
               GoogleSignInButton(
                 onPressed: onGooglePressed,
               ),
-              const SizedBox(height: 25), 
+              const SizedBox(height: 25),
 
               // الفوتر باستخدام EntryBottomActionText
               EntryBottomActionText(

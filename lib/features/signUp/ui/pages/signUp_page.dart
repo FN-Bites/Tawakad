@@ -37,8 +37,8 @@ class SingupPage extends StatelessWidget {
             },
       bottomPrefixText: 'لديك حساب؟ ',
       bottomActionText: 'قم بتسجيل الدخول',
-      onBottomActionPressed: () => Navigator.pushReplacementNamed(context, '/signin'),
-          
+      onBottomActionPressed: () =>
+          Navigator.pushReplacementNamed(context, '/signin'),
       child: SignUpContent(
         emailController: flow.emailController,
         passwordController: flow.passwordController,

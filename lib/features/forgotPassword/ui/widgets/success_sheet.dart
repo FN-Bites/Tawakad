@@ -11,7 +11,6 @@ class SuccessSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-
           EntryHeader(
             onBack: () => Navigator.pop(
               context,
@@ -48,21 +47,26 @@ class SuccessSheet extends StatelessWidget {
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[600], height: 1.5,),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
               children: [
                 TextSpan(
                   text: 'إذا كان البريد الإلكتروني مسجلًا لدينا\n',
                   style: TextStyle(
-                    color: Colors.blue, 
+                    color: Colors.blue,
                     fontSize: 15,
                   ),
                 ),
-                const TextSpan(text: ' فقد أرسلنا لك رابط إعادة التعيين، اضغط عليه لتعيين كلمة المرور الجديدة '),
+                const TextSpan(
+                    text:
+                        ' فقد أرسلنا لك رابط إعادة التعيين، اضغط عليه لتعيين كلمة المرور الجديدة '),
               ],
             ),
           ),
           const SizedBox(height: 10),
-          
+
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -73,35 +77,38 @@ class SuccessSheet extends StatelessWidget {
               children: [
                 const Icon(Icons.info_outline, color: Colors.amber, size: 20),
                 const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                'ملاحظة: يرجى التحقق من الرسائل غير المرغوب فيها (Spam) في حال لم تجد الرسالة في الوارد',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Colors.amber[700]),
+                Expanded(
+                  child: Text(
+                    'ملاحظة: يرجى التحقق من الرسائل غير المرغوب فيها (Spam) في حال لم تجد الرسالة في الوارد',
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelSmall
+                        ?.copyWith(color: Colors.amber[700]),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 15),
+          const SizedBox(height: 15),
 
-        // زر العودة لصفحة تسجيل الدخول
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                '/signin',
-                (route) => false,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 9),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
+          // زر العودة لصفحة تسجيل الدخول
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/signin',
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 9),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
               ),
               child: const Text('العودة لتسجيل الدخول'),
             ),

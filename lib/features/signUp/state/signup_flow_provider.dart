@@ -5,7 +5,6 @@ import '../../../core/services/auth/google_auth_service.dart';
 import '../../../core/services/user_service.dart';
 
 class SignupFlowProvider extends ChangeNotifier {
-  
   final EmailAuthService _emailAuthService = EmailAuthService();
   final GoogleAuthService _googleAuthService = GoogleAuthService();
   final UserService _userService = UserService();
@@ -13,7 +12,8 @@ class SignupFlowProvider extends ChangeNotifier {
   // ---------- Controllers ----------
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   // ---------- Internal state ----------
   String _email = '';
@@ -35,7 +35,7 @@ class SignupFlowProvider extends ChangeNotifier {
   String? _registrationError;
 
   // ---------- Getters ----------
-    
+
   bool get isLoading => _isLoading;
   String? get registrationError => _registrationError;
 
@@ -61,7 +61,8 @@ class SignupFlowProvider extends ChangeNotifier {
   String? get confirmPasswordError {
     if (!_confirmPasswordSubmitAttempted) return null;
     if (_confirmPassword.isEmpty) return 'يرجى إدخال تأكيد كلمة المرور';
-    if (_confirmPassword != _password) return 'كلمة المرور وتأكيدها غير متطابقة';
+    if (_confirmPassword != _password)
+      return 'كلمة المرور وتأكيدها غير متطابقة';
     return null;
   }
 
@@ -188,7 +189,7 @@ class SignupFlowProvider extends ChangeNotifier {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'google-signin-failed') {
         _registrationError = 'فشل تسجيل الدخول بإستخدام Google';
-      } 
+      }
       return false;
     } catch (_) {
       _registrationError ??= 'حدث خطأ غير متوقع ';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/features/onboarding/ui/pages/auth_entry_page.dart';
 import 'onboarding_content.dart';
 import 'onboarding_data.dart';
 import 'package:tawakad_app/features/onboarding/ui/widgets/onboarding_indicator.dart';
-import 'package:tawakad_app/core/widgets/glass_buttons/glass_back_button.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 
 class OnboardingPage extends StatefulWidget {
   final int initialPage;
