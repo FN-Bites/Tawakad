@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/singin_singup/sign_auth_text_field.dart';
+import 'package:tawakad_app/core/widgets/auth_text_field.dart';
 import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class SignInContent extends StatelessWidget {
@@ -30,21 +30,21 @@ class SignInContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return FieldCard(
       children: [
-        SignAuthTextField(
+        AuthTextField(
           hint: 'البريد الإلكتروني',
           controller: emailController,
-          errorText: emailError,
-          externalError: emailServerError,
+          invalid: emailError != null || emailServerError != null,
+          errorMsg: emailError ?? emailServerError ?? '',
           onChanged: onEmailChanged,
+          keyboardType: TextInputType.emailAddress,
         ),
-        const SizedBox(height: 10),
-        SignAuthTextField(
+        AuthTextField(
           hint: 'كلمة المرور',
           controller: passwordController,
           isPassword: true,
           enableToggle: true,
-          errorText: passwordError,
-          externalError: passwordServerError,
+          invalid: passwordError != null || passwordServerError != null,
+          errorMsg: passwordError ?? passwordServerError ?? '',
           onChanged: onPasswordChanged,
         ),
       ],

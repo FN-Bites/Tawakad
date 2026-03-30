@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/singin_singup/sign_auth_text_field.dart';
-import '../../../../core/widgets/singin_singup/password_strength_hints.dart';
+import '../../../../core/widgets/auth_text_field.dart';
+import '../../../../core/widgets/password_strength_hints.dart';
 import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class SignUpContent extends StatelessWidget {
@@ -48,32 +48,32 @@ class SignUpContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return FieldCard(
       children: [
-        SignAuthTextField(
+        AuthTextField(
           hint: 'البريد الإلكتروني',
           controller: emailController,
-          errorText: emailError,
-          externalError: registrationError,
+          invalid: emailError != null || registrationError != null,
+          errorMsg: emailError ?? registrationError ?? '',
+          keyboardType: TextInputType.emailAddress,
           onChanged: onEmailChanged,
         ),
-        const SizedBox(height: 10),
-        SignAuthTextField(
+        AuthTextField(
           hint: 'كلمة المرور',
           controller: passwordController,
           isPassword: true,
           enableToggle: true,
-          errorText: passwordError,
+          invalid: passwordError != null,
+          errorMsg: passwordError ?? '',
           onChanged: onPasswordChanged,
         ),
-        const SizedBox(height: 10),
-        SignAuthTextField(
+        AuthTextField(
           hint: 'تأكيد كلمة المرور',
           controller: confirmPasswordController,
           isPassword: true,
           enableToggle: true,
-          errorText: confirmPasswordError,
+          invalid: confirmPasswordError != null,
+          errorMsg: confirmPasswordError ?? '',
           onChanged: onConfirmPasswordChanged,
         ),
-        const SizedBox(height: 10),
         PasswordStrengthHints(
           hasMinLength: hasMinLength,
           hasNumber: hasNumber,

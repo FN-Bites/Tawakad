@@ -5,11 +5,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes.dart';
-import 'features/onboarding/state/onboarding_flow_provider.dart';
-import 'features/signUp/state/signup_flow_provider.dart';
-import 'features/verifyEmail/state/verifyEmail_flow_provider.dart';
-import 'package:tawakad_app/features/signIn/state/signIn_flow_provider.dart';
-import 'features/forgotPassword/state/forgotPassword_flow_provider.dart';
+import 'features/onboarding/providers/onboarding_flow_provider.dart';
+import 'features/signUp/providers/signup_flow_provider.dart';
+import 'features/signUp/providers/verifyEmail_flow_provider.dart';
+import 'package:tawakad_app/features/signIn/providers/signIn_flow_provider.dart';
+import 'features/signIn/providers/forgotPassword_flow_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

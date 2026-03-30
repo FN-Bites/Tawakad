@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
-import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
+import '../../../../core/widgets/glass_elements/google_glass_button.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
+import '../../../../core/widgets/glass_elements/app_liquid_buttons.dart';
 
 class SignUpScaffold extends StatelessWidget {
   final String title;
@@ -34,8 +35,10 @@ class SignUpScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppDarkColors.background : AppColors.background,
       body: SafeArea(
         top: true,
         bottom: true,
@@ -72,30 +75,9 @@ class SignUpScaffold extends StatelessWidget {
               const SizedBox(height: 25),
 
               // زر أساسي
-              SizedBox(
-                width: double.infinity,
-                height: 45,
-                child: ElevatedButton(
-                  onPressed: onPrimaryPressed,
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (states) {
-                        if (states.contains(MaterialState.disabled)) {
-                          return AppColors.linkSoft.withOpacity(0.6);
-                        }
-                        return AppColors.primary;
-                      },
-                    ),
-                    foregroundColor: MaterialStateProperty.all(Colors.white),
-                  ),
-                  child: Text(
-                    primaryButtonText,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge
-                        ?.copyWith(color: Colors.white),
-                  ),
-                ),
+              AppLiquidButtons.primary(
+                label: primaryButtonText,
+                onPressed: onPrimaryPressed,
               ),
               const SizedBox(height: 20),
 

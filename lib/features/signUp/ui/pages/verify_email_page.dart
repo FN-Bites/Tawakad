@@ -3,7 +3,7 @@ import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import '../animation/mail_sent_rive.dart';
 import 'package:provider/provider.dart';
-import '../../state/verifyEmail_flow_provider.dart';
+import '../../providers/verifyEmail_flow_provider.dart';
 
 class VerifyEmailPage extends StatelessWidget {
   const VerifyEmailPage({super.key});

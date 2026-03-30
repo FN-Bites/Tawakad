@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
-import '../../state/forgotPassword_flow_provider.dart';
+import '../../providers/forgotPassword_flow_provider.dart';
 import '../widgets/success_sheet.dart';
 import '../../../../../../core/widgets/auth_text_field.dart';
 import '../../../../../../core/theme/app_colors.dart';

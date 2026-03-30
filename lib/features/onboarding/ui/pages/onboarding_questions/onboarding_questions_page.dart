@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tawakad_app/features/onboarding/state/onboarding_flow_provider.dart';
+import 'package:tawakad_app/features/onboarding/providers/onboarding_flow_provider.dart';
 import '../../widgets/onboarding_scaffold.dart';
 import 'name_page.dart';
 import 'gender_page.dart';

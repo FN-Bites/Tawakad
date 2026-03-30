@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tawakad_app/features/signIn/ui/widgets/sign_in_content.dart';
 import 'package:tawakad_app/features/signIn/ui/widgets/sign_in_scaffold.dart';
-import '../../state/signIn_flow_provider.dart';
+import '../../providers/signIn_flow_provider.dart';
 
 class SignInPage extends StatelessWidget {
   const SignInPage({super.key});

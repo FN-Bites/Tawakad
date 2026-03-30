@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-class AuthTextField extends StatelessWidget {
+class AuthTextField extends StatefulWidget {
   const AuthTextField({
     super.key,
     required this.controller,
@@ -11,6 +11,8 @@ class AuthTextField extends StatelessWidget {
     required this.errorMsg,
     this.keyboardType = TextInputType.text,
     this.onAnyChange,
+    this.isPassword = false,
+    this.enableToggle = false,
   });
 
   final TextEditingController controller;
@@ -21,8 +23,22 @@ class AuthTextField extends StatelessWidget {
   final String errorMsg;
 
   final TextInputType keyboardType;
-
   final VoidCallback? onAnyChange;
+  final bool isPassword;
+  final bool enableToggle;
+
+  @override
+  State<AuthTextField> createState() => _AuthTextFieldState();
+}
+
+class _AuthTextFieldState extends State<AuthTextField> {
+  late bool _obscure;
+
+  @override
+  void initState() {
+    super.initState();
+    _obscure = widget.isPassword;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,18 +47,18 @@ class AuthTextField extends StatelessWidget {
     final base =
         const InputDecoration().applyDefaults(theme.inputDecorationTheme);
 
-    final fillColor = invalid
+    final fillColor = widget.invalid
         ? (isDark
             ? AppColors.fieldErrorFill.withOpacity(0.15)
             : AppColors.fieldErrorFill)
         : (isDark ? AppDarkColors.surface : AppColors.surface);
 
-    final borderColor = invalid
+    final borderColor = widget.invalid
         ? AppColors.fieldErrorBorder
         : (isDark ? AppDarkColors.fieldBorder : AppColors.fieldBorder);
 
     final focusedColor =
-        invalid ? AppColors.fieldErrorBorder : AppColors.primary;
+        widget.invalid ? AppColors.fieldErrorBorder : AppColors.primary;
 
     OutlineInputBorder border(Color color, double width) {
       return OutlineInputBorder(
@@ -54,10 +70,11 @@ class AuthTextField extends StatelessWidget {
     return Column(
       children: [
         TextField(
-          controller: controller,
+          controller: widget.controller,
+          obscureText: _obscure,
           textDirection: TextDirection.rtl,
           textAlign: TextAlign.right,
-          keyboardType: keyboardType,
+          keyboardType: widget.keyboardType,
           style: TextStyle(
             fontFamily: 'Montserrat',
             fontSize: 16,
@@ -65,11 +82,11 @@ class AuthTextField extends StatelessWidget {
             color: isDark ? AppDarkColors.textPrimary : AppColors.textPrimary,
           ),
           onChanged: (v) {
-            onChanged(v);
-            onAnyChange?.call();
+            widget.onChanged(v);
+            widget.onAnyChange?.call();
           },
           decoration: base.copyWith(
-            hintText: hint,
+            hintText: widget.hint,
             hintTextDirection: TextDirection.rtl,
             errorText: null,
             fillColor: fillColor,
@@ -83,16 +100,37 @@ class AuthTextField extends StatelessWidget {
                       borderSide: BorderSide(color: focusedColor, width: 1.5),
                     ) ??
                     border(focusedColor, 1.5),
+            suffixIconConstraints: widget.enableToggle
+                ? const BoxConstraints(minHeight: 40, minWidth: 40)
+                : null,
+            suffixIcon: widget.enableToggle
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: IconButton(
+                      icon: Icon(
+                        _obscure ? Icons.visibility_off : Icons.visibility,
+                        color: _obscure
+                            ? AppColors.fieldBorder
+                            : AppColors.primary,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscure = !_obscure;
+                        });
+                      },
+                    ),
+                  )
+                : null,
           ),
         ),
-        if (invalid) ...[
+        if (widget.invalid) ...[
           const SizedBox(height: 6),
           Padding(
             padding: const EdgeInsets.only(right: 20),
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                errorMsg,
+                widget.errorMsg,
                 textDirection: TextDirection.rtl,
                 textAlign: TextAlign.right,
                 style: theme.inputDecorationTheme.errorStyle ??

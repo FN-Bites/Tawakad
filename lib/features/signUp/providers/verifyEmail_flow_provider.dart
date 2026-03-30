@@ -57,7 +57,7 @@ class VerifyEmailFlowProvider extends ChangeNotifier {
   Future<void> _checkEmailVerified() async {
     await _auth.currentUser!.reload();
     final user = _auth.currentUser;
-    
+
     if (user != null && user.emailVerified) {
       _checkTimer?.cancel();
       _countdownTimer?.cancel();

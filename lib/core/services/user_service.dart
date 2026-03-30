@@ -22,6 +22,7 @@ class UserService {
       "createdAt": Timestamp.now(),
     });
   }
+
   // Update password history after sign in
   Future<void> updatePasswordHistoryIfChanged({
     required String uid,
@@ -34,7 +35,8 @@ class UserService {
 
       if (snapshot.exists) {
         List<dynamic> history = snapshot.data()?['passwordHistory'] ?? [];
-        final String currentHash = _generatePasswordHash(currentPassword, email);
+        final String currentHash =
+            _generatePasswordHash(currentPassword, email);
 
         if (history.isEmpty || history.last != currentHash) {
           history.add(currentHash);
@@ -53,6 +55,7 @@ class UserService {
       print("❌ Error updating password history: $e");
     }
   }
+
   // Hash password before storing in history
   String _generatePasswordHash(String password, String email) {
     final String salt = email.toLowerCase().trim();

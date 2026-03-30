@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tawakad_app/features/onboarding/state/onboarding_flow_provider.dart';
+import 'package:tawakad_app/features/onboarding/providers/onboarding_flow_provider.dart';
 import 'package:tawakad_app/features/onboarding/ui/widgets/radio_option.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/field_card.dart';

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/entry_bottom_action_text.dart';
-import '../../../../core/widgets/singin_singup/google_signIn_button.dart';
+import '../../../../core/widgets/glass_elements/google_glass_button.dart';
 import 'password_bottom_action_text.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 
 class SignInScaffold extends StatelessWidget {
   final String title;
@@ -17,8 +18,8 @@ class SignInScaffold extends StatelessWidget {
   final String forgotPasswordText;
   final VoidCallback? onForgotPasswordPressed;
 
-  final String bottomPrefixText; // " ليس لديك حساب؟ "
-  final String bottomActionText; // " إنشاء حساب"
+  final String bottomPrefixText;
+  final String bottomActionText;
   final VoidCallback? onBottomActionPressed;
 
   final VoidCallback? onBack;
@@ -40,8 +41,10 @@ class SignInScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppDarkColors.background : AppColors.background,
       body: SafeArea(
         top: true,
         bottom: true,
@@ -50,7 +53,6 @@ class SignInScaffold extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // زر الرجوع
               SizedBox(
                 height: 40,
                 child: Align(
@@ -59,16 +61,12 @@ class SignInScaffold extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-
-              // العنوان
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 20),
-
-              // المحتوى الأساسي + زر نسيت كلمة المرور
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -88,41 +86,13 @@ class SignInScaffold extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-
-              // زر أساسي
-              SizedBox(
-                width: double.infinity,
-                height: 45,
-                child: ElevatedButton(
-                  onPressed: onPrimaryPressed,
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (states) {
-                        if (states.contains(MaterialState.disabled)) {
-                          return AppColors.linkSoft.withOpacity(0.6);
-                        }
-                        return AppColors.primary;
-                      },
-                    ),
-                    foregroundColor: MaterialStateProperty.all(Colors.white),
-                  ),
-                  child: Text(
-                    primaryButtonText,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelLarge
-                        ?.copyWith(color: Colors.white),
-                  ),
-                ),
+              AppLiquidButtons.primary(
+                label: primaryButtonText,
+                onPressed: onPrimaryPressed,
               ),
               const SizedBox(height: 20),
-
-              GoogleSignInButton(
-                onPressed: onGooglePressed,
-              ),
+              GoogleSignInButton(onPressed: onGooglePressed),
               const SizedBox(height: 30),
-
-              // الفوتر باستخدام EntryBottomActionText
               EntryBottomActionText(
                 prefixText: bottomPrefixText,
                 actionText: bottomActionText,

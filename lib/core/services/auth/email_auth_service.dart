@@ -26,7 +26,6 @@ class EmailAuthService {
       await user.sendEmailVerification();
 
       return user;
-
     } on FirebaseAuthException {
       rethrow;
     } catch (e) {
@@ -36,6 +35,7 @@ class EmailAuthService {
       );
     }
   }
+
   // ---------------- SIGN IN ----------------
   Future<User> signInWithEmail({
     required String email,
@@ -64,7 +64,6 @@ class EmailAuthService {
       }
 
       return user;
-
     } on FirebaseAuthException {
       rethrow;
     } catch (_) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/widgets/entry_header.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 
 class SuccessSheet extends StatelessWidget {
   const SuccessSheet({super.key});
@@ -11,10 +11,10 @@ class SuccessSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          EntryHeader(
-            onBack: () => Navigator.pop(
-              context,
-              '/forgot-password',
+          Align(
+            alignment: Alignment.centerRight,
+            child: GlassBackButton(
+              onPressed: () => Navigator.pop(context, '/forgot-password'),
             ),
           ),
           const SizedBox(height: 10),
@@ -59,7 +59,7 @@ class SuccessSheet extends StatelessWidget {
                     fontSize: 15,
                   ),
                 ),
-                const TextSpan(
+                TextSpan(
                     text:
                         ' فقد أرسلنا لك رابط إعادة التعيين، اضغط عليه لتعيين كلمة المرور الجديدة '),
               ],

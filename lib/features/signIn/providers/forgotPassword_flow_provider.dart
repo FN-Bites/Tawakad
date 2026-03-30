@@ -30,7 +30,9 @@ class ForgotPasswordFlowProvider extends ChangeNotifier {
     return null;
   }
 
-  bool get emailInvalid => _emailSubmitAttempted && (_email.isEmpty || !_validateEmail(_email) || _serverError != null);
+  bool get emailInvalid =>
+      _emailSubmitAttempted &&
+      (_email.isEmpty || !_validateEmail(_email) || _serverError != null);
 
   void setEmail(String value) {
     _email = value.trim();
@@ -55,7 +57,6 @@ class ForgotPasswordFlowProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      
       await _auth.sendPasswordResetEmail(
         email: _email,
       );

@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/services/auth/email_auth_service.dart';
 import '../../../core/services/auth/google_auth_service.dart';
-import '../../../core/services/user_service.dart'; 
+import '../../../core/services/user_service.dart';
 
 class SignInFlowProvider extends ChangeNotifier {
   final EmailAuthService _emailAuthService = EmailAuthService();
   final GoogleAuthService _googleAuthService = GoogleAuthService();
-  final UserService _userService = UserService(); 
-  
+  final UserService _userService = UserService();
+
   // ---------- Controllers ----------
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -100,7 +100,7 @@ class SignInFlowProvider extends ChangeNotifier {
           currentPassword: _password,
         );
       }
-      
+
       return true;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -108,7 +108,8 @@ class SignInFlowProvider extends ChangeNotifier {
       } else if (e.code == 'wrong-password') {
         _passwordServerError = 'كلمة المرور غير صحيحة';
       } else if (e.code == 'email-not-verified') {
-        _emailServerError = 'يرجى التحقق من بريدك الإلكتروني والنقر على رابط التفعيل';
+        _emailServerError =
+            'يرجى التحقق من بريدك الإلكتروني والنقر على رابط التفعيل';
       } else if (e.code == 'invalid-credential') {
         _emailServerError = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
         _passwordServerError = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';

@@ -8,7 +8,6 @@ class PasswordStrengthHints extends StatelessWidget {
   final bool hasLowercase;
   final bool isPasswordEmpty;
 
-
   const PasswordStrengthHints({
     super.key,
     required this.hasMinLength,
@@ -18,7 +17,7 @@ class PasswordStrengthHints extends StatelessWidget {
     required this.hasSpecialChar,
     required this.isPasswordEmpty,
   });
-  
+
   Widget _buildRow(String text, bool ok) {
     Color color;
     IconData icon;
@@ -49,7 +48,7 @@ class PasswordStrengthHints extends StatelessWidget {
       ],
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../signUp/state/signup_flow_provider.dart';
-import '../../../onboarding/state/onboarding_flow_provider.dart';
+import '../../providers/signup_flow_provider.dart';
+import '../../../onboarding/providers/onboarding_flow_provider.dart';
 import '../../../signUp/ui/widgets/sign_up_content.dart';
 import '../../../signUp/ui/widgets/sign_up_scaffold.dart';
 
