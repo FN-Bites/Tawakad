@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/features/onboarding/ui/animation/phone_rive.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
@@ -13,10 +12,11 @@ class AuthEntryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -50,7 +50,8 @@ class AuthEntryPage extends StatelessWidget {
                 'أنشئ حسابًا أو سجل الدخول لبدء التجربة والاستفادة من المميزات',
                 textAlign: TextAlign.center,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: AppColors.placeholder,
+                  color:
+                      theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                   height: 1.6,
                 ),
               ),
@@ -61,7 +62,8 @@ class AuthEntryPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) => const OnboardingQuestionsPage()),
+                      builder: (_) => const OnboardingQuestionsPage(),
+                    ),
                   );
                 },
               ),
@@ -71,7 +73,9 @@ class AuthEntryPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => const SignInPage()),
+                    MaterialPageRoute(
+                      builder: (_) => const SignInPage(),
+                    ),
                   );
                 },
               ),

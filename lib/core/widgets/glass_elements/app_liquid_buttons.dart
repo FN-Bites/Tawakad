@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class AppLiquidButtons {
   AppLiquidButtons._();
@@ -29,41 +30,93 @@ class AppLiquidButtons {
     TextStyle? textStyle,
   }) =>
       _SmallGlassButton(
-          onPressed: onPressed,
-          child: Text(
-            label,
-            style: textStyle ??
-                const TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1C1C1E),
-                ),
-          ));
+        onPressed: onPressed,
+        child: _ThemedText(label: label, textStyle: textStyle),
+      );
 
   static Widget icon({
     required IconData icon,
     required VoidCallback? onPressed,
-    Color iconColor = const Color(0xFF1C1C1E),
+    Color? iconColor,
     double iconSize = 18,
     bool bold = false,
+    List<BoxShadow>? shadows,
   }) =>
       _SmallGlassButton(
         onPressed: onPressed,
         isSquare: true,
+        shadows: shadows,
         child: bold
-            ? CustomPaint(
-                size: Size(iconSize, iconSize),
-                painter: _BoldIconPainter(
-                  icon: icon,
-                  color: iconColor,
-                  size: iconSize,
-                  strokeExtra: 1,
-                ),
-              )
-            : Icon(icon, color: iconColor, size: iconSize),
+            ? _BoldIconBuilder(icon: icon, color: iconColor, size: iconSize)
+            : _ThemedIcon(icon: icon, color: iconColor, size: iconSize),
       );
 }
+
+// ─── Theme-aware helpers ───────────────────────────────────────────────────
+
+class _ThemedText extends StatelessWidget {
+  final String label;
+  final TextStyle? textStyle;
+
+  const _ThemedText({required this.label, this.textStyle});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Text(
+      label,
+      style: textStyle ??
+          TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppDarkColors.textPrimary : AppColors.textPrimary,
+          ),
+    );
+  }
+}
+
+class _ThemedIcon extends StatelessWidget {
+  final IconData icon;
+  final Color? color;
+  final double size;
+
+  const _ThemedIcon({required this.icon, required this.size, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final resolvedColor =
+        color ?? (isDark ? AppDarkColors.icon : AppColors.icon);
+    return Icon(icon, color: resolvedColor, size: size);
+  }
+}
+
+class _BoldIconBuilder extends StatelessWidget {
+  final IconData icon;
+  final Color? color;
+  final double size;
+
+  const _BoldIconBuilder({required this.icon, required this.size, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final resolvedColor =
+        color ?? (isDark ? AppDarkColors.icon : AppColors.icon);
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _BoldIconPainter(
+        icon: icon,
+        color: resolvedColor,
+        size: size,
+        strokeExtra: 1,
+      ),
+    );
+  }
+}
+
+// ─── Liquid button (primary / secondary) ──────────────────────────────────
 
 class _LiquidButton extends StatefulWidget {
   final String label;
@@ -135,6 +188,7 @@ class _PrimaryGlass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       height: 50,
@@ -142,7 +196,7 @@ class _PrimaryGlass extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3C8EFF).withOpacity(0.40),
+            color: AppColors.primary.withOpacity(isDark ? 0.25 : 0.40),
             blurRadius: 100,
             spreadRadius: 0,
             offset: const Offset(0, 2),
@@ -154,7 +208,7 @@ class _PrimaryGlass extends StatelessWidget {
         child: _GlassFill(
           pressed: pressed,
           borderRadius: 32,
-          tint: const Color(0xFF3C8EFF).withOpacity(1),
+          tint: AppColors.primary,
           child: Center(
             child: Text(
               label,
@@ -162,7 +216,7 @@ class _PrimaryGlass extends StatelessWidget {
                 fontFamily: 'Montserrat',
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Colors.white, // always white on blue
               ),
             ),
           ),
@@ -180,6 +234,7 @@ class _SecondaryGlass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       height: 50,
@@ -187,7 +242,7 @@ class _SecondaryGlass extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: const Color.fromARGB(255, 235, 230, 230).withOpacity(0.1),
+            color: Colors.black.withOpacity(isDark ? 0.30 : 0.06),
             blurRadius: 100,
             spreadRadius: 0,
             offset: const Offset(0, 2),
@@ -202,11 +257,12 @@ class _SecondaryGlass extends StatelessWidget {
           child: Center(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Montserrat',
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1C1C1E),
+                color:
+                    isDark ? AppDarkColors.textPrimary : AppColors.textPrimary,
               ),
             ),
           ),
@@ -216,17 +272,21 @@ class _SecondaryGlass extends StatelessWidget {
   }
 }
 
+// ─── Small glass button ────────────────────────────────────────────────────
+
 class _SmallGlassButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Widget child;
   final bool isSquare;
   final double height;
+  final List<BoxShadow>? shadows;
 
   const _SmallGlassButton({
     required this.onPressed,
     required this.child,
     this.isSquare = false,
     this.height = 44,
+    this.shadows,
   });
 
   @override
@@ -277,14 +337,15 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
           width: widget.isSquare ? widget.height : null,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.height / 2),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 8,
-                spreadRadius: 0,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            boxShadow: widget.shadows ??
+                [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.07),
+                    blurRadius: 8,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(widget.height / 2),
@@ -305,6 +366,8 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
   }
 }
 
+// ─── Glass fill ────────────────────────────────────────────────────────────
+
 class _GlassFill extends StatelessWidget {
   final bool pressed;
   final double borderRadius;
@@ -320,19 +383,39 @@ class _GlassFill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final resolvedTint = tint ??
+        (isDark
+            ? AppDarkColors.surface.withOpacity(0.55)
+            : AppColors.surface.withOpacity(0.62));
+
+    final rimTop = isDark
+        ? Colors.white.withOpacity(0.18)
+        : Colors.white.withOpacity(0.80);
+
+    final rimBottom = isDark
+        ? Colors.white.withOpacity(0.04)
+        : Colors.white.withOpacity(0.20);
+
+    final shimmerStart = isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.white.withOpacity(0.45);
+
     return Stack(
       children: [
+        // Blur
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: const SizedBox.expand(),
           ),
         ),
+        // Tint
         Positioned.fill(
-          child: Container(
-            color: tint ?? Colors.white.withOpacity(0.62),
-          ),
+          child: Container(color: resolvedTint),
         ),
+        // Top shimmer
         Positioned(
           top: 0,
           left: 0,
@@ -343,32 +426,37 @@ class _GlassFill extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withOpacity(0.45),
-                  Colors.white.withOpacity(0.0),
-                ],
+                colors: [shimmerStart, Colors.white.withOpacity(0.0)],
               ),
             ),
           ),
         ),
+        // Rim
         Positioned.fill(
           child: CustomPaint(
             painter: _GlassRimPainter(
               borderRadius: borderRadius,
-              topColor: Colors.white.withOpacity(0.80),
-              bottomColor: Colors.white.withOpacity(0.20),
+              topColor: rimTop,
+              bottomColor: rimBottom,
             ),
           ),
         ),
+        // Press overlay
         if (pressed)
           Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.06)),
+            child: Container(
+              color: isDark
+                  ? Colors.white.withOpacity(0.05)
+                  : Colors.black.withOpacity(0.06),
+            ),
           ),
         child,
       ],
     );
   }
 }
+
+// ─── Painters ─────────────────────────────────────────────────────────────
 
 class _GlassRimPainter extends CustomPainter {
   final double borderRadius;

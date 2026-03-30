@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import 'package:tawakad_app/features/onboarding/ui/animation/mascot_rive.dart';
@@ -41,11 +40,13 @@ class OnboardingScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     final progress =
         totalSteps <= 0 ? 0.0 : (currentStep / totalSteps).clamp(0.0, 1.0);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         top: true,
         bottom: true,
@@ -85,10 +86,9 @@ class OnboardingScaffold extends StatelessWidget {
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: theme.textTheme.headlineLarge?.copyWith(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  color: Colors.black,
                 ),
               ),
               const SizedBox(height: 32),

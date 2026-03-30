@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class FieldCard extends StatelessWidget {
   const FieldCard({
@@ -12,14 +13,16 @@ class FieldCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppDarkColors.surface : AppColors.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(isDark ? 0.25 : 0.06),
             blurRadius: 20,
             spreadRadius: 0,
             offset: const Offset(0, 4),

@@ -27,12 +27,15 @@ class _RadioOptionState extends State<RadioOption> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selected = widget.value == widget.groupValue;
 
-    Color background = AppColors.surface;
+    Color background = isDark ? AppDarkColors.surface : AppColors.surface;
 
     if (widget.hasError && !selected) {
-      background = AppColors.fieldErrorFill;
+      background = isDark
+          ? AppColors.fieldErrorFill.withOpacity(0.15)
+          : AppColors.fieldErrorFill;
     }
 
     if (_hovered || _pressed) {
@@ -44,7 +47,9 @@ class _RadioOptionState extends State<RadioOption> {
 
     final borderColor = widget.hasError
         ? AppColors.fieldErrorBorder
-        : (selected ? AppColors.primary : AppColors.fieldBorder);
+        : (selected
+            ? AppColors.primary
+            : (isDark ? AppDarkColors.fieldBorder : AppColors.fieldBorder));
 
     final borderWidth = (selected || widget.hasError) ? 2.0 : 1.0;
 
@@ -93,9 +98,14 @@ class _RadioOptionState extends State<RadioOption> {
                   child: Text(
                     widget.label,
                     textAlign: TextAlign.right,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textPrimary,
-                        ),
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: isDark
+                          ? AppDarkColors.textPrimary
+                          : AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ],

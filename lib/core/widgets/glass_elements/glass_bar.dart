@@ -11,6 +11,10 @@ class GlassSurface extends StatelessWidget {
   final int? itemCount;
   final double pillInset;
 
+  // ── Dark mode overrides ──
+  final Color? tintColor;
+  final Color? pillColor;
+
   const GlassSurface({
     super.key,
     required this.child,
@@ -21,35 +25,70 @@ class GlassSurface extends StatelessWidget {
     this.selectedIndex,
     this.itemCount,
     this.pillInset = 4.0,
+    this.tintColor,
+    this.pillColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Adapt tint to theme
+    final resolvedTint = tintColor ??
+        (isDark
+            ? Colors.white.withOpacity(0.08) // dark: smoky glass
+            : Colors.white.withOpacity(0.62)); // light: frosted white
+
+    final resolvedPill = pillColor ??
+        (isDark
+            ? Colors.white.withOpacity(0.15) // dark: subtle bright pill
+            : Colors.white.withOpacity(0.85)); // light: solid white pill
+
+    final resolvedShadows = shadows ??
+        [
+          BoxShadow(
+            color: isDark
+                ? Colors.black.withOpacity(0.35)
+                : Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 2),
+          ),
+        ];
+
+    final rimTop = isDark
+        ? Colors.white.withOpacity(0.18)
+        : Colors.white.withOpacity(0.80);
+
+    final rimBottom = isDark
+        ? Colors.white.withOpacity(0.04)
+        : Colors.white.withOpacity(0.20);
+
+    final shimmerColors = isDark
+        ? [Colors.white.withOpacity(0.10), Colors.white.withOpacity(0.0)]
+        : [Colors.white.withOpacity(0.45), Colors.white.withOpacity(0.0)];
+
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: shadows ??
-            [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 16,
-                offset: const Offset(0, 2),
-              ),
-            ],
+        boxShadow: resolvedShadows,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: _GlassFill(
           borderRadius: borderRadius,
-          child: _maybeWithPill(child),
+          tintColor: resolvedTint,
+          rimTop: rimTop,
+          rimBottom: rimBottom,
+          shimmerColors: shimmerColors,
+          child: _maybeWithPill(resolvedPill, child),
         ),
       ),
     );
   }
 
-  Widget _maybeWithPill(Widget child) {
+  Widget _maybeWithPill(Color pillColor, Widget child) {
     if (selectedIndex == null || itemCount == null || width == null) {
       return child;
     }
@@ -70,7 +109,7 @@ class GlassSurface extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(borderRadius - pillInset),
-              color: Colors.white.withOpacity(0.85),
+              color: pillColor,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
@@ -90,27 +129,36 @@ class GlassSurface extends StatelessWidget {
 class _GlassFill extends StatelessWidget {
   final double borderRadius;
   final Widget child;
+  final Color tintColor;
+  final Color rimTop;
+  final Color rimBottom;
+  final List<Color> shimmerColors;
 
   const _GlassFill({
     required this.borderRadius,
     required this.child,
+    required this.tintColor,
+    required this.rimTop,
+    required this.rimBottom,
+    required this.shimmerColors,
   });
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // Blur layer
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: const SizedBox.expand(),
           ),
         ),
+        // Tint layer
         Positioned.fill(
-          child: Container(
-            color: Colors.white.withOpacity(0.62),
-          ),
+          child: Container(color: tintColor),
         ),
+        // Top shimmer
         Positioned(
           top: 0,
           left: 0,
@@ -121,20 +169,18 @@ class _GlassFill extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white.withOpacity(0.45),
-                  Colors.white.withOpacity(0.0),
-                ],
+                colors: shimmerColors,
               ),
             ),
           ),
         ),
+        // Rim border
         Positioned.fill(
           child: CustomPaint(
             painter: _GlassRimPainter(
               borderRadius: borderRadius,
-              topColor: Colors.white.withOpacity(0.80),
-              bottomColor: Colors.white.withOpacity(0.20),
+              topColor: rimTop,
+              bottomColor: rimBottom,
             ),
           ),
         ),

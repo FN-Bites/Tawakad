@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'pack_list.dart';
 import '../widgets/pack_list/pack_list_card.dart';
 import '../widgets/buttons/pack_list_icon_badge.dart';
@@ -14,7 +13,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomeState extends State<HomePage> {
-  //Dummy data
   final List<PackList> _registeredList = [
     PackList(
       title: 'الجيم',
@@ -27,14 +25,15 @@ class _HomeState extends State<HomePage> {
       itemCount: 5,
       date: DateTime.now(),
       cardTheme: PackListCardTheme.blue,
-    )
+    ),
   ];
 
   void _openAddPackList() {
     showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (ctx) => const Text("Modal bottom sheet"));
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) => const Text("Modal bottom sheet"),
+    );
   }
 
   void _removePackList(PackList packlist) {
@@ -42,7 +41,7 @@ class _HomeState extends State<HomePage> {
     setState(() {
       _registeredList.remove(packlist);
     });
-    //Undo remove button
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 2),
@@ -61,6 +60,8 @@ class _HomeState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     Widget mainContent = const Center(
       child: Text("لا يوجد اي قوائم لديك قم بالاضافة"),
     );
@@ -73,30 +74,28 @@ class _HomeState extends State<HomePage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
         toolbarHeight: kToolbarHeight + 40,
         actions: [
           const SizedBox(width: 24),
-          const PackListIconBadge(
+          PackListIconBadge(
             icon: Icons.person,
-            iconColor: Colors.black,
+            iconColor: theme.iconTheme.color ?? theme.colorScheme.onSurface,
           ),
-          const SizedBox(
-            width: 16,
-          ),
+          const SizedBox(width: 16),
           Text(
             'الرئيسية',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: theme.textTheme.bodyLarge,
           ),
           const Spacer(),
           PackListIconBadge(
             onPressed: _openAddPackList,
             icon: Icons.add,
             bold: true,
-            iconColor: Colors.black,
+            iconColor: theme.iconTheme.color ?? theme.colorScheme.onSurface,
           ),
           const SizedBox(width: 24),
         ],

@@ -27,8 +27,22 @@ class AuthTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final base =
         const InputDecoration().applyDefaults(theme.inputDecorationTheme);
+
+    final fillColor = invalid
+        ? (isDark
+            ? AppColors.fieldErrorFill.withOpacity(0.15)
+            : AppColors.fieldErrorFill)
+        : (isDark ? AppDarkColors.surface : AppColors.surface);
+
+    final borderColor = invalid
+        ? AppColors.fieldErrorBorder
+        : (isDark ? AppDarkColors.fieldBorder : AppColors.fieldBorder);
+
+    final focusedColor =
+        invalid ? AppColors.fieldErrorBorder : AppColors.primary;
 
     OutlineInputBorder border(Color color, double width) {
       return OutlineInputBorder(
@@ -44,6 +58,12 @@ class AuthTextField extends StatelessWidget {
           textDirection: TextDirection.rtl,
           textAlign: TextAlign.right,
           keyboardType: keyboardType,
+          style: TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: isDark ? AppDarkColors.textPrimary : AppColors.textPrimary,
+          ),
           onChanged: (v) {
             onChanged(v);
             onAnyChange?.call();
@@ -52,33 +72,17 @@ class AuthTextField extends StatelessWidget {
             hintText: hint,
             hintTextDirection: TextDirection.rtl,
             errorText: null,
-            fillColor: invalid ? AppColors.fieldErrorFill : AppColors.surface,
-            enabledBorder: (base.enabledBorder as OutlineInputBorder?)
-                    ?.copyWith(
-                  borderSide: BorderSide(
-                    color: invalid
-                        ? AppColors.fieldErrorBorder
-                        : AppColors.fieldBorder,
-                    width: 1,
-                  ),
-                ) ??
-                border(
-                  invalid ? AppColors.fieldErrorBorder : AppColors.fieldBorder,
-                  1,
-                ),
+            fillColor: fillColor,
+            enabledBorder:
+                (base.enabledBorder as OutlineInputBorder?)?.copyWith(
+                      borderSide: BorderSide(color: borderColor, width: 1),
+                    ) ??
+                    border(borderColor, 1),
             focusedBorder:
                 (base.focusedBorder as OutlineInputBorder?)?.copyWith(
-                      borderSide: BorderSide(
-                        color: invalid
-                            ? AppColors.fieldErrorBorder
-                            : AppColors.primary,
-                        width: 1.5,
-                      ),
+                      borderSide: BorderSide(color: focusedColor, width: 1.5),
                     ) ??
-                    border(
-                      invalid ? AppColors.fieldErrorBorder : AppColors.primary,
-                      1.5,
-                    ),
+                    border(focusedColor, 1.5),
           ),
         ),
         if (invalid) ...[
