@@ -45,7 +45,9 @@ class SignInPage extends StatelessWidget {
         emailServerError: flow.emailServerError,
         passwordServerError: flow.passwordServerError,
         onEmailChanged: flow.setEmail,
-        onPasswordChanged: flow.setPassword,
+        onPasswordChanged: flow.setPassword, 
+        emailInvalid: flow.emailInvalid, 
+        passwordInvalid: flow.passwordInvalid,
       ),
     );
   }

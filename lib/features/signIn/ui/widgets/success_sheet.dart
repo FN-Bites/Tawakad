@@ -17,7 +17,7 @@ class SuccessSheet extends StatelessWidget {
               onPressed: () => Navigator.pop(context, '/forgot-password'),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
 
           // أيقونة النجاح
           Container(

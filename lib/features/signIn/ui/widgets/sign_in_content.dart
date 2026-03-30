@@ -6,6 +6,9 @@ class SignInContent extends StatelessWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
 
+  final bool emailInvalid;
+  final bool passwordInvalid;
+
   final String? emailError;
   final String? passwordError;
   final String? emailServerError;
@@ -23,7 +26,9 @@ class SignInContent extends StatelessWidget {
     required this.onEmailChanged,
     required this.onPasswordChanged,
     required this.emailServerError,
-    required this.passwordServerError,
+    required this.passwordServerError, 
+    required this.emailInvalid, 
+    required this.passwordInvalid,
   });
 
   @override
@@ -33,7 +38,7 @@ class SignInContent extends StatelessWidget {
         AuthTextField(
           hint: 'البريد الإلكتروني',
           controller: emailController,
-          invalid: emailError != null || emailServerError != null,
+          invalid: emailInvalid,
           errorMsg: emailError ?? emailServerError ?? '',
           onChanged: onEmailChanged,
           keyboardType: TextInputType.emailAddress,
@@ -43,7 +48,7 @@ class SignInContent extends StatelessWidget {
           controller: passwordController,
           isPassword: true,
           enableToggle: true,
-          invalid: passwordError != null || passwordServerError != null,
+          invalid: passwordInvalid,
           errorMsg: passwordError ?? passwordServerError ?? '',
           onChanged: onPasswordChanged,
         ),

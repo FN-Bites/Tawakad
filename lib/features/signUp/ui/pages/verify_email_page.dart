@@ -59,7 +59,7 @@ class VerifyEmailPage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 30),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -83,14 +83,14 @@ class VerifyEmailPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 30),
               Text(
                 'لم يصلك البريد؟',
                 style: theme.textTheme.labelMedium?.copyWith(
                   color: theme.colorScheme.primary,
                 ),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

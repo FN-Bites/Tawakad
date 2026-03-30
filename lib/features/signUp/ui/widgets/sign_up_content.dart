@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/auth_text_field.dart';
-import '../../../../core/widgets/password_strength_hints.dart';
+import 'password_strength_hints.dart';
 import 'package:tawakad_app/core/widgets/field_card.dart';
 
 class SignUpContent extends StatelessWidget {
@@ -8,6 +8,10 @@ class SignUpContent extends StatelessWidget {
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
 
+  final bool emailInvalid;
+  final bool passwordInvalid;
+  final bool confirmPasswordInvalid;
+  
   final String? emailError;
   final String? passwordError;
   final String? confirmPasswordError;
@@ -41,7 +45,10 @@ class SignUpContent extends StatelessWidget {
     required this.onPasswordChanged,
     required this.onConfirmPasswordChanged,
     required this.registrationError,
-    required this.isPasswordEmpty,
+    required this.isPasswordEmpty, 
+    required this.emailInvalid, 
+    required this.passwordInvalid, 
+    required this.confirmPasswordInvalid,
   });
 
   @override
@@ -51,7 +58,7 @@ class SignUpContent extends StatelessWidget {
         AuthTextField(
           hint: 'البريد الإلكتروني',
           controller: emailController,
-          invalid: emailError != null || registrationError != null,
+          invalid: emailInvalid,
           errorMsg: emailError ?? registrationError ?? '',
           keyboardType: TextInputType.emailAddress,
           onChanged: onEmailChanged,
@@ -61,7 +68,7 @@ class SignUpContent extends StatelessWidget {
           controller: passwordController,
           isPassword: true,
           enableToggle: true,
-          invalid: passwordError != null,
+          invalid: passwordInvalid,
           errorMsg: passwordError ?? '',
           onChanged: onPasswordChanged,
         ),
@@ -70,7 +77,7 @@ class SignUpContent extends StatelessWidget {
           controller: confirmPasswordController,
           isPassword: true,
           enableToggle: true,
-          invalid: confirmPasswordError != null,
+          invalid: confirmPasswordInvalid,
           errorMsg: confirmPasswordError ?? '',
           onChanged: onConfirmPasswordChanged,
         ),

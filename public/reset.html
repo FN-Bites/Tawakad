@@ -50,7 +50,7 @@ margin-bottom:30px;
 }
 
 .inputBox {
-margin-bottom: 7px;
+margin-bottom:10px;
 position: relative;
 }
 
@@ -85,7 +85,7 @@ align-items:center;
 
 .checkList{
 font-size:13px;
-margin-top:16px;
+margin-top:20px;
 line-height:1.5;
 color: #999;
 padding-right:5px;
@@ -108,7 +108,7 @@ color:#FF3B30;
 button{
 width:100%;
 padding:15px;
-margin-top:30px;
+margin-top:40px;
 border:none;
 border-radius:30px;
 background:linear-gradient(90deg,#2f6bff,#3b82f6);
@@ -185,7 +185,7 @@ font-size: 50px;
 <div class="inputBox">
 <input id="password" type="password" placeholder="كلمة المرور الجديدة">
 <span class="eye" onclick="togglePassword('password','passwordEye')">
-<span id="passwordEye" class="material-icons">visibility</span>
+<span id="passwordEye" class="material-icons">visibility_off</span>
 </span>
 </div>
 
@@ -194,7 +194,7 @@ font-size: 50px;
 <div class="inputBox">
 <input id="confirmPassword" type="password" placeholder="تأكيد كلمة المرور الجديدة">
 <span class="eye" onclick="togglePassword('confirmPassword','confirmEye')">
-<span id="confirmEye" class="material-icons">visibility</span>
+<span id="confirmEye" class="material-icons">visibility_off</span>
 </span>
 </div>
 
@@ -260,11 +260,11 @@ const field=document.getElementById(inputId);
 const icon=document.getElementById(iconId);
 if(field.type==="password"){
 field.type="text";
-icon.innerText="visibility_off";
+icon.innerText="visibility";
 }
 else{
 field.type="password";
-icon.innerText="visibility";
+icon.innerText="visibility_off";
 }
 }
 
@@ -340,7 +340,6 @@ async function hashPassword(password, email) {
 async function submitPassword(){
 const password=passwordInput.value;
 submitBtn.disabled = true;
-submitBtn.innerText = "جاري التحديث ...";
 submitBtn.classList.remove("active");
 
 try{
@@ -358,8 +357,6 @@ const newHash = await hashPassword(password, email);
 if (history.includes(newHash)) {
 document.getElementById("passwordError").innerText = "لا يمكن استخدام كلمة مرور تم استخدامها سابقاً";
 submitBtn.disabled = false;
-submitBtn.innerText = "تعيين كلمة المرور";
-submitBtn.classList.remove("active");
 return;
 }
 }
@@ -386,7 +383,6 @@ catch(e){
 document.getElementById("mainError").innerText="";
 console.error("Error:", e);
 submitBtn.disabled = false;
-submitBtn.innerText = "تعيين كلمة المرور";
 submitBtn.classList.add("active");
 
 if(e.code==="auth/expired-action-code"){
