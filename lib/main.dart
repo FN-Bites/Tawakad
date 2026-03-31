@@ -10,6 +10,8 @@ import 'features/signUp/providers/signup_flow_provider.dart';
 import 'features/signUp/providers/verifyEmail_flow_provider.dart';
 import 'package:tawakad_app/features/signIn/providers/signIn_flow_provider.dart';
 import 'features/signIn/providers/forgotPassword_flow_provider.dart';
+import 'features/home/ui/pages/primary_create_list_page.dart';
+import 'features/home/ui/pages/detail_create_list_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,8 +53,9 @@ class TawakadApp extends StatelessWidget {
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
-      routes: AppRoutes.routes,
-      initialRoute: AppRoutes.splashScreen,
+      //routes: AppRoutes.routes,
+      // home: AppRoutes.splashScreen,
+      home: const DetailCreateListPage(),
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: const [
