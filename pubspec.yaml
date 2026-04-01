@@ -113,7 +113,24 @@ flutter:
     - assets/animation/lists.riv
     - assets/animation/scanning.riv
     - assets/animation/location_icon.riv
-    - assets/Icons/Google.png
+    - assets/icons/Google.png
+    - assets/icons/airplane.up.forward.png
+    - assets/icons/backpack.fill.png
+    - assets/icons/beach.umbrella.png
+    - assets/icons/birthday.cake.png
+    - assets/icons/building.2.fill.png
+    - assets/icons/car.fill.png
+    - assets/icons/cloud.drizzle.fill.png
+    - assets/icons/dumbbell.png
+    - assets/icons/flame.fill.png
+    - assets/icons/gamecontroller.fill.png
+    - assets/icons/graduationcap.fill.png
+    - assets/icons/list.bullet.png
+    - assets/icons/snowflake.png
+    - assets/icons/stethoscope.png
+    - assets/icons/suitcase.fill.png
+    - assets/icons/sun.min.fill.png
+    - assets/icons/tent.png
   fonts:
     - family: Montserrat
       fonts:
