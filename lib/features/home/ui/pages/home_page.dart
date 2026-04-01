@@ -4,8 +4,11 @@ import '../widgets/pack_list/pack_list_card.dart';
 import '../widgets/buttons/pack_list_icon_badge.dart';
 import '../widgets/pack_list_card_theme.dart';
 import '../widgets/buttons/filter_bar.dart';
+import '../widgets/home_empty_state.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   State<HomePage> createState() {
     return _HomeState();
@@ -38,6 +41,7 @@ class _HomeState extends State<HomePage> {
 
   void _removePackList(PackList packlist) {
     final listIndex = _registeredList.indexOf(packlist);
+
     setState(() {
       _registeredList.remove(packlist);
     });
@@ -62,8 +66,12 @@ class _HomeState extends State<HomePage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    Widget mainContent = const Center(
-      child: Text("لا يوجد اي قوائم لديك قم بالاضافة"),
+    Widget mainContent = const Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 350),
+        child: HomeEmptyState(),
+      ),
     );
 
     if (_registeredList.isNotEmpty) {

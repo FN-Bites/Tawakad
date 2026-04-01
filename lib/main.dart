@@ -52,7 +52,7 @@ class TawakadApp extends StatelessWidget {
       darkTheme: AppTheme.dark(),
       themeMode: ThemeMode.system,
       routes: AppRoutes.routes,
-      initialRoute: AppRoutes.splashScreen,
+      initialRoute: AppRoutes.homePage,
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: const [
