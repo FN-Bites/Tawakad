@@ -131,6 +131,7 @@ flutter:
     - assets/icons/suitcase.fill.png
     - assets/icons/sun.min.fill.png
     - assets/icons/tent.png
+    - assets/icons/trash.png
   fonts:
     - family: Montserrat
       fonts:
