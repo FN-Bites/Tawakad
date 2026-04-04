@@ -1,16 +1,17 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class GlassSearchButton extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final VoidCallback? onClosed;
+  final VoidCallback? onOpened;
   final String hintText;
 
   const GlassSearchButton({
     super.key,
     this.onChanged,
     this.onClosed,
+    this.onOpened,
     this.hintText = 'Search',
   });
 
@@ -21,7 +22,7 @@ class GlassSearchButton extends StatefulWidget {
 class _GlassSearchButtonState extends State<GlassSearchButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
-  late Animation<double> _widthFactor;
+  late Animation<double> _expandAnim;
   late Animation<double> _contentFade;
   late Animation<double> _cancelFade;
 
@@ -29,22 +30,21 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
   final TextEditingController _textCtrl = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  static const double _buttonSize = 48.0;
-  static const double _gap = 10.0;
-  // left padding(14) + icon(24) + gap(8) + right padding(14) = 60
-  static const double _leadingArea = 60.0;
+  static const double _collapsedWidth = 52.0;
+  static const double _cancelSize = 48.0;
+  static const double _cancelGap = 10.0;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 420),
     );
-    _widthFactor = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOutCubic);
+    _expandAnim = CurvedAnimation(parent: _ctrl, curve: Curves.easeInOutCubic);
     _contentFade = CurvedAnimation(
       parent: _ctrl,
-      curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+      curve: const Interval(0.45, 1.0, curve: Curves.easeOut),
     );
     _cancelFade = CurvedAnimation(
       parent: _ctrl,
@@ -62,8 +62,9 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
 
   void _open() {
     setState(() => _isExpanded = true);
+    widget.onOpened?.call();
     _ctrl.forward();
-    Future.delayed(const Duration(milliseconds: 380), () {
+    Future.delayed(const Duration(milliseconds: 370), () {
       if (mounted) _focusNode.requestFocus();
     });
   }
@@ -83,62 +84,55 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDark ? AppDarkColors.textPrimary : AppColors.textPrimary;
-    final iconColor = isDark ? Colors.white : Colors.black;
+    final iconColor = isDark ? AppDarkColors.icon : AppColors.icon;
+    final capsuleColor =
+        isDark ? const Color(0xFF171B22) : const Color(0xFFFFFFFF);
 
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: SizedBox(
-        height: _buttonSize,
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final totalWidth = constraints.maxWidth.isFinite
-                ? constraints.maxWidth
-                : MediaQuery.of(context).size.width - 48;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width - 40;
 
-            final expandedBarWidth = totalWidth - _buttonSize - _gap;
+        final expandedPillW = maxW - _cancelSize - _cancelGap;
 
-            return AnimatedBuilder(
-              animation: _ctrl,
-              builder: (context, _) {
-                final barWidth = _buttonSize +
-                    (expandedBarWidth - _buttonSize) * _widthFactor.value;
+        return AnimatedBuilder(
+          animation: _ctrl,
+          builder: (context, _) {
+            final pillW = _collapsedWidth +
+                (expandedPillW - _collapsedWidth) * _expandAnim.value;
 
-                final textFieldWidth =
-                    (barWidth - _leadingArea).clamp(0.0, double.infinity);
+            const leadingArea = 52.0;
+            final tfW = (pillW - leadingArea).clamp(0.0, double.infinity);
+            final cancelAllocW = (_cancelSize + _cancelGap) * _expandAnim.value;
 
-                return Row(
+            return ClipRect(
+              child: SizedBox(
+                width: maxW,
+                height: _collapsedWidth,
+                child: Row(
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // ── Search bar ─────────────────────────
-                    _GlassCapsule(
-                      width: barWidth,
-                      height: _buttonSize,
+                    // ── Pill ──────────────────────────────────────────────
+                    _FlatCapsule(
+                      width: pillW,
+                      height: _collapsedWidth,
+                      color: capsuleColor,
                       onTap: _isExpanded ? null : _open,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          // Left padding then icon in a fixed square
-                          const SizedBox(width: 12),
-                          SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: Center(
-                              child: Icon(
-                                Icons.search_rounded,
-                                size: 24,
-                                color: iconColor,
-                              ),
-                            ),
-                          ),
-                          // Text field — transparent, no background
+                          const SizedBox(width: 14),
+                          Icon(Icons.search_rounded,
+                              size: 22, color: iconColor),
                           if (_isExpanded)
                             FadeTransition(
                               opacity: _contentFade,
                               child: SizedBox(
-                                width: textFieldWidth,
-                                height: _buttonSize,
+                                width: tfW,
+                                height: _collapsedWidth,
                                 child: Padding(
                                   padding:
                                       const EdgeInsets.only(left: 8, right: 14),
@@ -152,7 +146,7 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
                                       textAlignVertical:
                                           TextAlignVertical.center,
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.w400,
                                         color: textColor,
                                         height: 1.2,
@@ -160,18 +154,15 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
                                       decoration: InputDecoration(
                                         hintText: widget.hintText,
                                         hintStyle: TextStyle(
-                                          fontSize: 16,
+                                          fontSize: 15,
                                           fontWeight: FontWeight.w400,
-                                          color: textColor.withOpacity(0.35),
+                                          color:
+                                              textColor.withValues(alpha: 0.35),
                                           height: 1.2,
                                         ),
-                                        // Remove every border and background
                                         border: InputBorder.none,
                                         enabledBorder: InputBorder.none,
                                         focusedBorder: InputBorder.none,
-                                        disabledBorder: InputBorder.none,
-                                        errorBorder: InputBorder.none,
-                                        focusedErrorBorder: InputBorder.none,
                                         filled: false,
                                         isDense: true,
                                         isCollapsed: true,
@@ -186,69 +177,72 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
                       ),
                     ),
 
-                    // ── Cancel button ──────────────────────
-                    if (_isExpanded)
-                      FadeTransition(
-                        opacity: _cancelFade,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: _gap),
-                          child: _GlassCapsule(
-                            width: _buttonSize,
-                            height: _buttonSize,
-                            onTap: _close,
-                            child: SizedBox.expand(
-                              child: Center(
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  size: 20,
-                                  color: iconColor,
+                    // ── Cancel button ─────────────────────────────────────
+                    SizedBox(
+                      width: cancelAllocW,
+                      height: _collapsedWidth,
+                      child: cancelAllocW > _cancelGap
+                          ? FadeTransition(
+                              opacity: _cancelFade,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: _cancelGap),
+                                child: _FlatCapsule(
+                                  width: _cancelSize,
+                                  height: _cancelSize,
+                                  color: capsuleColor,
+                                  onTap: _close,
+                                  child: Center(
+                                    child: Icon(Icons.close_rounded,
+                                        size: 20, color: iconColor),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ],
-                );
-              },
+                ),
+              ),
             );
           },
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
-// ─── Glass capsule ─────────────────────────────────────────────────────────
+// ─── Flat capsule — no blur, no shadow, no rim ────────────────────────────
 
-class _GlassCapsule extends StatefulWidget {
+class _FlatCapsule extends StatefulWidget {
   final double width;
   final double height;
+  final Color color;
   final VoidCallback? onTap;
   final Widget child;
 
-  const _GlassCapsule({
+  const _FlatCapsule({
     required this.width,
     required this.height,
+    required this.color,
     required this.child,
     this.onTap,
   });
 
   @override
-  State<_GlassCapsule> createState() => _GlassCapsuleState();
+  State<_FlatCapsule> createState() => _FlatCapsuleState();
 }
 
-class _GlassCapsuleState extends State<_GlassCapsule>
+class _FlatCapsuleState extends State<_FlatCapsule>
     with SingleTickerProviderStateMixin {
   late AnimationController _ctrl;
   late Animation<double> _scale;
-  bool _pressed = false;
 
   @override
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 120));
+        vsync: this, duration: const Duration(milliseconds: 110));
     _scale = Tween(begin: 1.0, end: 0.93)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
@@ -264,149 +258,27 @@ class _GlassCapsuleState extends State<_GlassCapsule>
     final radius = widget.height / 2;
 
     return GestureDetector(
-      onTapDown: widget.onTap == null
-          ? null
-          : (_) {
-              setState(() => _pressed = true);
-              _ctrl.forward();
-            },
+      onTapDown: widget.onTap == null ? null : (_) => _ctrl.forward(),
       onTapUp: widget.onTap == null
           ? null
           : (_) {
-              setState(() => _pressed = false);
               _ctrl.reverse();
               widget.onTap?.call();
             },
-      onTapCancel: widget.onTap == null
-          ? null
-          : () {
-              setState(() => _pressed = false);
-              _ctrl.reverse();
-            },
+      onTapCancel: widget.onTap == null ? null : () => _ctrl.reverse(),
       child: ScaleTransition(
         scale: _scale,
         child: Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
+            color: widget.color,
             borderRadius: BorderRadius.circular(radius),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.07),
-                blurRadius: 8,
-                spreadRadius: 0,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            // No shadow
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(radius),
-            child: _GlassFill(
-              pressed: _pressed,
-              borderRadius: radius,
-              child: widget.child,
-            ),
-          ),
+          child: widget.child,
         ),
       ),
     );
   }
-}
-
-// ─── Glass fill ────────────────────────────────────────────────────────────
-// blur → single flat tint → rim. Nothing else. No shimmer. No banding.
-
-class _GlassFill extends StatelessWidget {
-  final bool pressed;
-  final double borderRadius;
-  final Widget child;
-
-  const _GlassFill({
-    required this.pressed,
-    required this.borderRadius,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final tint = isDark
-        ? AppDarkColors.surface.withOpacity(0.55)
-        : AppColors.surface.withOpacity(0.62);
-
-    final rimTop = isDark
-        ? Colors.white.withOpacity(0.18)
-        : Colors.white.withOpacity(0.80);
-    final rimBottom = isDark
-        ? Colors.white.withOpacity(0.04)
-        : Colors.white.withOpacity(0.20);
-
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // 1. Blur
-        BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: const SizedBox.expand(),
-        ),
-        // 2. Single flat tint — one color, no gradient
-        Container(color: tint),
-        // 3. Rim stroke
-        CustomPaint(
-          painter: _GlassRimPainter(
-            borderRadius: borderRadius,
-            topColor: rimTop,
-            bottomColor: rimBottom,
-          ),
-        ),
-        // 4. Press overlay
-        if (pressed)
-          Container(
-            color: isDark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.black.withOpacity(0.06),
-          ),
-        // 5. Child — must be transparent itself
-        child,
-      ],
-    );
-  }
-}
-
-// ─── Rim painter ───────────────────────────────────────────────────────────
-
-class _GlassRimPainter extends CustomPainter {
-  final double borderRadius;
-  final Color topColor;
-  final Color bottomColor;
-
-  const _GlassRimPainter({
-    required this.borderRadius,
-    required this.topColor,
-    required this.bottomColor,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rrect = RRect.fromRectAndRadius(
-      Rect.fromLTWH(0.5, 0.5, size.width - 1, size.height - 1),
-      Radius.circular(borderRadius),
-    );
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [topColor, bottomColor],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    canvas.drawRRect(rrect, paint);
-  }
-
-  @override
-  bool shouldRepaint(_GlassRimPainter old) =>
-      old.topColor != topColor ||
-      old.bottomColor != bottomColor ||
-      old.borderRadius != borderRadius;
 }

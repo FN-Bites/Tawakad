@@ -6,6 +6,7 @@ import '../features/signUp/ui/pages/verify_email_page.dart';
 import '../features/signIn/ui/pages/sign_in_page.dart';
 import '../features/signIn/ui/pages/forgot_password_page.dart';
 import 'package:tawakad_app/features/home/ui/pages/home_page.dart';
+import 'package:tawakad_app/core/app_shell.dart';
 
 class AppRoutes {
   static const onboarding = '/';
@@ -15,6 +16,7 @@ class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const splashScreen = '/splash';
   static const homePage = '/home';
+  static const appShell = '/app-shell';
 
   static final routes = <String, WidgetBuilder>{
     onboarding: (_) => const OnboardingQuestionsPage(),
@@ -23,6 +25,7 @@ class AppRoutes {
     signIn: (_) => const SignInPage(),
     forgotPassword: (_) => const ForgotPasswordPage(),
     splashScreen: (_) => const SplashPage(),
-    homePage: (_) => HomePage(),
+    homePage: (_) => const HomePage(),
+    appShell: (_) => const AppShell(),
   };
 }

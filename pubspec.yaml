@@ -114,6 +114,9 @@ flutter:
     - assets/animation/scanning.riv
     - assets/animation/location_icon.riv
     - assets/animation/searchin.riv
+    - assets/icons/nav_bar/calender.png
+    - assets/icons/nav_bar/home.png
+    - assets/icons/nav_bar/signal.png
     - assets/icons/Google.png
     - assets/icons/airplane.up.forward.png
     - assets/icons/backpack.fill.png

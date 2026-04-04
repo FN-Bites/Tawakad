@@ -6,10 +6,14 @@ import '../widgets/pack_list_card_theme.dart';
 import '../widgets/buttons/filter_bar.dart';
 import '../widgets/home_empty_state.dart';
 import '../widgets/search_empty_state.dart';
-import 'package:tawakad_app/core/widgets/glass_elements/glass_search_button.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String searchQuery;
+
+  const HomePage({
+    super.key,
+    this.searchQuery = '',
+  });
 
   @override
   State<HomePage> createState() => _HomeState();
@@ -31,10 +35,9 @@ class _HomeState extends State<HomePage> {
     ),
   ];
 
-  String _searchQuery = '';
   List<PackList> get _filteredList {
-    if (_searchQuery.isEmpty) return _registeredList;
-    final q = _searchQuery.toLowerCase();
+    if (widget.searchQuery.isEmpty) return _registeredList;
+    final q = widget.searchQuery.toLowerCase();
     return _registeredList
         .where((p) => p.title.toLowerCase().contains(q))
         .toList();
@@ -49,20 +52,7 @@ class _HomeState extends State<HomePage> {
   }
 
   void _removePackList(PackList packlist) {
-    final listIndex = _registeredList.indexOf(packlist);
     setState(() => _registeredList.remove(packlist));
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        duration: const Duration(seconds: 2),
-        content: const Text('تم حذف القائمة'),
-        action: SnackBarAction(
-          label: 'رجوع',
-          onPressed: () {
-            setState(() => _registeredList.insert(listIndex, packlist));
-          },
-        ),
-      ),
-    );
   }
 
   @override
@@ -70,10 +60,9 @@ class _HomeState extends State<HomePage> {
     final theme = Theme.of(context);
     final filtered = _filteredList;
 
-    Widget mainContent = const Align(
-      alignment: Alignment.topCenter,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: 350),
+    Widget mainContent = const Padding(
+      padding: EdgeInsets.only(bottom: 200),
+      child: Center(
         child: HomeEmptyState(),
       ),
     );
@@ -83,11 +72,10 @@ class _HomeState extends State<HomePage> {
         packList: filtered,
         onRemoveList: _removePackList,
       );
-    } else if (_searchQuery.isNotEmpty && filtered.isEmpty) {
-      mainContent = const Align(
-        alignment: Alignment.topCenter,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 350),
+    } else if (widget.searchQuery.isNotEmpty && filtered.isEmpty) {
+      mainContent = const Padding(
+        padding: EdgeInsets.only(bottom: 200),
+        child: Center(
           child: SearchEmptyState(),
         ),
       );
@@ -120,54 +108,26 @@ class _HomeState extends State<HomePage> {
           const SizedBox(width: 24),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Align(
+      body: Padding(
+        padding: const EdgeInsets.only(left: 24, right: 24),
+        child: Column(
+          children: [
+            Align(
               alignment: Alignment.topRight,
               child: GlassFilterBar(
                 initialFilter: FilterOption.today,
                 onFilterChanged: (filter) {},
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 40,
-              ),
-              child: mainContent,
-            ),
-          ),
-          SafeArea(
-            top: false,
-            child: Directionality(
-              textDirection: TextDirection.ltr,
+            Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: GlassSearchButton(
-                    hintText: 'ابحث عن قائمة',
-                    onChanged: (value) {
-                      setState(() => _searchQuery = value);
-                    },
-                    onClosed: () {
-                      setState(() => _searchQuery = '');
-                    },
-                  ),
-                ),
+                padding: const EdgeInsets.only(top: 40),
+                child: mainContent,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 100),
+          ],
+        ),
       ),
     );
   }
