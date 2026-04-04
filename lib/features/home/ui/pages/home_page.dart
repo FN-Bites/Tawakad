@@ -5,14 +5,14 @@ import '../widgets/buttons/pack_list_icon_badge.dart';
 import '../widgets/pack_list_card_theme.dart';
 import '../widgets/buttons/filter_bar.dart';
 import '../widgets/home_empty_state.dart';
+import '../widgets/search_empty_state.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/glass_search_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() {
-    return _HomeState();
-  }
+  State<HomePage> createState() => _HomeState();
 }
 
 class _HomeState extends State<HomePage> {
@@ -31,6 +31,15 @@ class _HomeState extends State<HomePage> {
     ),
   ];
 
+  String _searchQuery = '';
+  List<PackList> get _filteredList {
+    if (_searchQuery.isEmpty) return _registeredList;
+    final q = _searchQuery.toLowerCase();
+    return _registeredList
+        .where((p) => p.title.toLowerCase().contains(q))
+        .toList();
+  }
+
   void _openAddPackList() {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -41,11 +50,7 @@ class _HomeState extends State<HomePage> {
 
   void _removePackList(PackList packlist) {
     final listIndex = _registeredList.indexOf(packlist);
-
-    setState(() {
-      _registeredList.remove(packlist);
-    });
-
+    setState(() => _registeredList.remove(packlist));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 2),
@@ -53,9 +58,7 @@ class _HomeState extends State<HomePage> {
         action: SnackBarAction(
           label: 'رجوع',
           onPressed: () {
-            setState(() {
-              _registeredList.insert(listIndex, packlist);
-            });
+            setState(() => _registeredList.insert(listIndex, packlist));
           },
         ),
       ),
@@ -65,6 +68,7 @@ class _HomeState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final filtered = _filteredList;
 
     Widget mainContent = const Align(
       alignment: Alignment.topCenter,
@@ -74,10 +78,18 @@ class _HomeState extends State<HomePage> {
       ),
     );
 
-    if (_registeredList.isNotEmpty) {
+    if (filtered.isNotEmpty) {
       mainContent = PackListCard(
-        packList: _registeredList,
+        packList: filtered,
         onRemoveList: _removePackList,
+      );
+    } else if (_searchQuery.isNotEmpty && filtered.isEmpty) {
+      mainContent = const Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 350),
+          child: SearchEmptyState(),
+        ),
       );
     }
 
@@ -128,6 +140,31 @@ class _HomeState extends State<HomePage> {
                 top: 40,
               ),
               child: mainContent,
+            ),
+          ),
+          SafeArea(
+            top: false,
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: GlassSearchButton(
+                    hintText: 'ابحث عن قائمة',
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value);
+                    },
+                    onClosed: () {
+                      setState(() => _searchQuery = '');
+                    },
+                  ),
+                ),
+              ),
             ),
           ),
         ],
