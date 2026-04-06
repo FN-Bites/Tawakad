@@ -11,23 +11,24 @@ class IconsPicker extends StatelessWidget {
   });
 
   static const List<String> icons = [
-    "assets/Icons/list.bullet.png",
-    "assets/Icons/airplane.up.forward.png",
-    "assets/Icons/backpack.fill.png",
-    "assets/Icons/beach.umbrella.png",
-    "assets/Icons/birthday.cake.png",
-    "assets/Icons/building.2.fill.png",
-    "assets/Icons/car.fill.png",
-    "assets/Icons/cloud.drizzle.fill.png",
-    "assets/Icons/dumbbell.png",
-    "assets/Icons/flame.fill.png",
-    "assets/Icons/gamecontroller.fill.png",
-    "assets/Icons/graduationcap.fill.png",
-    "assets/Icons/snowflake.png",
-    "assets/Icons/stethoscope.png",
-    "assets/Icons/suitcase.fill.png",
-    "assets/Icons/sun.min.fill.png",
-    "assets/Icons/tent.png",
+    "assets/icons/icon_picker/1-logo.png",
+    "assets/icons/icon_picker/a-list.png",
+    "assets/icons/icon_picker/a-location.png",
+    "assets/icons/icon_picker/backpack.png",
+    "assets/icons/icon_picker/bank.png",
+    "assets/icons/icon_picker/beach.png",
+    "assets/icons/icon_picker/building.png",
+    "assets/icons/icon_picker/gym.png",
+    "assets/icons/icon_picker/graduation.png",
+    "assets/icons/icon_picker/home.png",
+    "assets/icons/icon_picker/hospitle.png",
+    "assets/icons/icon_picker/mosque.png",
+    "assets/icons/icon_picker/party.png",
+    "assets/icons/icon_picker/plane.png",
+    "assets/icons/icon_picker/stadium.png",
+    "assets/icons/icon_picker/teepee.png",
+    "assets/icons/icon_picker/tree.png",
+    "assets/icons/icon_picker/work.png",
   ];
 
   @override
@@ -43,10 +44,9 @@ class IconsPicker extends StatelessWidget {
 
           return GestureDetector(
             onTap: () => onIconSelected(icon),
-            child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(6),
               child: Container(
-                width: 48,
-                height: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
@@ -56,11 +56,11 @@ class IconsPicker extends StatelessWidget {
                     width: 3,
                   ),
                 ),
-                child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
                   child: Image.asset(
                     icon,
-                    width: 28,
-                    height: 24,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),

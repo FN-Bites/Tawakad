@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/features/home/ui/widgets/pack_list/pack_list_item.dart';
-import '../../pages/pack_list.dart';
+import 'package:provider/provider.dart';
+import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
+import 'pack_list/pack_list_item.dart';
 
 class PackListCard extends StatelessWidget {
-  const PackListCard({
-    super.key,
-    required this.packList,
-    required this.onRemoveList,
-  });
-
-  final void Function(PackList packlist) onRemoveList;
-  final List<PackList> packList;
+  const PackListCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final packList = context.watch<PackListProvider>().lists;
+
     return ListView.builder(
       itemCount: packList.length,
       itemBuilder: (ctx, index) => _SwipeToDeleteItem(
-        key: ValueKey(packList[index]),
-        onDelete: () => onRemoveList(packList[index]),
+        key: ValueKey(packList[index].id),
+        onDelete: () =>
+            context.read<PackListProvider>().removeList(packList[index].id),
         child: PackListItem(packList[index]),
       ),
     );
@@ -81,9 +78,7 @@ class _SwipeToDeleteItemState extends State<_SwipeToDeleteItem>
     }
   }
 
-  void _close() {
-    _controller.animateTo(0.0, curve: Curves.easeOut);
-  }
+  void _close() => _controller.animateTo(0.0, curve: Curves.easeOut);
 
   @override
   Widget build(BuildContext context) {

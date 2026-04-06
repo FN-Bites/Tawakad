@@ -1,49 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
-
-// عدّلي المسارات حسب مكان الملفات عندك
 import 'package:tawakad_app/core/widgets/field_card.dart';
-import 'package:tawakad_app/core/widgets/toggle_button.dart';
 import 'package:tawakad_app/core/widgets/pop_up_list.dart';
 import 'package:tawakad_app/features/home/ui/widgets/colors_picker.dart';
-import 'package:tawakad_app/features/home/ui/widgets/image_name_list.dart';
 import 'package:tawakad_app/features/home/ui/widgets/icons_picker.dart';
-import 'package:tawakad_app/features/home/ui/widgets/items_list.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/favorite_button.dart';
+import 'package:tawakad_app/features/home/ui/pages/secondary_create_list_page.dart';
 
 class PrimaryCreateListPage extends StatefulWidget {
   const PrimaryCreateListPage({super.key});
 
   @override
-  State<PrimaryCreateListPage> createState() => _PrimaryCreateListPage();
+  State<PrimaryCreateListPage> createState() => _PrimaryCreateListPageState();
 }
 
-class _PrimaryCreateListPage extends State<PrimaryCreateListPage> {
+class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
   final TextEditingController _nameController = TextEditingController();
 
-  late String _selectedCreationType;
-  late String _selectedCategory;
   late String _selectedEvent;
   late Color _selectedColor;
   late String _selectedIcon;
+  bool _isFavorite = false;
+  bool _nameInvalid = false;
 
-  final List<String> _creationOptions = ['يدوي', 'تلقائي'];
-  final List<String> _categoryOptions = [
-    'المفضلة',
-    'الدراسة',
-    'العمل',
-    'السفر'
-  ];
-  final List<String> _eventOptions = ['لايوجد شيء', 'جامعة', 'موعد', 'رحلة'];
+  final List<String> _eventOptions = ['لايوجد شيء', 'برزنتشين', 'اختبار'];
 
   @override
   void initState() {
     super.initState();
-    _selectedCreationType = _creationOptions.first;
-    _selectedCategory = _categoryOptions.first;
     _selectedEvent = _eventOptions.first;
     _selectedColor = ColorPicker.colors[0];
-    _selectedIcon = "assets/Icons/list.bullet.png";
+    _selectedIcon = "assets/icons/icon_picker/1-logo.png";
   }
 
   @override
@@ -52,17 +39,26 @@ class _PrimaryCreateListPage extends State<PrimaryCreateListPage> {
     super.dispose();
   }
 
-  void _saveList() {
+  void _goToNextPage() {
     FocusScope.of(context).unfocus();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Text(
-          _nameController.text.trim().isEmpty
-              ? 'اكتبي اسم القائمة أولًا'
-              : 'تم حفظ القائمة',
-          textDirection: TextDirection.rtl,
+    final title = _nameController.text.trim();
+
+    if (title.isEmpty) {
+      setState(() => _nameInvalid = true);
+      return;
+    }
+
+    setState(() => _nameInvalid = false);
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SecondaryCreateListPage(
+          title: title,
+          iconPath: _selectedIcon,
+          color: _selectedColor,
+          isFavorite: _isFavorite,
+          event: _selectedEvent == _eventOptions.first ? null : _selectedEvent,
         ),
       ),
     );
@@ -89,108 +85,28 @@ class _PrimaryCreateListPage extends State<PrimaryCreateListPage> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.88),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 18,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      _headerCircleButton(
-                        child: const Icon(
-                          Icons.close_rounded,
-                          size: 28,
-                          color: Colors.black87,
-                        ),
-                        onTap: () => Navigator.maybePop(context),
-                        backgroundColor: const Color(0xFFF7F7F8),
-                      ),
-                      const Expanded(
-                        child: Center(
-                          child: Text(
-                            'إنشاء قائمة',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                      ),
-                      _headerCircleButton(
-                        child: const Icon(
-                          Icons.check_rounded,
-                          size: 28,
-                          color: Colors.white,
-                        ),
-                        onTap: _saveList,
-                        backgroundColor: const Color(0xFF1F8EFA),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildHeader(),
                 const SizedBox(height: 22),
-                _imageNameCard(),
+                _buildImageNameCard(),
                 const SizedBox(height: 22),
                 FieldCard(
                   gap: 14,
                   children: [
-                    PopUpList(
-                      title: 'طريقة الإنشاء',
-                      options: _creationOptions,
-                      initialValue: _selectedCreationType,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCreationType = value;
-                        });
-                      },
-                      icon: Icons.edit_rounded,
-                      circleColor: const Color(0xFFF3A754),
-                    ),
-                    PopUpList(
-                      title: 'الفئات',
-                      options: _categoryOptions,
-                      initialValue: _selectedCategory,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedCategory = value;
-                        });
-                      },
-                      icon: Icons.sell_rounded,
-                      circleColor: const Color(0xFF6B67C8),
-                    ),
-                    PopUpList(
+                    GlassPopUpList(
                       title: 'الحدث',
                       options: _eventOptions,
                       initialValue: _selectedEvent,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedEvent = value;
-                        });
-                      },
+                      onChanged: (v) => setState(() => _selectedEvent = v),
                       icon: Icons.flag_rounded,
                       circleColor: const Color(0xFFC97070),
                     ),
                   ],
                 ),
                 const SizedBox(height: 22),
-                _colorsCard(),
+                _buildColorsCard(),
                 const SizedBox(height: 22),
-                _iconsCard(),
+                _buildIconsCard(),
                 const SizedBox(height: 24),
-                AppLiquidButtons.primary(
-                  label: 'إنشاء القائمة',
-                  onPressed: _saveList,
-                ),
               ],
             ),
           ),
@@ -199,7 +115,88 @@ class _PrimaryCreateListPage extends State<PrimaryCreateListPage> {
     );
   }
 
-  Widget _imageNameCard() {
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Text(
+            'إنشاء قائمة',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _circleButton(
+                child: const CustomPaint(
+                  size: Size(22, 22),
+                  painter: BoldIconPainter(
+                    icon: Icons.close_rounded,
+                    color: Colors.black87,
+                    size: 22,
+                    strokeExtra: 1.2,
+                  ),
+                ),
+                onTap: () => Navigator.maybePop(context),
+                backgroundColor: const Color(0xFFF0F0F3),
+              ),
+              Row(
+                children: [
+                  FavoriteToggleButton(
+                    isFavorite: _isFavorite,
+                    onToggle: () => setState(() => _isFavorite = !_isFavorite),
+                  ),
+                  const SizedBox(width: 10),
+                  _circleButton(
+                    child: const CustomPaint(
+                      size: Size(22, 22),
+                      painter: BoldIconPainter(
+                        icon: Icons.check,
+                        color: Colors.white,
+                        size: 22,
+                        strokeExtra: 1.2,
+                      ),
+                    ),
+                    onTap: _goToNextPage,
+                    backgroundColor: const Color(0xFF1F8EFA),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _circleButton({
+    required Widget child,
+    required VoidCallback onTap,
+    required Color backgroundColor,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.07),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Center(child: child),
+      ),
+    );
+  }
+
+  Widget _buildImageNameCard() {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -228,74 +225,103 @@ class _PrimaryCreateListPage extends State<PrimaryCreateListPage> {
               ],
             ),
             child: CircleAvatar(
-              radius: 54,
+              radius: 72,
               backgroundColor: _selectedColor,
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: Image.asset(
                   _selectedIcon,
-                  width: 56,
-                  height: 56,
+                  width: 80,
+                  height: 80,
                   fit: BoxFit.contain,
                   color: Colors.white,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.list_alt_rounded,
-                      color: Colors.white,
-                      size: 46,
-                    );
-                  },
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.list_alt_rounded,
+                    color: Colors.white,
+                    size: 56,
+                  ),
                 ),
               ),
             ),
           ),
           const SizedBox(height: 24),
-          TextField(
-            controller: _nameController,
-            textAlign: TextAlign.center,
-            textDirection: TextDirection.rtl,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
-            ),
-            decoration: InputDecoration(
-              hintText: 'اسم القائمة',
-              hintTextDirection: TextDirection.rtl,
-              hintStyle: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFB2B2B8),
-              ),
-              filled: true,
-              fillColor: const Color(0xFFE7E7EA),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 18,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(
-                  color: _selectedColor.withOpacity(0.75),
-                  width: 1.5,
+          Column(
+            children: [
+              TextField(
+                controller: _nameController,
+                textAlign: TextAlign.center,
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+                onChanged: (_) {
+                  if (_nameInvalid) setState(() => _nameInvalid = false);
+                },
+                decoration: InputDecoration(
+                  hintText: 'اسم القائمة',
+                  hintTextDirection: TextDirection.rtl,
+                  hintStyle: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFB2B2B8),
+                  ),
+                  filled: true,
+                  fillColor: _nameInvalid
+                      ? const Color(0xFFFFECEC)
+                      : const Color(0xFFE7E7EA),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 18,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: _nameInvalid
+                        ? const BorderSide(color: Color(0xFFE53935), width: 1.5)
+                        : BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide(
+                      color: _nameInvalid
+                          ? const Color(0xFFE53935)
+                          : _selectedColor.withOpacity(0.75),
+                      width: 1.5,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              if (_nameInvalid) ...[
+                const SizedBox(height: 6),
+                const Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Text(
+                      'الرجاء ادخال اسم القائمة',
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _colorsCard() {
+  Widget _buildColorsCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
@@ -312,16 +338,12 @@ class _PrimaryCreateListPage extends State<PrimaryCreateListPage> {
       ),
       child: ColorPicker(
         selectedColor: _selectedColor,
-        onColorSelected: (color) {
-          setState(() {
-            _selectedColor = color;
-          });
-        },
+        onColorSelected: (c) => setState(() => _selectedColor = c),
       ),
     );
   }
 
-  Widget _iconsCard() {
+  Widget _buildIconsCard() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 18, 14, 18),
@@ -343,31 +365,8 @@ class _PrimaryCreateListPage extends State<PrimaryCreateListPage> {
         ),
         child: IconsPicker(
           selectedIcon: _selectedIcon,
-          onIconSelected: (iconPath) {
-            setState(() {
-              _selectedIcon = iconPath;
-            });
-          },
+          onIconSelected: (p) => setState(() => _selectedIcon = p),
         ),
-      ),
-    );
-  }
-
-  Widget _headerCircleButton({
-    required Widget child,
-    required VoidCallback onTap,
-    required Color backgroundColor,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 54,
-        height: 54,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          shape: BoxShape.circle,
-        ),
-        child: Center(child: child),
       ),
     );
   }

@@ -106,7 +106,7 @@ class _BoldIconBuilder extends StatelessWidget {
         color ?? (isDark ? AppDarkColors.icon : AppColors.icon);
     return CustomPaint(
       size: Size(size, size),
-      painter: _BoldIconPainter(
+      painter: BoldIconPainter(
         icon: icon,
         color: resolvedColor,
         size: size,
@@ -216,7 +216,7 @@ class _PrimaryGlass extends StatelessWidget {
                 fontFamily: 'Montserrat',
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: Colors.white, // always white on blue
+                color: Colors.white,
               ),
             ),
           ),
@@ -493,13 +493,14 @@ class _GlassRimPainter extends CustomPainter {
       old.borderRadius != borderRadius;
 }
 
-class _BoldIconPainter extends CustomPainter {
+// ─── Public so it can be used outside this file ───────────────────────────
+class BoldIconPainter extends CustomPainter {
   final IconData icon;
   final Color color;
   final double size;
   final double strokeExtra;
 
-  const _BoldIconPainter({
+  const BoldIconPainter({
     required this.icon,
     required this.color,
     required this.size,
@@ -527,7 +528,7 @@ class _BoldIconPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BoldIconPainter old) =>
+  bool shouldRepaint(BoldIconPainter old) =>
       old.icon != icon ||
       old.color != color ||
       old.size != size ||

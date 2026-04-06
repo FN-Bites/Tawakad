@@ -1,215 +1,204 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_overlays.dart';
 
-class PopUpList extends StatefulWidget {
-  const PopUpList({
+class GlassPopUpList extends StatefulWidget {
+  final String title;
+  final List<String> options;
+  final String initialValue;
+  final ValueChanged<String> onChanged;
+  final IconData icon;
+  final Color circleColor;
+
+  const GlassPopUpList({
     super.key,
     required this.title,
     required this.options,
     required this.initialValue,
     required this.onChanged,
-    this.icon,
-    this.imagePath,
-    this.iconColor = Colors.white,
-    this.circleColor = const Color(0xFF3C8EFF),
+    required this.icon,
+    required this.circleColor,
   });
 
-  final String title;
-  final List<String> options;
-  final String initialValue;
-  final ValueChanged<String> onChanged;
-  final IconData? icon;
-  final String? imagePath;
-  final Color iconColor;
-  final Color circleColor;
-
   @override
-  State<PopUpList> createState() => _PopUpListState();
+  State<GlassPopUpList> createState() => _GlassPopUpListState();
 }
 
-class _PopUpListState extends State<PopUpList> {
-  late String selectedValue;
-  MenuController? _menuController;
+class _GlassPopUpListState extends State<GlassPopUpList>
+    with SingleTickerProviderStateMixin {
+  final LayerLink _layerLink = LayerLink();
+  OverlayEntry? _overlayEntry;
+  bool _isOpen = false;
 
-  bool get isMenuOpen => _menuController?.isOpen ?? false;
-  bool get _hasLeadingVisual => widget.icon != null || widget.imagePath != null;
+  late AnimationController _animCtrl;
+  late Animation<double> _progress;
 
   @override
   void initState() {
     super.initState();
-    selectedValue = widget.initialValue;
+    _animCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _progress = CurvedAnimation(parent: _animCtrl, curve: Curves.easeOutCubic);
+  }
+
+  @override
+  void dispose() {
+    _removeOverlay();
+    _animCtrl.dispose();
+    super.dispose();
+  }
+
+  void _toggle() => _isOpen ? _close() : _open();
+
+  void _open() {
+    _overlayEntry = _buildOverlay();
+    Overlay.of(context).insert(_overlayEntry!);
+    _animCtrl.forward(from: 0);
+    if (mounted) setState(() => _isOpen = true);
+  }
+
+  Future<void> _close() async {
+    await _animCtrl.reverse();
+    _removeOverlay();
+    if (mounted) setState(() => _isOpen = false);
+  }
+
+  void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+
+  void _select(int index) {
+    widget.onChanged(widget.options[index]);
+    _close();
+  }
+
+  OverlayEntry _buildOverlay() {
+    final renderBox = context.findRenderObject() as RenderBox;
+    final rowWidth = renderBox.size.width;
+
+    return OverlayEntry(
+      builder: (_) => Stack(
+        children: [
+          // Transparent dismiss barrier
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: _close,
+              behavior: HitTestBehavior.translucent,
+              child: const SizedBox.expand(),
+            ),
+          ),
+          // Dropdown anchored below the row
+          Positioned(
+            width: rowWidth,
+            child: CompositedTransformFollower(
+              link: _layerLink,
+              showWhenUnlinked: false,
+              offset: const Offset(0, 8),
+              child: FadeTransition(
+                opacity: _progress,
+                child: ScaleTransition(
+                  scale: Tween(begin: 0.90, end: 1.0).animate(_progress),
+                  alignment: Alignment.topCenter,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: AppGlassDropdown(
+                        items: widget.options
+                            .map((o) => GlassDropdownItem(label: o))
+                            .toList(),
+                        selectedIndex: widget.options
+                            .indexOf(widget.initialValue)
+                            .clamp(0, widget.options.length - 1),
+                        accentColor: widget.circleColor,
+                        onItemTap: _select,
+                        header: Row(
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: widget.circleColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(widget.icon,
+                                  color: Colors.white, size: 13),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              widget.title,
+                              style: const TextStyle(
+                                fontFamily: 'Montserrat',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: MenuAnchor(
-        controller: _menuController,
-        builder: (context, controller, child) {
-          _menuController = controller;
-
-          return GestureDetector(
-            onTap: () => isMenuOpen ? controller.close() : controller.open(),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              height: 76,
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+    return CompositedTransformTarget(
+      link: _layerLink,
+      child: GestureDetector(
+        onTap: _toggle,
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          children: [
+            Container(
+              width: 38,
+              height: 38,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(28),
-                color: isMenuOpen
-                    ? widget.circleColor.withOpacity(0.15)
-                    : Colors.white.withOpacity(0.55),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(isMenuOpen ? 0.12 : 0.06),
-                    blurRadius: isMenuOpen ? 20 : 14,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-                border: Border.all(
-                  color: isMenuOpen ? widget.circleColor : Colors.transparent,
-                  width: isMenuOpen ? 2 : 0,
-                ),
+                color: widget.circleColor,
+                shape: BoxShape.circle,
               ),
-              child: Row(
-                textDirection: TextDirection.rtl,
-                children: [
-                  if (_hasLeadingVisual) ...[
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isMenuOpen
-                            ? widget.circleColor.withOpacity(0.8)
-                            : widget.circleColor.withOpacity(0.9),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black
-                                .withOpacity(isMenuOpen ? 0.2 : 0.1),
-                            blurRadius: isMenuOpen ? 12 : 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: widget.imagePath != null
-                            ? Image.asset(
-                                widget.imagePath!,
-                                width: 20,
-                                height: 20,
-                                color: widget.iconColor,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(
-                                    widget.icon ??
-                                        Icons.image_not_supported_outlined,
-                                    color: widget.iconColor,
-                                    size: 20,
-                                  );
-                                },
-                              )
-                            : Icon(
-                                widget.icon!,
-                                color: widget.iconColor,
-                                size: 22,
-                              ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w700,
-                      color: isMenuOpen ? Colors.black : Colors.black87,
-                    ),
-                    child: Text(widget.title),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AnimatedDefaultTextStyle(
-                      duration: const Duration(milliseconds: 200),
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w500,
-                        color: isMenuOpen
-                            ? Colors.black87
-                            : const Color(0xFF8E8E93),
-                      ),
-                      child: Text(
-                        selectedValue,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isMenuOpen
-                          ? widget.circleColor.withOpacity(0.25)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      isMenuOpen
-                          ? Icons.keyboard_arrow_up_rounded
-                          : Icons.keyboard_arrow_down_rounded,
-                      size: 20,
-                      color:
-                          isMenuOpen ? Colors.white : const Color(0xFF1C1C1E),
-                    ),
-                  ),
-                ],
+              child: Icon(widget.icon, color: Colors.white, size: 19),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              widget.title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
               ),
             ),
-          );
-        },
-        menuChildren: widget.options.map((option) {
-          final selected = option == selectedValue;
-
-          return MenuItemButton(
-            onPressed: () {
-              setState(() => selectedValue = option);
-              widget.onChanged(option);
-              _menuController?.close();
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              child: Row(
-                textDirection: TextDirection.rtl,
-                children: [
-                  Expanded(
-                    child: Text(
-                      option,
-                      textAlign: TextAlign.right,
-                      style: TextStyle(
-                        fontSize: 17,
-                        color: selected ? Colors.black : Colors.black87,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  if (selected) ...[
-                    const SizedBox(width: 10),
-                    Icon(
-                      Icons.check_rounded,
-                      size: 20,
-                      color: widget.circleColor,
-                    ),
-                  ],
-                ],
+            const Spacer(),
+            Text(
+              widget.initialValue,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFFAAAAAA),
               ),
             ),
-          );
-        }).toList(),
+            const SizedBox(width: 6),
+            AnimatedRotation(
+              turns: _isOpen ? 0.5 : 0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              child: const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: Color(0xFFAAAAAA),
+                size: 20,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

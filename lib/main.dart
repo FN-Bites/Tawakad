@@ -10,8 +10,7 @@ import 'features/signUp/providers/signup_flow_provider.dart';
 import 'features/signUp/providers/verifyEmail_flow_provider.dart';
 import 'package:tawakad_app/features/signIn/providers/signIn_flow_provider.dart';
 import 'features/signIn/providers/forgotPassword_flow_provider.dart';
-import 'features/home/ui/pages/primary_create_list_page.dart';
-import 'features/home/ui/pages/detail_create_list_page.dart';
+import 'features/home/provider/pack_list_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +35,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => ForgotPasswordFlowProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PackListProvider(),
         ),
       ],
       child: const TawakadApp(),
