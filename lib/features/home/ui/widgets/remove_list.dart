@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_overlays.dart';
 import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 import 'pack_list/pack_list_item.dart';
 
@@ -80,6 +81,31 @@ class _SwipeToDeleteItemState extends State<_SwipeToDeleteItem>
 
   void _close() => _controller.animateTo(0.0, curve: Curves.easeOut);
 
+  Future<void> _confirmDelete() async {
+    _close();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.35),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+        child: AppGlassDialog(
+          title: 'حذف القائمة',
+          message: 'هل أنت متأكد أنك تريد حذف هذه القائمة؟',
+          primaryLabel: 'حذف',
+          secondaryLabel: 'إلغاء',
+          isPrimaryDestructive: true,
+          onPrimaryPressed: () => Navigator.pop(ctx, true),
+          onSecondaryPressed: () => Navigator.pop(ctx, false),
+        ),
+      ),
+    );
+
+    if (confirmed == true) widget.onDelete();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -97,10 +123,7 @@ class _SwipeToDeleteItemState extends State<_SwipeToDeleteItem>
                 width: _buttonSize,
                 height: _buttonSize,
                 child: GestureDetector(
-                  onTap: () {
-                    _close();
-                    widget.onDelete();
-                  },
+                  onTap: _confirmDelete,
                   child: Container(
                     decoration: const BoxDecoration(
                       color: Color.fromARGB(255, 255, 0, 0),

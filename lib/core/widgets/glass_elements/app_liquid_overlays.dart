@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 
+// ─── Dropdown model ────────────────────────────────────────────────────────
+
 class GlassDropdownItem {
   final String label;
   final Widget? leadingIcon;
@@ -15,6 +17,8 @@ class GlassDropdownItem {
     this.enabled = true,
   });
 }
+
+// ─── Dropdown ──────────────────────────────────────────────────────────────
 
 class AppGlassDropdown extends StatelessWidget {
   final List<GlassDropdownItem> items;
@@ -207,6 +211,294 @@ class _GlassDropdownRowState extends State<_GlassDropdownRow>
       );
 }
 
+// ─── Dialog ────────────────────────────────────────────────────────────────
+
+class AppGlassDialog extends StatelessWidget {
+  final String title;
+  final String message;
+
+  final String primaryLabel;
+  final String secondaryLabel;
+
+  final VoidCallback? onPrimaryPressed;
+  final VoidCallback? onSecondaryPressed;
+
+  final bool isPrimaryDestructive;
+  final Color primaryDestructiveColor;
+
+  final TextStyle? titleStyle;
+  final TextStyle? messageStyle;
+
+  const AppGlassDialog({
+    super.key,
+    required this.title,
+    required this.message,
+    required this.primaryLabel,
+    required this.secondaryLabel,
+    this.onPrimaryPressed,
+    this.onSecondaryPressed,
+    this.isPrimaryDestructive = false,
+    this.primaryDestructiveColor = const Color(0xFFD93025),
+    this.titleStyle,
+    this.messageStyle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final dialogTint = isDark
+        ? const Color(0xFF1A2E2C).withOpacity(0.55)
+        : const Color(0xFFD6F0EC).withOpacity(0.68);
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 32,
+            spreadRadius: 0,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(26),
+        child: Stack(
+          children: [
+            // Blur
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 22, sigmaY: 22),
+                child: const SizedBox.expand(),
+              ),
+            ),
+
+            // Tint
+            Positioned.fill(
+              child: Container(color: dialogTint),
+            ),
+
+            // Top shimmer
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 12,
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withOpacity(0.38),
+                      Colors.white.withOpacity(0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Rim
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _GlassRimPainter(
+                  borderRadius: 26,
+                  topColor: isDark
+                      ? Colors.white.withOpacity(0.18)
+                      : Colors.white.withOpacity(0.72),
+                  bottomColor: isDark
+                      ? Colors.white.withOpacity(0.04)
+                      : Colors.white.withOpacity(0.22),
+                ),
+              ),
+            ),
+
+            // Content
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 32, 22, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: titleStyle ??
+                        TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF0D1A18),
+                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: messageStyle ??
+                        TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          height: 1.55,
+                          color: isDark
+                              ? Colors.white.withOpacity(0.60)
+                              : const Color(0xFF2E5550).withOpacity(0.72),
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _GlassPillButton(
+                          label: secondaryLabel,
+                          textColor:
+                              isDark ? Colors.white : const Color(0xFF0D1A18),
+                          onPressed: onSecondaryPressed,
+                          isDark: isDark,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _GlassPillButton(
+                          label: primaryLabel,
+                          textColor: isPrimaryDestructive
+                              ? primaryDestructiveColor
+                              : AppColors.primary,
+                          onPressed: onPrimaryPressed,
+                          isDark: isDark,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Glass pill button ─────────────────────────────────────────────────────
+
+class _GlassPillButton extends StatefulWidget {
+  final String label;
+  final Color textColor;
+  final VoidCallback? onPressed;
+  final bool isDark;
+
+  const _GlassPillButton({
+    required this.label,
+    required this.textColor,
+    required this.onPressed,
+    required this.isDark,
+  });
+
+  @override
+  State<_GlassPillButton> createState() => _GlassPillButtonState();
+}
+
+class _GlassPillButtonState extends State<_GlassPillButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+  bool _pressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 110));
+    _scale = Tween(begin: 1.0, end: 0.95)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pillTint = widget.isDark
+        ? Colors.white.withOpacity(0.08)
+        : Colors.white.withOpacity(0.36);
+
+    final pressedOverlay = widget.isDark
+        ? Colors.white.withOpacity(0.06)
+        : Colors.black.withOpacity(0.05);
+
+    return GestureDetector(
+      onTapDown: (_) {
+        setState(() => _pressed = true);
+        _ctrl.forward();
+      },
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        _ctrl.reverse();
+        widget.onPressed?.call();
+      },
+      onTapCancel: () {
+        setState(() => _pressed = false);
+        _ctrl.reverse();
+      },
+      child: ScaleTransition(
+        scale: _scale,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(50),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                  child: const SizedBox.expand(),
+                ),
+              ),
+              Positioned.fill(
+                child: Container(color: pillTint),
+              ),
+              if (_pressed)
+                Positioned.fill(
+                  child: Container(color: pressedOverlay),
+                ),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _GlassRimPainter(
+                    borderRadius: 50,
+                    topColor:
+                        Colors.white.withOpacity(widget.isDark ? 0.14 : 0.55),
+                    bottomColor:
+                        Colors.white.withOpacity(widget.isDark ? 0.03 : 0.14),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 46,
+                child: Center(
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: widget.textColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Subtle divider ────────────────────────────────────────────────────────
 
 class _GlassDivider extends StatelessWidget {
@@ -225,270 +517,26 @@ class _GlassDivider extends StatelessWidget {
   }
 }
 
-class AppGlassDialog extends StatelessWidget {
-  final String title;
-  final String message;
-  final Widget? icon;
-
-  final String primaryLabel;
-  final String secondaryLabel;
-
-  final VoidCallback? onPrimaryPressed;
-  final VoidCallback? onSecondaryPressed;
-
-  /// When true the primary button uses [primaryDestructiveColor] as its tint.
-  final bool isPrimaryDestructive;
-
-  /// Override the destructive accent. Defaults to a red tone.
-  final Color primaryDestructiveColor;
-
-  /// Title text style override.
-  final TextStyle? titleStyle;
-
-  /// Body text style override.
-  final TextStyle? messageStyle;
-
-  const AppGlassDialog({
-    super.key,
-    required this.title,
-    required this.message,
-    required this.primaryLabel,
-    required this.secondaryLabel,
-    this.icon,
-    this.onPrimaryPressed,
-    this.onSecondaryPressed,
-    this.isPrimaryDestructive = false,
-    this.primaryDestructiveColor = const Color(0xFFE53935),
-    this.titleStyle,
-    this.messageStyle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.40 : 0.14),
-            blurRadius: 50,
-            spreadRadius: 0,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
-        child: _GlassFill(
-          pressed: false,
-          borderRadius: 28,
-          tint: isDark
-              ? const Color(0xFF1A2E2C).withOpacity(0.60)
-              : const Color(0xFFDEF5F2).withOpacity(0.72),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ── Icon ──────────────────────────────────────────────────
-                if (icon != null) ...[
-                  icon!,
-                  const SizedBox(height: 14),
-                ],
-                // ── Title ─────────────────────────────────────────────────
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: titleStyle ??
-                      TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? AppDarkColors.textPrimary
-                            : AppColors.textPrimary,
-                      ),
-                ),
-                const SizedBox(height: 10),
-                // ── Message ───────────────────────────────────────────────
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: messageStyle ??
-                      TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        height: 1.55,
-                        color: isDark
-                            ? AppDarkColors.textPrimary.withOpacity(0.65)
-                            : AppColors.textPrimary.withOpacity(0.60),
-                      ),
-                ),
-                const SizedBox(height: 26),
-                // ── Buttons ───────────────────────────────────────────────
-                Row(
-                  children: [
-                    // Secondary (left in RTL = visually right, cancel-like)
-                    Expanded(
-                      child: _DialogGlassButton(
-                        label: secondaryLabel,
-                        onPressed: onSecondaryPressed,
-                        tint: null,
-                        isDark: isDark,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Primary
-                    Expanded(
-                      child: _DialogGlassButton(
-                        label: primaryLabel,
-                        onPressed: onPrimaryPressed,
-                        tint: isPrimaryDestructive
-                            ? primaryDestructiveColor
-                            : AppColors.primary,
-                        isDark: isDark,
-                        isAccent: true,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Dialog button ─────────────────────────────────────────────────────────
-
-class _DialogGlassButton extends StatefulWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final Color? tint;
-  final bool isDark;
-  final bool isAccent;
-
-  const _DialogGlassButton({
-    required this.label,
-    required this.onPressed,
-    required this.tint,
-    required this.isDark,
-    this.isAccent = false,
-  });
-
-  @override
-  State<_DialogGlassButton> createState() => _DialogGlassButtonState();
-}
-
-class _DialogGlassButtonState extends State<_DialogGlassButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _ctrl;
-  late Animation<double> _scale;
-  bool _pressed = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 120));
-    _scale = Tween(begin: 1.0, end: 0.95)
-        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final labelColor = widget.isAccent
-        ? Colors.white
-        : (widget.isDark ? AppDarkColors.textPrimary : AppColors.textPrimary);
-
-    return GestureDetector(
-      onTapDown: (_) {
-        setState(() => _pressed = true);
-        _ctrl.forward();
-      },
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        _ctrl.reverse();
-        widget.onPressed?.call();
-      },
-      onTapCancel: () {
-        setState(() => _pressed = false);
-        _ctrl.reverse();
-      },
-      child: ScaleTransition(
-        scale: _scale,
-        child: Container(
-          height: 48,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: (widget.tint ?? Colors.black)
-                    .withOpacity(widget.isAccent ? 0.28 : 0.06),
-                blurRadius: 16,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: _GlassFill(
-              pressed: _pressed,
-              borderRadius: 24,
-              tint: widget.tint != null
-                  ? widget.tint!.withOpacity(widget.isDark ? 0.65 : 0.80)
-                  : null,
-              child: Center(
-                child: Text(
-                  widget.label,
-                  style: TextStyle(
-                    fontFamily: 'Montserrat',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: labelColor,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// ─── Glass fill (used by dropdown) ────────────────────────────────────────
 
 class _GlassFill extends StatelessWidget {
   final bool pressed;
   final double borderRadius;
   final Widget child;
-  final Color? tint;
 
   const _GlassFill({
     required this.pressed,
     required this.borderRadius,
     required this.child,
-    this.tint,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final resolvedTint = tint ??
-        (isDark
-            ? AppDarkColors.surface.withOpacity(0.55)
-            : AppColors.surface.withOpacity(0.62));
+    final resolvedTint = isDark
+        ? AppDarkColors.surface.withOpacity(0.55)
+        : AppColors.surface.withOpacity(0.62);
 
     final rimTop = isDark
         ? Colors.white.withOpacity(0.18)
@@ -504,18 +552,15 @@ class _GlassFill extends StatelessWidget {
 
     return Stack(
       children: [
-        // Blur
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: const SizedBox.expand(),
           ),
         ),
-        // Tint
         Positioned.fill(
           child: Container(color: resolvedTint),
         ),
-        // Top shimmer
         Positioned(
           top: 0,
           left: 0,
@@ -531,7 +576,6 @@ class _GlassFill extends StatelessWidget {
             ),
           ),
         ),
-        // Rim
         Positioned.fill(
           child: CustomPaint(
             painter: _GlassRimPainter(
@@ -541,7 +585,6 @@ class _GlassFill extends StatelessWidget {
             ),
           ),
         ),
-        // Press overlay
         if (pressed)
           Positioned.fill(
             child: Container(
@@ -555,6 +598,8 @@ class _GlassFill extends StatelessWidget {
     );
   }
 }
+
+// ─── Shared rim painter ────────────────────────────────────────────────────
 
 class _GlassRimPainter extends CustomPainter {
   final double borderRadius;
