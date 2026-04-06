@@ -10,6 +10,7 @@ class PackList {
   final String iconPath;
   final int colorValue;
   final List<String> items;
+  final Set<int> checkedIndices;
   final DateTime? date;
   final String? time;
   final String? event;
@@ -17,7 +18,6 @@ class PackList {
   final List<int> repeatDays;
   final bool isShared;
   final DateTime createdAt;
-  final DateTime updatedAt;
   final bool isFavorite;
 
   const PackList({
@@ -27,6 +27,7 @@ class PackList {
     required this.iconPath,
     required this.colorValue,
     required this.items,
+    this.checkedIndices = const {},
     this.date,
     this.time,
     this.event,
@@ -34,7 +35,6 @@ class PackList {
     this.repeatDays = const [],
     this.isShared = false,
     required this.createdAt,
-    required this.updatedAt,
     this.isFavorite = false,
   });
 
@@ -47,6 +47,7 @@ class PackList {
     required String iconPath,
     required Color color,
     List<String> items = const [],
+    Set<int> checkedIndices = const {},
     DateTime? date,
     String? time,
     String? event,
@@ -63,6 +64,7 @@ class PackList {
       iconPath: iconPath,
       colorValue: color.value,
       items: items,
+      checkedIndices: checkedIndices,
       date: date,
       time: time,
       event: event,
@@ -70,7 +72,6 @@ class PackList {
       repeatDays: repeatDays,
       isShared: isShared,
       createdAt: now,
-      updatedAt: now,
       isFavorite: isFavorite,
     );
   }
@@ -80,6 +81,7 @@ class PackList {
     String? iconPath,
     int? colorValue,
     List<String>? items,
+    Set<int>? checkedIndices,
     DateTime? date,
     String? time,
     String? event,
@@ -95,6 +97,7 @@ class PackList {
       iconPath: iconPath ?? this.iconPath,
       colorValue: colorValue ?? this.colorValue,
       items: items ?? this.items,
+      checkedIndices: checkedIndices ?? this.checkedIndices,
       date: date ?? this.date,
       time: time ?? this.time,
       event: event ?? this.event,
@@ -102,7 +105,6 @@ class PackList {
       repeatDays: repeatDays ?? this.repeatDays,
       isShared: isShared ?? this.isShared,
       createdAt: createdAt,
-      updatedAt: DateTime.now(),
       isFavorite: isFavorite ?? this.isFavorite,
     );
   }
@@ -115,6 +117,7 @@ class PackList {
       'iconPath': iconPath,
       'colorValue': colorValue,
       'items': items,
+      'checkedIndices': checkedIndices.toList(),
       'date': date?.toIso8601String(),
       'time': time,
       'event': event,
@@ -122,7 +125,6 @@ class PackList {
       'repeatDays': repeatDays,
       'isShared': isShared,
       'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
       'isFavorite': isFavorite,
     };
   }
@@ -135,6 +137,9 @@ class PackList {
       iconPath: map['iconPath'] as String,
       colorValue: map['colorValue'] as int,
       items: List<String>.from(map['items'] as List),
+      checkedIndices: map['checkedIndices'] != null
+          ? Set<int>.from(map['checkedIndices'] as List)
+          : {},
       date: map['date'] != null ? DateTime.parse(map['date'] as String) : null,
       time: map['time'] as String?,
       event: map['event'] as String?,
@@ -144,7 +149,6 @@ class PackList {
           : [],
       isShared: map['isShared'] as bool? ?? false,
       createdAt: DateTime.parse(map['createdAt'] as String),
-      updatedAt: DateTime.parse(map['updatedAt'] as String),
       isFavorite: map['isFavorite'] as bool? ?? false,
     );
   }

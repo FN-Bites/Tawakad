@@ -3,7 +3,18 @@ import 'package:tawakad_app/core/widgets/toggle_button.dart';
 import 'day_of_week_selector.dart';
 
 class DateTimeCard extends StatefulWidget {
-  const DateTimeCard({super.key});
+  final DateTime? initialDate;
+  final String? initialTime;
+  final bool initialRepeat;
+  final List<int> initialRepeatDays;
+
+  const DateTimeCard({
+    super.key,
+    this.initialDate,
+    this.initialTime,
+    this.initialRepeat = false,
+    this.initialRepeatDays = const [],
+  });
 
   @override
   State<DateTimeCard> createState() => DateTimeCardState();
@@ -18,12 +29,36 @@ class DateTimeCardState extends State<DateTimeCard> {
   TimeOfDay? _selectedTime;
   List<int> _selectedDays = [];
 
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialDate != null) {
+      _selectedDate = widget.initialDate;
+      _dateEnabled = true;
+    }
+
+    if (widget.initialTime != null) {
+      final parts = widget.initialTime!.split(':');
+      if (parts.length == 2) {
+        final hour = int.tryParse(parts[0]);
+        final minute = int.tryParse(parts[1]);
+        if (hour != null && minute != null) {
+          _selectedTime = TimeOfDay(hour: hour, minute: minute);
+          _timeEnabled = true;
+        }
+      }
+    }
+
+    if (widget.initialRepeat) {
+      _repeatEnabled = true;
+      _selectedDays = List<int>.from(widget.initialRepeatDays);
+    }
+  }
+
   DateTime? get selectedDate => _dateEnabled ? _selectedDate : null;
-
   TimeOfDay? get selectedTime => _timeEnabled ? _selectedTime : null;
-
   bool get repeatEnabled => _repeatEnabled;
-
   List<int> get selectedDays =>
       _repeatEnabled ? List<int>.unmodifiable(_selectedDays) : [];
 
@@ -61,12 +96,18 @@ class DateTimeCardState extends State<DateTimeCard> {
     return '${weekdays[date.weekday - 1]}، ${date.day} ${months[date.month - 1]} ${date.year}';
   }
 
+  String _formatTimeOfDay(TimeOfDay t) {
+    final h = t.hour.toString().padLeft(2, '0');
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
   Future<void> _onDateToggled(bool value) async {
     setState(() => _dateEnabled = value);
     if (!value) return;
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
@@ -78,7 +119,7 @@ class DateTimeCardState extends State<DateTimeCard> {
     if (!value) return;
     final picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: _selectedTime ?? TimeOfDay.now(),
     );
     if (picked != null) setState(() => _selectedTime = picked);
   }
@@ -124,7 +165,7 @@ class DateTimeCardState extends State<DateTimeCard> {
             value: _timeEnabled,
             onChanged: _onTimeToggled,
             subtitle: _timeEnabled && _selectedTime != null
-                ? _selectedTime!.format(context)
+                ? _formatTimeOfDay(_selectedTime!)
                 : null,
           ),
           const Divider(height: 1, color: Color(0xFFF0F0F3)),

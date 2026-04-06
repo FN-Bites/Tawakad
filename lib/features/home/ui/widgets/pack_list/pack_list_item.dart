@@ -1,7 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/features/home/model/pack_list.dart';
 import '../buttons/pack_list_item_count_button.dart';
+import 'package:tawakad_app/features/home/ui/pages/pack_list_items_page.dart';
 
 class PackListItem extends StatelessWidget {
   const PackListItem(this.packlist, {super.key});
@@ -85,7 +85,14 @@ class PackListItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            PackListItemCountButton(itemCount: packlist.itemCount),
+            PackListItemCountButton(
+              itemCount: packlist.itemCount,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PackListItemsPage(listId: packlist.id),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -98,11 +105,6 @@ class PackListItem extends StatelessWidget {
     }
 
     final parts = <String>[];
-
-    if (packlist.date != null) {
-      final d = packlist.date!;
-      parts.add('${d.year}/${d.month}/${d.day}');
-    }
 
     if (packlist.time != null) {
       parts.add(packlist.time!);

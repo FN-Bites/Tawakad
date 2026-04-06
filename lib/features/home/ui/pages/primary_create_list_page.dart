@@ -5,10 +5,13 @@ import 'package:tawakad_app/core/widgets/pop_up_list.dart';
 import 'package:tawakad_app/features/home/ui/widgets/colors_picker.dart';
 import 'package:tawakad_app/features/home/ui/widgets/icons_picker.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/favorite_button.dart';
+import 'package:tawakad_app/features/home/model/pack_list.dart';
 import 'package:tawakad_app/features/home/ui/pages/secondary_create_list_page.dart';
 
 class PrimaryCreateListPage extends StatefulWidget {
-  const PrimaryCreateListPage({super.key});
+  final PackList? existing;
+
+  const PrimaryCreateListPage({super.key, this.existing});
 
   @override
   State<PrimaryCreateListPage> createState() => _PrimaryCreateListPageState();
@@ -20,7 +23,7 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
   late String _selectedEvent;
   late Color _selectedColor;
   late String _selectedIcon;
-  bool _isFavorite = false;
+  late bool _isFavorite;
   bool _nameInvalid = false;
 
   final List<String> _eventOptions = ['لايوجد شيء', 'برزنتشين', 'اختبار'];
@@ -28,9 +31,21 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
   @override
   void initState() {
     super.initState();
-    _selectedEvent = _eventOptions.first;
-    _selectedColor = ColorPicker.colors[0];
-    _selectedIcon = "assets/icons/icon_picker/1-logo.png";
+    final e = widget.existing;
+    if (e != null) {
+      _nameController.text = e.title;
+      _selectedColor = e.color;
+      _selectedIcon = e.iconPath;
+      _isFavorite = e.isFavorite;
+      _selectedEvent = (e.event != null && _eventOptions.contains(e.event))
+          ? e.event!
+          : _eventOptions.first;
+    } else {
+      _selectedEvent = _eventOptions.first;
+      _selectedColor = ColorPicker.colors[0];
+      _selectedIcon = "assets/icons/icon_picker/1-logo.png";
+      _isFavorite = false;
+    }
   }
 
   @override
@@ -41,14 +56,11 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
 
   void _goToNextPage() {
     FocusScope.of(context).unfocus();
-
     final title = _nameController.text.trim();
-
     if (title.isEmpty) {
       setState(() => _nameInvalid = true);
       return;
     }
-
     setState(() => _nameInvalid = false);
 
     Navigator.of(context).push(
@@ -59,6 +71,7 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
           color: _selectedColor,
           isFavorite: _isFavorite,
           event: _selectedEvent == _eventOptions.first ? null : _selectedEvent,
+          existing: widget.existing,
         ),
       ),
     );
@@ -122,7 +135,7 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
         alignment: Alignment.center,
         children: [
           Text(
-            'إنشاء قائمة',
+            widget.existing != null ? 'تعديل القائمة' : 'إنشاء قائمة',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           Row(
@@ -301,7 +314,7 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                 const Align(
                   alignment: Alignment.centerRight,
                   child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
+                    padding: EdgeInsets.only(right: 8),
                     child: Text(
                       'الرجاء ادخال اسم القائمة',
                       textDirection: TextDirection.rtl,

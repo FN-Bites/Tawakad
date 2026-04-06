@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tawakad_app/features/home/model/pack_list.dart';
 import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
@@ -13,6 +14,7 @@ class SecondaryCreateListPage extends StatefulWidget {
   final Color color;
   final bool isFavorite;
   final String? event;
+  final PackList? existing;
 
   const SecondaryCreateListPage({
     super.key,
@@ -21,6 +23,7 @@ class SecondaryCreateListPage extends StatefulWidget {
     required this.color,
     required this.isFavorite,
     this.event,
+    this.existing,
   });
 
   @override
@@ -33,32 +36,59 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
   final _dateTimeKey = GlobalKey<DateTimeCardState>();
   final _sharingKey = GlobalKey<SharingCardState>();
 
+  String? _formatTime(TimeOfDay? t) {
+    if (t == null) return null;
+    final h = t.hour.toString().padLeft(2, '0');
+    final m = t.minute.toString().padLeft(2, '0');
+    return '$h:$m';
+  }
+
   void _saveList() {
     FocusScope.of(context).unfocus();
 
     final dateTimeState = _dateTimeKey.currentState!;
     final sharingState = _sharingKey.currentState!;
+    final provider = context.read<PackListProvider>();
 
-    context.read<PackListProvider>().createList(
-          title: widget.title,
-          iconPath: widget.iconPath,
-          color: widget.color,
-          isFavorite: widget.isFavorite,
-          items: _itemsKey.currentState!.items.toList(),
-          date: dateTimeState.selectedDate,
-          time: dateTimeState.selectedTime?.format(context),
-          event: widget.event,
-          repeat: dateTimeState.repeatEnabled,
-          repeatDays: dateTimeState.selectedDays,
-          isShared: sharingState.sharingEnabled,
-        );
-
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
+    if (widget.existing != null) {
+      provider.editList(
+        id: widget.existing!.id,
+        title: widget.title,
+        iconPath: widget.iconPath,
+        color: widget.color,
+        isFavorite: widget.isFavorite,
+        date: dateTimeState.selectedDate,
+        time: _formatTime(dateTimeState.selectedTime),
+        event: widget.event,
+        repeat: dateTimeState.repeatEnabled,
+        repeatDays: dateTimeState.selectedDays,
+        isShared: sharingState.sharingEnabled,
+      );
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+    } else {
+      provider.createList(
+        title: widget.title,
+        iconPath: widget.iconPath,
+        color: widget.color,
+        isFavorite: widget.isFavorite,
+        items: _itemsKey.currentState!.items.toList(),
+        date: dateTimeState.selectedDate,
+        time: _formatTime(dateTimeState.selectedTime),
+        event: widget.event,
+        repeat: dateTimeState.repeatEnabled,
+        repeatDays: dateTimeState.selectedDays,
+        isShared: sharingState.sharingEnabled,
+      );
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final e = widget.existing;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -85,14 +115,29 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                     ),
                   ),
                 ),
-                ItemsCard(
-                  key: _itemsKey,
-                  accentColor: widget.color,
+                e != null
+                    ? ItemsCard(
+                        key: _itemsKey,
+                        accentColor: widget.color,
+                        listId: e.id,
+                      )
+                    : ItemsCard(
+                        key: _itemsKey,
+                        accentColor: widget.color,
+                      ),
+                const SizedBox(height: 22),
+                DateTimeCard(
+                  key: _dateTimeKey,
+                  initialDate: e?.date,
+                  initialTime: e?.time,
+                  initialRepeat: e?.repeat ?? false,
+                  initialRepeatDays: e?.repeatDays ?? [],
                 ),
                 const SizedBox(height: 22),
-                DateTimeCard(key: _dateTimeKey),
-                const SizedBox(height: 22),
-                SharingCard(key: _sharingKey),
+                SharingCard(
+                  key: _sharingKey,
+                  initialSharing: e?.isShared ?? false,
+                ),
                 const SizedBox(height: 24),
               ],
             ),

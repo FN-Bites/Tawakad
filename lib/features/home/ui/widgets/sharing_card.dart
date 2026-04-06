@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/toggle_button.dart';
 
 class SharingCard extends StatefulWidget {
-  const SharingCard({super.key});
+  final bool initialSharing;
+
+  const SharingCard({
+    super.key,
+    this.initialSharing = false,
+  });
 
   @override
   State<SharingCard> createState() => SharingCardState();
@@ -11,6 +16,12 @@ class SharingCard extends StatefulWidget {
 class SharingCardState extends State<SharingCard> {
   bool _sharingEnabled = false;
   bool get sharingEnabled => _sharingEnabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _sharingEnabled = widget.initialSharing;
+  }
 
   @override
   Widget build(BuildContext context) {
