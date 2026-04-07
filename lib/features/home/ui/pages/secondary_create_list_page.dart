@@ -126,6 +126,19 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                         accentColor: widget.color,
                       ),
                 const SizedBox(height: 22),
+                Padding(
+                  padding: const EdgeInsets.only(right: 4, bottom: 10),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'التاريخ و الوقت ',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF8A8A8E),
+                          ),
+                    ),
+                  ),
+                ),
                 DateTimeCard(
                   key: _dateTimeKey,
                   initialDate: e?.date,
@@ -134,9 +147,24 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                   initialRepeatDays: e?.repeatDays ?? [],
                 ),
                 const SizedBox(height: 22),
+                Padding(
+                  padding: const EdgeInsets.only(right: 4, bottom: 10),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'المشاركة ',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF8A8A8E),
+                          ),
+                    ),
+                  ),
+                ),
                 SharingCard(
                   key: _sharingKey,
+                  title: widget.title,
                   initialSharing: e?.isShared ?? false,
+                  getItems: () => _itemsKey.currentState?.items.toList() ?? [],
                 ),
                 const SizedBox(height: 24),
               ],
@@ -153,7 +181,7 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GlassBackButton(),
+          const GlassBackButton(),
           _circleButton(
             child: const CustomPaint(
               size: Size(22, 22),
