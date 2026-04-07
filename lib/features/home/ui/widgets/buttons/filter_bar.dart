@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_bar.dart';
 
-enum FilterOption { today, all, favorites }
+enum FilterOption { today, favorites, all }
 
 extension FilterOptionLabel on FilterOption {
   String get label {
     switch (this) {
       case FilterOption.today:
         return 'اليوم';
-      case FilterOption.all:
-        return 'الكل';
       case FilterOption.favorites:
         return 'المفضل';
+      case FilterOption.all:
+        return 'الكل';
     }
   }
 }

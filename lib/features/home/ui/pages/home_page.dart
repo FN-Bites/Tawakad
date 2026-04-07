@@ -21,6 +21,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomeState extends State<HomePage> {
+  FilterOption _activeFilter = FilterOption.today;
+
   void _openAddPackList() {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -36,9 +38,24 @@ class _HomeState extends State<HomePage> {
 
     final allLists = context.watch<PackListProvider>().lists;
 
+    final today = DateTime.now();
+    final afterFilter = allLists.where((p) {
+      switch (_activeFilter) {
+        case FilterOption.today:
+          if (p.date == null) return false;
+          return p.date!.year == today.year &&
+              p.date!.month == today.month &&
+              p.date!.day == today.day;
+        case FilterOption.favorites:
+          return p.isFavorite;
+        case FilterOption.all:
+          return true;
+      }
+    }).toList();
+
     final filtered = widget.searchQuery.isEmpty
-        ? allLists
-        : allLists
+        ? afterFilter
+        : afterFilter
             .where((p) => p.title.toLowerCase().contains(
                   widget.searchQuery.toLowerCase(),
                 ))
@@ -50,7 +67,7 @@ class _HomeState extends State<HomePage> {
     );
 
     if (filtered.isNotEmpty) {
-      mainContent = const PackListCard();
+      mainContent = PackListCard(lists: filtered);
     } else if (widget.searchQuery.isNotEmpty && filtered.isEmpty) {
       mainContent = const Padding(
         padding: EdgeInsets.only(bottom: 200),
@@ -92,8 +109,10 @@ class _HomeState extends State<HomePage> {
             Align(
               alignment: Alignment.topRight,
               child: GlassFilterBar(
-                initialFilter: FilterOption.today,
-                onFilterChanged: (filter) {},
+                initialFilter: _activeFilter,
+                onFilterChanged: (filter) {
+                  setState(() => _activeFilter = filter);
+                },
               ),
             ),
             Expanded(

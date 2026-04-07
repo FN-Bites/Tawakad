@@ -3,21 +3,22 @@ import 'package:provider/provider.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_overlays.dart';
 import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 import 'pack_list/pack_list_item.dart';
+import '../../model/pack_list.dart';
 
 class PackListCard extends StatelessWidget {
-  const PackListCard({super.key});
+  final List<PackList> lists;
+
+  const PackListCard({super.key, required this.lists});
 
   @override
   Widget build(BuildContext context) {
-    final packList = context.watch<PackListProvider>().lists;
-
     return ListView.builder(
-      itemCount: packList.length,
+      itemCount: lists.length,
       itemBuilder: (ctx, index) => _SwipeToDeleteItem(
-        key: ValueKey(packList[index].id),
+        key: ValueKey(lists[index].id),
         onDelete: () =>
-            context.read<PackListProvider>().removeList(packList[index].id),
-        child: PackListItem(packList[index]),
+            context.read<PackListProvider>().removeList(lists[index].id),
+        child: PackListItem(lists[index]),
       ),
     );
   }
