@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/pack_list_provider.dart';
-import '../widgets/remove_list.dart';
+import '../widgets/pack_list_card.dart.dart';
 import '../widgets/buttons/pack_list_icon_badge.dart';
 import '../widgets/buttons/filter_bar.dart';
 import '../widgets/home_empty_state.dart';

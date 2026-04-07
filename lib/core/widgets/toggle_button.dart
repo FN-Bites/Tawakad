@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class ToggleRowWidget extends StatelessWidget {
   final IconData icon;
@@ -6,6 +7,7 @@ class ToggleRowWidget extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
   final String? subtitle;
+  final VoidCallback? onSubtitleTap;
 
   const ToggleRowWidget({
     super.key,
@@ -14,6 +16,7 @@ class ToggleRowWidget extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.subtitle,
+    this.onSubtitleTap,
   });
 
   @override
@@ -35,11 +38,14 @@ class ToggleRowWidget extends StatelessWidget {
                 ),
               ),
               if (subtitle != null)
-                Text(
-                  subtitle!,
-                  style: const TextStyle(
-                    color: Color(0xFF1F8EFA),
-                    fontSize: 12,
+                GestureDetector(
+                  onTap: onSubtitleTap,
+                  child: Text(
+                    subtitle!,
+                    style: const TextStyle(
+                      color: Color(0xFF1F8EFA),
+                      fontSize: 12,
+                    ),
                   ),
                 ),
             ],

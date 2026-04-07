@@ -97,9 +97,43 @@ class DateTimeCardState extends State<DateTimeCard> {
   }
 
   String _formatTimeOfDay(TimeOfDay t) {
-    final h = t.hour.toString().padLeft(2, '0');
+    final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
     final m = t.minute.toString().padLeft(2, '0');
-    return '$h:$m';
+    final period = t.period == DayPeriod.am ? 'ص' : 'م';
+    return '$hour:$m $period';
+  }
+
+  ThemeData _pickerTheme(BuildContext context) {
+    return Theme.of(context).copyWith(
+      colorScheme: Theme.of(context).colorScheme.copyWith(
+            primary: const Color(0xFF4CAF82),
+            onPrimary: Colors.white,
+            surface: Colors.white,
+            onSurface: Colors.black87,
+          ),
+      datePickerTheme: const DatePickerThemeData(
+        backgroundColor: Colors.white,
+        headerBackgroundColor: Colors.white,
+        headerForegroundColor: Colors.black87,
+        surfaceTintColor: Colors.transparent,
+        elevation: 4,
+      ),
+      timePickerTheme: const TimePickerThemeData(
+        backgroundColor: Colors.white,
+        hourMinuteColor: Color(0xFFF5F5F5),
+        hourMinuteTextColor: Colors.black87,
+        dayPeriodColor: Color(0xFFF5F5F5),
+        dayPeriodTextColor: Colors.black87,
+        dialBackgroundColor: Color(0xFFF5F5F5),
+        dialHandColor: Color(0xFF4CAF82),
+        dialTextColor: Colors.black87,
+        entryModeIconColor: Colors.black54,
+      ),
+      dialogTheme: const DialogThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+      ),
+    );
   }
 
   Future<void> _onDateToggled(bool value) async {
@@ -110,6 +144,32 @@ class DateTimeCardState extends State<DateTimeCard> {
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
+      locale: const Locale('ar'),
+      builder: (context, child) => Theme(
+        data: _pickerTheme(context),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        ),
+      ),
+    );
+    if (picked != null) setState(() => _selectedDate = picked);
+  }
+
+  Future<void> _openDatePicker() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      locale: const Locale('ar'),
+      builder: (context, child) => Theme(
+        data: _pickerTheme(context),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        ),
+      ),
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
@@ -120,6 +180,34 @@ class DateTimeCardState extends State<DateTimeCard> {
     final picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime ?? TimeOfDay.now(),
+      helpText: 'اختيار الوقت',
+      hourLabelText: 'ساعة',
+      minuteLabelText: 'دقيقة',
+      builder: (context, child) => Theme(
+        data: _pickerTheme(context),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        ),
+      ),
+    );
+    if (picked != null) setState(() => _selectedTime = picked);
+  }
+
+  Future<void> _openTimePicker() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.now(),
+      helpText: 'اختيار الوقت',
+      hourLabelText: 'ساعة',
+      minuteLabelText: 'دقيقة',
+      builder: (context, child) => Theme(
+        data: _pickerTheme(context),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        ),
+      ),
     );
     if (picked != null) setState(() => _selectedTime = picked);
   }
@@ -157,6 +245,8 @@ class DateTimeCardState extends State<DateTimeCard> {
             subtitle: _dateEnabled && _selectedDate != null
                 ? _formatDate(_selectedDate!)
                 : null,
+            onSubtitleTap:
+                _dateEnabled && _selectedDate != null ? _openDatePicker : null,
           ),
           const Divider(height: 1, color: Color(0xFFF0F0F3)),
           ToggleRowWidget(
@@ -167,6 +257,8 @@ class DateTimeCardState extends State<DateTimeCard> {
             subtitle: _timeEnabled && _selectedTime != null
                 ? _formatTimeOfDay(_selectedTime!)
                 : null,
+            onSubtitleTap:
+                _timeEnabled && _selectedTime != null ? _openTimePicker : null,
           ),
           const Divider(height: 1, color: Color(0xFFF0F0F3)),
           ToggleRowWidget(
