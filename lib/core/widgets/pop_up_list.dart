@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_overlays.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class GlassPopUpList extends StatefulWidget {
   final String title;
@@ -49,6 +50,8 @@ class _GlassPopUpListState extends State<GlassPopUpList>
     super.dispose();
   }
 
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
   void _toggle() => _isOpen ? _close() : _open();
 
   void _open() {
@@ -77,11 +80,11 @@ class _GlassPopUpListState extends State<GlassPopUpList>
   OverlayEntry _buildOverlay() {
     final renderBox = context.findRenderObject() as RenderBox;
     final rowWidth = renderBox.size.width;
+    final isDark = _isDark;
 
     return OverlayEntry(
       builder: (_) => Stack(
         children: [
-          // Transparent dismiss barrier
           Positioned.fill(
             child: GestureDetector(
               onTap: _close,
@@ -89,7 +92,6 @@ class _GlassPopUpListState extends State<GlassPopUpList>
               child: const SizedBox.expand(),
             ),
           ),
-          // Dropdown anchored below the row
           Positioned(
             width: rowWidth,
             child: CompositedTransformFollower(
@@ -129,11 +131,11 @@ class _GlassPopUpListState extends State<GlassPopUpList>
                             const SizedBox(width: 8),
                             Text(
                               widget.title,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Montserrat',
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: Colors.black54,
+                                color: isDark ? Colors.white60 : Colors.black54,
                               ),
                             ),
                           ],
@@ -152,6 +154,10 @@ class _GlassPopUpListState extends State<GlassPopUpList>
 
   @override
   Widget build(BuildContext context) {
+    final textColor = _isDark ? AppDarkColors.textPrimary : Colors.black87;
+    final subColor =
+        _isDark ? AppDarkColors.placeholder : const Color(0xFFAAAAAA);
+
     return CompositedTransformTarget(
       link: _layerLink,
       child: GestureDetector(
@@ -171,19 +177,19 @@ class _GlassPopUpListState extends State<GlassPopUpList>
             const SizedBox(width: 12),
             Text(
               widget.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: Colors.black87,
+                color: textColor,
               ),
             ),
             const Spacer(),
             Text(
               widget.initialValue,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFFAAAAAA),
+                color: subColor,
               ),
             ),
             const SizedBox(width: 6),
@@ -191,9 +197,9 @@ class _GlassPopUpListState extends State<GlassPopUpList>
               turns: _isOpen ? 0.5 : 0,
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeInOut,
-              child: const Icon(
+              child: Icon(
                 Icons.keyboard_arrow_down_rounded,
-                color: Color(0xFFAAAAAA),
+                color: subColor,
                 size: 20,
               ),
             ),

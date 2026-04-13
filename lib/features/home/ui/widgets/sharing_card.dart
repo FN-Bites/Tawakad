@@ -30,7 +30,6 @@ class SharingCardState extends State<SharingCard> {
 
   String _buildShareText() {
     final items = widget.getItems();
-
     final itemsText = items.isEmpty
         ? '  • لا توجد عناصر'
         : items.map((item) => '  • $item').join('\n');
@@ -45,7 +44,6 @@ class SharingCardState extends State<SharingCard> {
 
   Future<void> _handleSharing(bool value) async {
     setState(() => _sharingEnabled = value);
-
     if (!value) return;
 
     await SharePlus.instance.share(
@@ -59,15 +57,20 @@ class SharingCardState extends State<SharingCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: isDark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.06),
             blurRadius: 22,
             offset: const Offset(0, 8),
           ),

@@ -113,33 +113,41 @@ class DateTimeCardState extends State<DateTimeCard> {
   }
 
   ThemeData _pickerTheme(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+
+    final surfaceColor = isDark ? const Color(0xFF1E1E2E) : Colors.white;
+    final onSurfaceColor = isDark ? Colors.white : Colors.black87;
+    final fieldColor =
+        isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF5F5F5);
+
     return Theme.of(context).copyWith(
-      colorScheme: Theme.of(context).colorScheme.copyWith(
-            primary: const Color(0xFF4CAF82),
-            onPrimary: Colors.white,
-            surface: Colors.white,
-            onSurface: Colors.black87,
-          ),
-      datePickerTheme: const DatePickerThemeData(
-        backgroundColor: Colors.white,
-        headerBackgroundColor: Colors.white,
-        headerForegroundColor: Colors.black87,
+      colorScheme: colorScheme.copyWith(
+        primary: const Color(0xFF4CAF82),
+        onPrimary: Colors.white,
+        surface: surfaceColor,
+        onSurface: onSurfaceColor,
+      ),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: surfaceColor,
+        headerBackgroundColor: surfaceColor,
+        headerForegroundColor: onSurfaceColor,
         surfaceTintColor: Colors.transparent,
         elevation: 4,
       ),
-      timePickerTheme: const TimePickerThemeData(
-        backgroundColor: Colors.white,
-        hourMinuteColor: Color(0xFFF5F5F5),
-        hourMinuteTextColor: Colors.black87,
-        dayPeriodColor: Color(0xFFF5F5F5),
-        dayPeriodTextColor: Colors.black87,
-        dialBackgroundColor: Color(0xFFF5F5F5),
-        dialHandColor: Color(0xFF4CAF82),
-        dialTextColor: Colors.black87,
-        entryModeIconColor: Colors.black54,
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: surfaceColor,
+        hourMinuteColor: fieldColor,
+        hourMinuteTextColor: onSurfaceColor,
+        dayPeriodColor: fieldColor,
+        dayPeriodTextColor: onSurfaceColor,
+        dialBackgroundColor: fieldColor,
+        dialHandColor: const Color(0xFF4CAF82),
+        dialTextColor: onSurfaceColor,
+        entryModeIconColor: isDark ? Colors.white54 : Colors.black54,
       ),
-      dialogTheme: const DialogThemeData(
-        backgroundColor: Colors.white,
+      dialogTheme: DialogThemeData(
+        backgroundColor: surfaceColor,
         surfaceTintColor: Colors.transparent,
       ),
     );
@@ -234,15 +242,20 @@ class DateTimeCardState extends State<DateTimeCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = colorScheme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: isDark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.06),
             blurRadius: 22,
             offset: const Offset(0, 8),
           ),
@@ -261,7 +274,10 @@ class DateTimeCardState extends State<DateTimeCard> {
             onSubtitleTap:
                 _dateEnabled && _selectedDate != null ? _openDatePicker : null,
           ),
-          const Divider(height: 1, color: Color(0xFFF0F0F3)),
+          Divider(
+              height: 1,
+              color:
+                  isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF0F0F3)),
           ToggleRowWidget(
             icon: Icons.access_time_rounded,
             label: 'الوقت',
@@ -273,7 +289,10 @@ class DateTimeCardState extends State<DateTimeCard> {
             onSubtitleTap:
                 _timeEnabled && _selectedTime != null ? _openTimePicker : null,
           ),
-          const Divider(height: 1, color: Color(0xFFF0F0F3)),
+          Divider(
+              height: 1,
+              color:
+                  isDark ? const Color(0xFF2A2A3E) : const Color(0xFFF0F0F3)),
           ToggleRowWidget(
             icon: Icons.repeat_rounded,
             label: 'التكرار',
@@ -287,7 +306,11 @@ class DateTimeCardState extends State<DateTimeCard> {
             child: _repeatEnabled
                 ? Column(
                     children: [
-                      const Divider(height: 1, color: Color(0xFFF0F0F3)),
+                      Divider(
+                          height: 1,
+                          color: isDark
+                              ? const Color(0xFF2A2A3E)
+                              : const Color(0xFFF0F0F3)),
                       const SizedBox(height: 8),
                       DayOfWeekSelector(
                         selectedDays: _selectedDays,

@@ -7,6 +7,8 @@ import '../widgets/buttons/filter_bar.dart';
 import '../widgets/home_empty_state.dart';
 import '../widgets/search_empty_state.dart';
 import '../pages/primary_create_list_page.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class HomePage extends StatefulWidget {
   final String searchQuery;
@@ -93,11 +95,11 @@ class _HomeState extends State<HomePage> {
             style: theme.textTheme.bodyLarge,
           ),
           const Spacer(),
-          PackListIconBadge(
-            onPressed: _openAddPackList,
+          AppLiquidButtons.iconWithLabel(
             icon: Icons.add,
-            bold: true,
-            iconColor: theme.iconTheme.color ?? theme.colorScheme.onSurface,
+            label: 'إضافة قائمة',
+            onPressed: _openAddPackList,
+            fillColor: AppColors.primary,
           ),
           const SizedBox(width: 24),
         ],

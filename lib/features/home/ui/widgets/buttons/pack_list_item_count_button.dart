@@ -23,8 +23,7 @@ class PackListItemCountButton extends StatelessWidget {
   String _itemLabel() {
     if (itemCount == 1) return '${_toArabicNumerals('1')} غرض واحد';
     if (itemCount == 2) return '${_toArabicNumerals('2')} غرضان';
-    if (itemCount <= 10)
-      return '${_toArabicNumerals(itemCount.toString())} أغراض';
+    if (itemCount <= 10) return '${_toArabicNumerals(itemCount.toString())} أغراض';
     return '${_toArabicNumerals(itemCount.toString())} غرض';
   }
 

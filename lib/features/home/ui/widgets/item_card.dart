@@ -65,6 +65,17 @@ class ItemsCardState extends State<ItemsCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    final cardColor = colorScheme.surface;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final dividerColor =
+        isDark ? const Color(0xFF2A2A3E) : const Color(0xFFE5E5EA);
+    final dashedCircleColor =
+        isDark ? const Color(0xFF555568) : const Color(0xFFB0B0B8);
+    final hintColor = isDark ? const Color(0xFF888899) : Colors.black38;
+
     final items = widget.listId != null
         ? context
             .watch<PackListProvider>()
@@ -76,11 +87,11 @@ class ItemsCardState extends State<ItemsCard> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
             blurRadius: 22,
             offset: const Offset(0, 8),
           ),
@@ -111,20 +122,20 @@ class ItemsCardState extends State<ItemsCard> {
                           item,
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.right,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black87,
+                            color: textColor,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Divider(
+                Divider(
                   height: 1,
                   thickness: 0.5,
-                  color: Color(0xFFE5E5EA),
+                  color: dividerColor,
                   indent: 18,
                   endIndent: 18,
                 ),
@@ -160,17 +171,20 @@ class ItemsCardState extends State<ItemsCard> {
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       autofocus: true,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: Colors.black87,
+                        color: textColor,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: 'اسم الغرض',
                         hintTextDirection: TextDirection.rtl,
+                        hintStyle: TextStyle(color: hintColor),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
+                        fillColor: Colors.transparent,
+                        filled: true,
                         isDense: true,
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -183,13 +197,14 @@ class ItemsCardState extends State<ItemsCard> {
           else
             GestureDetector(
               onTap: _startAdding,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: CustomPaint(
-                    size: Size(26, 26),
-                    painter: _DashedCirclePainter(color: Color(0xFFB0B0B8)),
+                    size: const Size(26, 26),
+                    painter: _DashedCirclePainter(color: dashedCircleColor),
                   ),
                 ),
               ),

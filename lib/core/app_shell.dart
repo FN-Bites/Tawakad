@@ -116,7 +116,7 @@ class _SearchNavRow extends StatelessWidget {
                   onOpened: onSearchOpened,
                   onClosed: onSearchClosed,
                   onChanged: onSearchChanged,
-                  hintText: '...ابحث',
+                  hintText: 'ابحث عن قائمة',
                 ),
               ),
               AnimatedBuilder(

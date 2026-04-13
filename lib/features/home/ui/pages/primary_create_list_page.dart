@@ -7,6 +7,7 @@ import 'package:tawakad_app/features/home/ui/widgets/icons_picker.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/favorite_button.dart';
 import 'package:tawakad_app/features/home/model/pack_list.dart';
 import 'package:tawakad_app/features/home/ui/pages/secondary_create_list_page.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class PrimaryCreateListPage extends StatefulWidget {
   final PackList? existing;
@@ -54,6 +55,8 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
     super.dispose();
   }
 
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
   void _goToNextPage() {
     FocusScope.of(context).unfocus();
     final title = _nameController.text.trim();
@@ -77,12 +80,33 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
     );
   }
 
+  Widget _sectionTitle(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 4, bottom: 10),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: _isDark
+                    ? AppDarkColors.placeholder
+                    : const Color(0xFF8A8A8E),
+              ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bgColor =
+        _isDark ? AppDarkColors.background : const Color(0xFFF1F4F8);
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF1F4F8),
+        backgroundColor: bgColor,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
@@ -93,7 +117,9 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                   width: 44,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFCFCFD4),
+                    color: _isDark
+                        ? AppDarkColors.fieldBorder
+                        : const Color(0xFFCFCFD4),
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
@@ -102,6 +128,7 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                 const SizedBox(height: 22),
                 _buildImageNameCard(),
                 const SizedBox(height: 22),
+                _sectionTitle('حدث القائمة'),
                 FieldCard(
                   gap: 14,
                   children: [
@@ -115,11 +142,13 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 22, width: 20),
+                _sectionTitle('لون القائمة'),
                 _buildColorsCard(),
-                const SizedBox(height: 22),
+                const SizedBox(height: 22, width: 20),
+                _sectionTitle('أيقونة القائمة'),
                 _buildIconsCard(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 22, width: 20),
               ],
             ),
           ),
@@ -129,6 +158,10 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
   }
 
   Widget _buildHeader() {
+    final closeBtnBg =
+        _isDark ? AppDarkColors.surface : const Color(0xFFF0F0F3);
+    final closeBtnIconColor = _isDark ? AppDarkColors.icon : Colors.black87;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: Stack(
@@ -136,23 +169,25 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
         children: [
           Text(
             widget.existing != null ? 'تعديل القائمة' : 'إنشاء قائمة',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: _isDark ? AppDarkColors.textPrimary : null,
+                ),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _circleButton(
-                child: const CustomPaint(
-                  size: Size(22, 22),
+                child: CustomPaint(
+                  size: const Size(22, 22),
                   painter: BoldIconPainter(
                     icon: Icons.close_rounded,
-                    color: Colors.black87,
+                    color: closeBtnIconColor,
                     size: 22,
                     strokeExtra: 1.2,
                   ),
                 ),
                 onTap: () => Navigator.maybePop(context),
-                backgroundColor: const Color(0xFFF0F0F3),
+                backgroundColor: closeBtnBg,
               ),
               Row(
                 children: [
@@ -198,7 +233,7 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.07),
+              color: Colors.black.withOpacity(_isDark ? 0.3 : 0.07),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -210,14 +245,21 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
   }
 
   Widget _buildImageNameCard() {
+    final cardBg = _isDark ? AppDarkColors.surface : Colors.white;
+    final fieldBg =
+        _isDark ? AppDarkColors.fieldBorder : const Color(0xFFE7E7EA);
+    final hintColor =
+        _isDark ? AppDarkColors.placeholder : const Color(0xFFB2B2B8);
+    final textColor = _isDark ? AppDarkColors.textPrimary : Colors.black87;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.07),
+            color: Colors.black.withOpacity(_isDark ? 0.25 : 0.07),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -264,10 +306,10 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                 controller: _nameController,
                 textAlign: TextAlign.center,
                 textDirection: TextDirection.rtl,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+                  color: textColor,
                 ),
                 onChanged: (_) {
                   if (_nameInvalid) setState(() => _nameInvalid = false);
@@ -275,15 +317,17 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                 decoration: InputDecoration(
                   hintText: 'اسم القائمة',
                   hintTextDirection: TextDirection.rtl,
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFFB2B2B8),
+                    color: hintColor,
                   ),
                   filled: true,
                   fillColor: _nameInvalid
-                      ? const Color(0xFFFFECEC)
-                      : const Color(0xFFE7E7EA),
+                      ? (_isDark
+                          ? const Color(0xFF3B1A1A)
+                          : const Color(0xFFFFECEC))
+                      : fieldBg,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 18,
@@ -339,11 +383,11 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? AppDarkColors.surface : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(_isDark ? 0.25 : 0.06),
             blurRadius: 22,
             offset: const Offset(0, 8),
           ),
@@ -361,11 +405,11 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 18, 14, 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _isDark ? AppDarkColors.surface : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withOpacity(_isDark ? 0.25 : 0.06),
             blurRadius: 22,
             offset: const Offset(0, 8),
           ),

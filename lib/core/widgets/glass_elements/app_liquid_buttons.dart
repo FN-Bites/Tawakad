@@ -50,6 +50,48 @@ class AppLiquidButtons {
             ? _BoldIconBuilder(icon: icon, color: iconColor, size: iconSize)
             : _ThemedIcon(icon: icon, color: iconColor, size: iconSize),
       );
+
+  static Widget iconWithLabel({
+    required IconData icon,
+    required String label,
+    required VoidCallback? onPressed,
+    Color? iconColor,
+    double iconSize = 18,
+    bool bold = false,
+    TextStyle? textStyle,
+    List<BoxShadow>? shadows,
+    Color? fillColor,
+  }) {
+    final resolvedIconColor = fillColor != null ? Colors.white : iconColor;
+    final resolvedTextStyle = fillColor != null
+        ? const TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          )
+        : textStyle;
+    // When fillColor is set, default bold to true for the icon
+    final resolvedBold = fillColor != null ? true : bold;
+
+    return _SmallGlassButton(
+      onPressed: onPressed,
+      shadows: shadows,
+      fillColor: fillColor,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          resolvedBold
+              ? _BoldIconBuilder(
+                  icon: icon, color: resolvedIconColor, size: iconSize)
+              : _ThemedIcon(
+                  icon: icon, color: resolvedIconColor, size: iconSize),
+          const SizedBox(width: 6),
+          _ThemedText(label: label, textStyle: resolvedTextStyle),
+        ],
+      ),
+    );
+  }
 }
 
 // ─── Theme-aware helpers ───────────────────────────────────────────────────
@@ -280,6 +322,7 @@ class _SmallGlassButton extends StatefulWidget {
   final bool isSquare;
   final double height;
   final List<BoxShadow>? shadows;
+  final Color? fillColor;
 
   const _SmallGlassButton({
     required this.onPressed,
@@ -287,6 +330,7 @@ class _SmallGlassButton extends StatefulWidget {
     this.isSquare = false,
     this.height = 44,
     this.shadows,
+    this.fillColor,
   });
 
   @override
@@ -340,7 +384,8 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
             boxShadow: widget.shadows ??
                 [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.07),
+                    color: (widget.fillColor ?? Colors.black)
+                        .withOpacity(widget.fillColor != null ? 0.35 : 0.07),
                     blurRadius: 8,
                     spreadRadius: 0,
                     offset: const Offset(0, 2),
@@ -349,16 +394,29 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(widget.height / 2),
-            child: _GlassFill(
-              pressed: _pressed,
-              borderRadius: widget.height / 2,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: widget.isSquare ? 0 : 18,
-                ),
-                child: Center(child: widget.child),
-              ),
-            ),
+            child: widget.fillColor != null
+                // ── Solid fill mode: no glass, just a flat colored button ──
+                ? _SolidFill(
+                    pressed: _pressed,
+                    color: widget.fillColor!,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: widget.isSquare ? 0 : 18,
+                      ),
+                      child: Center(child: widget.child),
+                    ),
+                  )
+                // ── Default glass mode: unchanged ──
+                : _GlassFill(
+                    pressed: _pressed,
+                    borderRadius: widget.height / 2,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: widget.isSquare ? 0 : 18,
+                      ),
+                      child: Center(child: widget.child),
+                    ),
+                  ),
           ),
         ),
       ),
@@ -366,7 +424,35 @@ class _SmallGlassButtonState extends State<_SmallGlassButton>
   }
 }
 
-// ─── Glass fill ────────────────────────────────────────────────────────────
+// ─── Solid fill (for colored buttons) ─────────────────────────────────────
+
+class _SolidFill extends StatelessWidget {
+  final bool pressed;
+  final Color color;
+  final Widget child;
+
+  const _SolidFill({
+    required this.pressed,
+    required this.color,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(child: Container(color: color)),
+        if (pressed)
+          Positioned.fill(
+            child: Container(color: Colors.black.withOpacity(0.08)),
+          ),
+        child,
+      ],
+    );
+  }
+}
+
+// ─── Glass fill (UNCHANGED) ────────────────────────────────────────────────
 
 class _GlassFill extends StatelessWidget {
   final bool pressed;
@@ -456,7 +542,7 @@ class _GlassFill extends StatelessWidget {
   }
 }
 
-// ─── Painters ─────────────────────────────────────────────────────────────
+// ─── Painters (UNCHANGED) ─────────────────────────────────────────────────
 
 class _GlassRimPainter extends CustomPainter {
   final double borderRadius;

@@ -33,6 +33,9 @@ class IconsPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? Colors.white : Colors.black;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: GridView.count(
@@ -58,10 +61,10 @@ class IconsPicker extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(10),
-                  child: Image.asset(
-                    icon,
-                    fit: BoxFit.contain,
-                  ),
+                  child: Image.asset(icon,
+                      fit: BoxFit.contain,
+                      color: iconColor,
+                      colorBlendMode: BlendMode.srcIn),
                 ),
               ),
             ),

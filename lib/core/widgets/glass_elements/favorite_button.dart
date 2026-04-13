@@ -60,6 +60,8 @@ class _FavoriteToggleButtonState extends State<FavoriteToggleButton>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AnimatedBuilder(
       animation: _scale,
       builder: (context, child) => Transform.scale(
@@ -71,7 +73,9 @@ class _FavoriteToggleButtonState extends State<FavoriteToggleButton>
             ? Icons.favorite_rounded
             : Icons.favorite_border_rounded,
         onPressed: _handleTap,
-        iconColor: widget.isFavorite ? Colors.red : Colors.black45,
+        iconColor: widget.isFavorite
+            ? Colors.red
+            : (isDark ? Colors.white60 : Colors.black45),
         iconSize: 20,
       ),
     );

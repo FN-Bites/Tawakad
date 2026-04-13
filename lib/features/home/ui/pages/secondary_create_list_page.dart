@@ -4,6 +4,7 @@ import 'package:tawakad_app/features/home/model/pack_list.dart';
 import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 import '../widgets/item_card.dart';
 import '../widgets/date_time_card.dart';
 import '../widgets/sharing_card.dart';
@@ -35,6 +36,8 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
   final _itemsKey = GlobalKey<ItemsCardState>();
   final _dateTimeKey = GlobalKey<DateTimeCardState>();
   final _sharingKey = GlobalKey<SharingCardState>();
+
+  bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   String? _formatTime(TimeOfDay? t) {
     if (t == null) return null;
@@ -85,14 +88,34 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
     }
   }
 
+  Widget _sectionLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 4, bottom: 10),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: _isDark
+                    ? AppDarkColors.placeholder
+                    : const Color(0xFF8A8A8E),
+              ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final e = widget.existing;
+    final bgColor =
+        _isDark ? AppDarkColors.background : const Color(0xFFF1F4F8);
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF1F4F8),
+        backgroundColor: bgColor,
         body: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
@@ -102,19 +125,7 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                 const SizedBox(height: 22),
                 _buildListPreviewHeader(),
                 const SizedBox(height: 22),
-                Padding(
-                  padding: const EdgeInsets.only(right: 4, bottom: 10),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'الأغراض',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF8A8A8E),
-                          ),
-                    ),
-                  ),
-                ),
+                _sectionLabel('الأغراض'),
                 e != null
                     ? ItemsCard(
                         key: _itemsKey,
@@ -126,19 +137,7 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                         accentColor: widget.color,
                       ),
                 const SizedBox(height: 22),
-                Padding(
-                  padding: const EdgeInsets.only(right: 4, bottom: 10),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'التاريخ و الوقت ',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF8A8A8E),
-                          ),
-                    ),
-                  ),
-                ),
+                _sectionLabel('التاريخ و الوقت '),
                 DateTimeCard(
                   key: _dateTimeKey,
                   initialDate: e?.date,
@@ -147,19 +146,7 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                   initialRepeatDays: e?.repeatDays ?? [],
                 ),
                 const SizedBox(height: 22),
-                Padding(
-                  padding: const EdgeInsets.only(right: 4, bottom: 10),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      'المشاركة ',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF8A8A8E),
-                          ),
-                    ),
-                  ),
-                ),
+                _sectionLabel('المشاركة '),
                 SharingCard(
                   key: _sharingKey,
                   title: widget.title,
@@ -215,7 +202,7 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.07),
+              color: Colors.black.withOpacity(_isDark ? 0.3 : 0.07),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -247,7 +234,9 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
         const SizedBox(width: 12),
         Text(
           widget.title,
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: _isDark ? AppDarkColors.textPrimary : null,
+              ),
           overflow: TextOverflow.ellipsis,
         ),
       ],
