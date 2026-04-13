@@ -62,6 +62,15 @@ class DateTimeCardState extends State<DateTimeCard> {
   List<int> get selectedDays =>
       _repeatEnabled ? List<int>.unmodifiable(_selectedDays) : [];
 
+  String _toArabicNumerals(String input) {
+    const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    for (int i = 0; i < western.length; i++) {
+      input = input.replaceAll(western[i], arabic[i]);
+    }
+    return input;
+  }
+
   String _repeatSubtitle() {
     if (_selectedDays.isEmpty || _selectedDays.length == 7) return 'كل يوم';
     const names = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
@@ -93,14 +102,14 @@ class DateTimeCardState extends State<DateTimeCard> {
       'نوفمبر',
       'ديسمبر',
     ];
-    return '${weekdays[date.weekday - 1]}، ${date.day} ${months[date.month - 1]} ${date.year}';
+    return '${weekdays[date.weekday - 1]}، ${_toArabicNumerals(date.day.toString())} ${months[date.month - 1]} ${_toArabicNumerals(date.year.toString())}';
   }
 
   String _formatTimeOfDay(TimeOfDay t) {
     final hour = t.hourOfPeriod == 0 ? 12 : t.hourOfPeriod;
     final m = t.minute.toString().padLeft(2, '0');
     final period = t.period == DayPeriod.am ? 'ص' : 'م';
-    return '$hour:$m $period';
+    return '${_toArabicNumerals(hour.toString())}:${_toArabicNumerals(m)} $period';
   }
 
   ThemeData _pickerTheme(BuildContext context) {
@@ -136,6 +145,34 @@ class DateTimeCardState extends State<DateTimeCard> {
     );
   }
 
+  Widget _datePickerBuilder(BuildContext context, Widget? child) {
+    return Theme(
+      data: _pickerTheme(context),
+      child: Localizations.override(
+        context: context,
+        locale: const Locale('ar', 'EG'),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        ),
+      ),
+    );
+  }
+
+  Widget _timePickerBuilder(BuildContext context, Widget? child) {
+    return Theme(
+      data: _pickerTheme(context),
+      child: Localizations.override(
+        context: context,
+        locale: const Locale('ar', 'EG'),
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        ),
+      ),
+    );
+  }
+
   Future<void> _onDateToggled(bool value) async {
     setState(() => _dateEnabled = value);
     if (!value) return;
@@ -144,14 +181,8 @@ class DateTimeCardState extends State<DateTimeCard> {
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
-      locale: const Locale('ar'),
-      builder: (context, child) => Theme(
-        data: _pickerTheme(context),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        ),
-      ),
+      locale: const Locale('ar', 'EG'),
+      builder: _datePickerBuilder,
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
@@ -162,14 +193,8 @@ class DateTimeCardState extends State<DateTimeCard> {
       initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
-      locale: const Locale('ar'),
-      builder: (context, child) => Theme(
-        data: _pickerTheme(context),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        ),
-      ),
+      locale: const Locale('ar', 'EG'),
+      builder: _datePickerBuilder,
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
@@ -183,13 +208,7 @@ class DateTimeCardState extends State<DateTimeCard> {
       helpText: 'اختيار الوقت',
       hourLabelText: 'ساعة',
       minuteLabelText: 'دقيقة',
-      builder: (context, child) => Theme(
-        data: _pickerTheme(context),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        ),
-      ),
+      builder: _timePickerBuilder,
     );
     if (picked != null) setState(() => _selectedTime = picked);
   }
@@ -201,13 +220,7 @@ class DateTimeCardState extends State<DateTimeCard> {
       helpText: 'اختيار الوقت',
       hourLabelText: 'ساعة',
       minuteLabelText: 'دقيقة',
-      builder: (context, child) => Theme(
-        data: _pickerTheme(context),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        ),
-      ),
+      builder: _timePickerBuilder,
     );
     if (picked != null) setState(() => _selectedTime = picked);
   }

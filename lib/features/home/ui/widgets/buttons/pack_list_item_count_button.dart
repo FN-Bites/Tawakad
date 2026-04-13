@@ -11,6 +11,23 @@ class PackListItemCountButton extends StatelessWidget {
   final int itemCount;
   final VoidCallback? onTap;
 
+  String _toArabicNumerals(String input) {
+    const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    for (int i = 0; i < western.length; i++) {
+      input = input.replaceAll(western[i], arabic[i]);
+    }
+    return input;
+  }
+
+  String _itemLabel() {
+    if (itemCount == 1) return '${_toArabicNumerals('1')} غرض واحد';
+    if (itemCount == 2) return '${_toArabicNumerals('2')} غرضان';
+    if (itemCount <= 10)
+      return '${_toArabicNumerals(itemCount.toString())} أغراض';
+    return '${_toArabicNumerals(itemCount.toString())} غرض';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -33,7 +50,7 @@ class PackListItemCountButton extends StatelessWidget {
               children: [
                 const SizedBox(width: 2),
                 Text(
-                  '$itemCount أغراض',
+                  _itemLabel(),
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 13,

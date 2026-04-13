@@ -68,7 +68,7 @@ class _GlassNavBarState extends State<GlassNavBar>
         : const Color(0xFF000000).withOpacity(0.06);
 
     return Container(
-      height: 76,
+      height: 96,
       decoration: BoxDecoration(
         color: barColor,
         borderRadius: BorderRadius.circular(60),
@@ -219,16 +219,16 @@ class _NavItemTileState extends State<_NavItemTile>
                   ),
                   child: Image.asset(
                     widget.item.assetPath,
-                    width: 28,
-                    height: 28,
+                    width: 36,
+                    height: 36,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 AnimatedDefaultTextStyle(
                   duration: const Duration(milliseconds: 200),
                   style: TextStyle(
                     fontFamily: 'Cairo',
-                    fontSize: 11,
+                    fontSize: 14,
                     height: 1.0,
                     fontWeight:
                         widget.isActive ? FontWeight.w700 : FontWeight.w500,

@@ -88,14 +88,14 @@ class _SearchNavRow extends StatelessWidget {
 
   static const double _sidePad = 20;
   static const double _rowGap = 10;
-  static const double _rowHeight = 76.0;
+  static const double _rowHeight = 96.0;
   static const double _bottomPad = 16;
 
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
     final screenW = MediaQuery.of(context).size.width;
-    const searchCollapsedW = 52.0;
+    const searchCollapsedW = 64.0;
     final navW = screenW - _sidePad * 2 - searchCollapsedW - _rowGap;
 
     return SizedBox(

@@ -7,6 +7,29 @@ class PackListItem extends StatelessWidget {
   const PackListItem(this.packlist, {super.key});
 
   final PackList packlist;
+
+  String _toArabicNumerals(String input) {
+    const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    for (int i = 0; i < western.length; i++) {
+      input = input.replaceAll(western[i], arabic[i]);
+    }
+    return input;
+  }
+
+  String _formatTime(String time) {
+    final parts = time.split(':');
+    if (parts.length != 2) return _toArabicNumerals(time);
+    final hour = int.tryParse(parts[0]);
+    final minute = int.tryParse(parts[1]);
+    if (hour == null || minute == null) return _toArabicNumerals(time);
+
+    final period = hour < 12 ? 'ص' : 'م';
+    final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    final minuteStr = minute.toString().padLeft(2, '0');
+    return '${_toArabicNumerals(hour12.toString())}:${_toArabicNumerals(minuteStr)} $period';
+  }
+
   LinearGradient _buildGradient(Color base) {
     final hsl = HSLColor.fromColor(base);
     final lighter =
@@ -104,12 +127,6 @@ class PackListItem extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final parts = <String>[];
-
-    if (packlist.time != null) {
-      parts.add(packlist.time!);
-    }
-
     return Row(
       children: [
         const Icon(
@@ -119,11 +136,11 @@ class PackListItem extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          parts.join('  '),
+          packlist.time != null ? _formatTime(packlist.time!) : '',
           style: const TextStyle(
             fontFamily: 'Montserrat',
             fontSize: 13,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
         ),

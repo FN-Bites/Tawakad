@@ -30,8 +30,8 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
   final TextEditingController _textCtrl = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  static const double _collapsedWidth = 52.0;
-  static const double _cancelSize = 48.0;
+  static const double _collapsedWidth = 64.0;
+  static const double _cancelSize = 64.0;
   static const double _cancelGap = 10.0;
 
   @override
@@ -102,7 +102,7 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
             final pillW = _collapsedWidth +
                 (expandedPillW - _collapsedWidth) * _expandAnim.value;
 
-            const leadingArea = 52.0;
+            const leadingArea = 64.0;
             final tfW = (pillW - leadingArea).clamp(0.0, double.infinity);
             final cancelAllocW = (_cancelSize + _cancelGap) * _expandAnim.value;
 
@@ -124,9 +124,9 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(width: 14),
+                          const SizedBox(width: 18),
                           Icon(Icons.search_rounded,
-                              size: 22, color: iconColor),
+                              size: 28, color: iconColor),
                           if (_isExpanded)
                             FadeTransition(
                               opacity: _contentFade,
@@ -187,14 +187,16 @@ class _GlassSearchButtonState extends State<GlassSearchButton>
                               child: Padding(
                                 padding:
                                     const EdgeInsets.only(left: _cancelGap),
-                                child: _FlatCapsule(
-                                  width: _cancelSize,
-                                  height: _cancelSize,
-                                  color: capsuleColor,
-                                  onTap: _close,
-                                  child: Center(
-                                    child: Icon(Icons.close_rounded,
-                                        size: 20, color: iconColor),
+                                child: Center(
+                                  child: _FlatCapsule(
+                                    width: _cancelSize,
+                                    height: _cancelSize,
+                                    color: capsuleColor,
+                                    onTap: _close,
+                                    child: Center(
+                                      child: Icon(Icons.close_rounded,
+                                          size: 24, color: iconColor),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -274,7 +276,6 @@ class _FlatCapsuleState extends State<_FlatCapsule>
           decoration: BoxDecoration(
             color: widget.color,
             borderRadius: BorderRadius.circular(radius),
-            // No shadow
           ),
           child: widget.child,
         ),
