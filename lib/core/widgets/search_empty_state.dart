@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../animation/search_rive.dart';
+import 'animation/search_rive.dart';
 
 class SearchEmptyState extends StatelessWidget {
   const SearchEmptyState({super.key});

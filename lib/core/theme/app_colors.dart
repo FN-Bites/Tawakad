@@ -7,7 +7,7 @@ var kDarkColorScheme = ColorScheme.fromSeed(
 
 class AppColors {
   // Light mode
-  static const background = Color(0xFFFAFDFF);
+  static const background = Color(0xFFF7FAFC);
   static const surface = Color(0xFFFFFFFF);
 
   static const primary = Color(0xFF0091FF);

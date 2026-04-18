@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/pack_list_provider.dart';
-import '../widgets/pack_list_card.dart.dart';
-import '../widgets/buttons/pack_list_icon_badge.dart';
-import '../widgets/buttons/filter_bar.dart';
+import '../widgets/pack_list/pack_list_card.dart';
+import 'package:tawakad_app/core/widgets/cards/app_icon_badge.dart';
+import '../../../../core/widgets/filter_bar.dart';
 import '../widgets/home_empty_state.dart';
-import '../widgets/search_empty_state.dart';
+import '../../../../core/widgets/search_empty_state.dart';
 import '../pages/primary_create_list_page.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
+
+enum FilterOption { today, favorites, all }
 
 class HomePage extends StatefulWidget {
   final String searchQuery;
@@ -37,10 +39,9 @@ class _HomeState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     final allLists = context.watch<PackListProvider>().lists;
-
     final today = DateTime.now();
+
     final afterFilter = allLists.where((p) {
       switch (_activeFilter) {
         case FilterOption.today:
@@ -58,9 +59,9 @@ class _HomeState extends State<HomePage> {
     final filtered = widget.searchQuery.isEmpty
         ? afterFilter
         : afterFilter
-            .where((p) => p.title.toLowerCase().contains(
-                  widget.searchQuery.toLowerCase(),
-                ))
+            .where((p) => p.title
+                .toLowerCase()
+                .contains(widget.searchQuery.toLowerCase()))
             .toList();
 
     Widget mainContent = const Padding(
@@ -85,7 +86,7 @@ class _HomeState extends State<HomePage> {
         toolbarHeight: kToolbarHeight + 40,
         actions: [
           const SizedBox(width: 24),
-          PackListIconBadge(
+          AppIconBadge(
             icon: Icons.person,
             iconColor: theme.iconTheme.color ?? theme.colorScheme.onSurface,
           ),
@@ -110,10 +111,16 @@ class _HomeState extends State<HomePage> {
           children: [
             Align(
               alignment: Alignment.topRight,
-              child: GlassFilterBar(
-                initialFilter: _activeFilter,
-                onFilterChanged: (filter) {
-                  setState(() => _activeFilter = filter);
+              child: AppFilterBar(
+                labels: const [
+                  'قوائم اليوم',
+                  'القوائم المفضلة',
+                  'جميع القوائم',
+                ],
+                chipWidth: 115.0,
+                initialIndex: 0,
+                onFilterChanged: (index) {
+                  setState(() => _activeFilter = FilterOption.values[index]);
                 },
               ),
             ),

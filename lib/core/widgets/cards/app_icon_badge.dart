@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 
-class PackListIconBadge extends StatelessWidget {
-  const PackListIconBadge({
+class AppIconBadge extends StatelessWidget {
+  const AppIconBadge({
     super.key,
     required this.icon,
     this.onPressed,

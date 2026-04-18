@@ -1,76 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_bar.dart';
 
-enum FilterOption { today, favorites, all }
-
-extension FilterOptionLabel on FilterOption {
-  String get label {
-    switch (this) {
-      case FilterOption.today:
-        return 'اليوم';
-      case FilterOption.favorites:
-        return 'المفضل';
-      case FilterOption.all:
-        return 'الكل';
-    }
-  }
-}
-
-class GlassFilterBar extends StatefulWidget {
-  final FilterOption initialFilter;
-  final ValueChanged<FilterOption>? onFilterChanged;
+class AppFilterBar extends StatefulWidget {
+  final List<String> labels;
+  final int initialIndex;
+  final ValueChanged<int>? onFilterChanged;
   final double chipWidth;
   final double height;
 
-  const GlassFilterBar({
+  const AppFilterBar({
     super.key,
-    this.initialFilter = FilterOption.today,
+    required this.labels,
+    this.initialIndex = 0,
     this.onFilterChanged,
     this.chipWidth = 90.0,
     this.height = 40.0,
   });
 
   @override
-  State<GlassFilterBar> createState() => _GlassFilterBarState();
+  State<AppFilterBar> createState() => _AppFilterBarState();
 }
 
-class _GlassFilterBarState extends State<GlassFilterBar> {
-  late FilterOption _selected;
+class _AppFilterBarState extends State<AppFilterBar> {
+  late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    _selected = widget.initialFilter;
+    _selectedIndex = widget.initialIndex;
   }
 
   @override
   Widget build(BuildContext context) {
-    const options = FilterOption.values;
     const pillInset = 4.0;
-    final totalWidth = (widget.chipWidth * options.length) + (pillInset * 2);
-    final selectedIndex = options.indexOf(_selected);
+    final totalWidth =
+        (widget.chipWidth * widget.labels.length) + (pillInset * 2);
 
     return GlassSurface(
       height: widget.height,
       width: totalWidth,
-      selectedIndex: selectedIndex,
-      itemCount: options.length,
+      selectedIndex: _selectedIndex,
+      itemCount: widget.labels.length,
       pillInset: pillInset,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: pillInset),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: options.map((option) {
+          children: List.generate(widget.labels.length, (i) {
             return _FilterChip(
-              label: option.label,
-              isSelected: option == _selected,
+              label: widget.labels[i],
+              isSelected: i == _selectedIndex,
               width: widget.chipWidth,
               onTap: () {
-                setState(() => _selected = option);
-                widget.onFilterChanged?.call(option);
+                setState(() => _selectedIndex = i);
+                widget.onFilterChanged?.call(i);
               },
             );
-          }).toList(),
+          }),
         ),
       ),
     );

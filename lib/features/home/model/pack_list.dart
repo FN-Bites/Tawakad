@@ -41,6 +41,13 @@ class PackList {
   int get itemCount => items.length;
   Color get color => Color(colorValue);
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is PackList && other.id == id);
+
+  @override
+  int get hashCode => id.hashCode;
+
   factory PackList.create({
     required String userId,
     required String title,

@@ -1,44 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_overlays.dart';
-import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
-import 'pack_list/pack_list_item.dart';
-import '../../model/pack_list.dart';
 
-class PackListCard extends StatelessWidget {
-  final List<PackList> lists;
+class AppSwipeToDelete extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onDelete;
+  final String dialogTitle;
+  final String dialogMessage;
+  final String confirmLabel;
+  final String cancelLabel;
 
-  const PackListCard({super.key, required this.lists});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: lists.length,
-      itemBuilder: (ctx, index) => _SwipeToDeleteItem(
-        key: ValueKey(lists[index].id),
-        onDelete: () =>
-            context.read<PackListProvider>().removeList(lists[index].id),
-        child: PackListItem(lists[index]),
-      ),
-    );
-  }
-}
-
-class _SwipeToDeleteItem extends StatefulWidget {
-  const _SwipeToDeleteItem({
+  const AppSwipeToDelete({
     super.key,
     required this.child,
     required this.onDelete,
+    this.dialogTitle = 'حذف',
+    this.dialogMessage = 'هل أنت متأكد أنك تريد الحذف؟',
+    this.confirmLabel = 'حذف',
+    this.cancelLabel = 'إلغاء',
   });
 
-  final Widget child;
-  final VoidCallback onDelete;
-
   @override
-  State<_SwipeToDeleteItem> createState() => _SwipeToDeleteItemState();
+  State<AppSwipeToDelete> createState() => _AppSwipeToDeleteState();
 }
 
-class _SwipeToDeleteItemState extends State<_SwipeToDeleteItem>
+class _AppSwipeToDeleteState extends State<AppSwipeToDelete>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _slideAnimation;
@@ -84,7 +69,6 @@ class _SwipeToDeleteItemState extends State<_SwipeToDeleteItem>
 
   Future<void> _confirmDelete() async {
     _close();
-
     final confirmed = await showDialog<bool>(
       context: context,
       barrierColor: Colors.black.withOpacity(0.35),
@@ -93,17 +77,16 @@ class _SwipeToDeleteItemState extends State<_SwipeToDeleteItem>
         elevation: 0,
         insetPadding: const EdgeInsets.symmetric(horizontal: 28),
         child: AppGlassDialog(
-          title: 'حذف القائمة',
-          message: 'هل أنت متأكد أنك تريد حذف هذه القائمة؟',
-          primaryLabel: 'حذف',
-          secondaryLabel: 'إلغاء',
+          title: widget.dialogTitle,
+          message: widget.dialogMessage,
+          primaryLabel: widget.confirmLabel,
+          secondaryLabel: widget.cancelLabel,
           isPrimaryDestructive: true,
           onPrimaryPressed: () => Navigator.pop(ctx, true),
           onSecondaryPressed: () => Navigator.pop(ctx, false),
         ),
       ),
     );
-
     if (confirmed == true) widget.onDelete();
   }
 
