@@ -109,7 +109,7 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
         backgroundColor: bgColor,
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 64, 16, 24),
             child: Column(
               children: [
                 const SizedBox(height: 2),
