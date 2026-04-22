@@ -51,6 +51,7 @@ dependencies:
   permission_handler: ^11.3.1
   convert: ^3.0.0
   shared_preferences: ^2.3.0
+  flutter_foreground_task: ^9.2.2
 
 dev_dependencies:
   flutter_test:
@@ -115,6 +116,8 @@ flutter:
     - assets/animation/logo_glitter.riv
     - assets/animation/lists.riv
     - assets/animation/scanning.riv
+    - assets/animation/devices.riv
+    - assets/animation/bluetooth_scan.riv
     - assets/animation/location_icon.riv
     - assets/animation/searchin.riv
     - assets/icons/nav_bar/calender.png

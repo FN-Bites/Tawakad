@@ -142,4 +142,31 @@ class PackListProvider extends ChangeNotifier {
     _lists[i] = _lists[i].copyWith(checkedIndices: current);
     notifyListeners();
   }
+
+  /// Called by the BLE auto-scan: finds [itemName] inside [listId] and
+  /// marks it as checked.  If it is already checked nothing changes.
+  /// If [itemName] is not found the call is silently ignored.
+  void checkItemByName(String listId, String itemName) {
+    final i = _lists.indexWhere((l) => l.id == listId);
+    if (i == -1) return;
+
+    final itemIndex = _lists[i].items.indexOf(itemName);
+    if (itemIndex == -1) return; // item not in this list
+
+    final current = Set<int>.from(_lists[i].checkedIndices);
+    if (current.contains(itemIndex)) return; // already checked — no-op
+
+    current.add(itemIndex);
+    _lists[i] = _lists[i].copyWith(checkedIndices: current);
+    notifyListeners();
+  }
+
+  /// Returns the scheduled time string ("HH:mm") for a list, or null.
+  String? listTime(String listId) {
+    try {
+      return _lists.firstWhere((l) => l.id == listId).time;
+    } catch (_) {
+      return null;
+    }
+  }
 }

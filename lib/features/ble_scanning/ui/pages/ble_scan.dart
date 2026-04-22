@@ -4,15 +4,23 @@ import 'package:tawakad_app/core/widgets/cards/app_icon_badge.dart';
 import 'package:tawakad_app/core/widgets/filter_bar.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
-import 'package:tawakad_app/features/ble_scanning/provider/ble_provider.dart';
+import 'package:tawakad_app/features/ble_scanning/provider/ble_item_provider.dart';
 import '../widgets/ble_item/ble_item_card.dart';
 import '../widgets/ble_empty_state.dart';
+import 'package:tawakad_app/core/widgets/search_empty_state.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/pages/create_ble_item.dart';
 
 enum BleFilterOption { all, today, favorites }
 
 class BleScanPage extends StatefulWidget {
-  const BleScanPage({super.key});
+  final VoidCallback? onGoToScan;
+  final String searchQuery;
+
+  const BleScanPage({
+    super.key,
+    this.onGoToScan,
+    this.searchQuery = '',
+  });
 
   @override
   State<BleScanPage> createState() => _BleScanPageState();
@@ -24,11 +32,12 @@ class _BleScanPageState extends State<BleScanPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ble = context.watch<BleProvider>();
+    final bleItems = context.watch<BleItemProvider>();
     final now = DateTime.now();
 
-    final allItems = ble.savedItems;
-    final filtered = allItems.where((d) {
+    final allItems = bleItems.savedItems;
+
+    final afterFilter = allItems.where((d) {
       switch (_activeFilter) {
         case BleFilterOption.all:
           return true;
@@ -41,6 +50,13 @@ class _BleScanPageState extends State<BleScanPage> {
       }
     }).toList();
 
+    final filtered = widget.searchQuery.isEmpty
+        ? afterFilter
+        : afterFilter
+            .where((d) =>
+                d.name.toLowerCase().contains(widget.searchQuery.toLowerCase()))
+            .toList();
+
     Widget mainContent = const Padding(
       padding: EdgeInsets.only(bottom: 200),
       child: Center(child: BleEmptyState()),
@@ -50,6 +66,11 @@ class _BleScanPageState extends State<BleScanPage> {
       mainContent = ListView.builder(
         itemCount: filtered.length,
         itemBuilder: (ctx, index) => BleItemCard(item: filtered[index]),
+      );
+    } else if (widget.searchQuery.isNotEmpty && filtered.isEmpty) {
+      mainContent = const Padding(
+        padding: EdgeInsets.only(bottom: 200),
+        child: Center(child: SearchEmptyState()),
       );
     }
 
@@ -66,23 +87,27 @@ class _BleScanPageState extends State<BleScanPage> {
             iconColor: theme.iconTheme.color ?? theme.colorScheme.onSurface,
           ),
           const SizedBox(width: 16),
-          Text(
-            'المسح',
-            style: theme.textTheme.bodyLarge,
-          ),
+          Text('المسح', style: theme.textTheme.bodyLarge),
           const Spacer(),
           AppLiquidButtons.iconWithLabel(
             icon: Icons.add,
             label: 'إضافة غرض',
             onPressed: () {
+              final shellNavigator = Navigator.of(context);
+
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 useSafeArea: true,
-                builder: (_) => const SizedBox(
+                builder: (_) => SizedBox(
                   height: double.infinity,
-                  child: CreateBleItemPage(),
+                  child: CreateBleItemPage(
+                    onItemSaved: () {
+                      shellNavigator.pop();
+                      widget.onGoToScan?.call();
+                    },
+                  ),
                 ),
               );
             },

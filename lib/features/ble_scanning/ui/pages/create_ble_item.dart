@@ -2,15 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/favorite_button.dart';
 import 'package:tawakad_app/features/ble_scanning/model/ble_item.dart';
-import 'package:tawakad_app/features/ble_scanning/provider/ble_provider.dart';
+import 'package:tawakad_app/features/ble_scanning/provider/ble_item_provider.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/widgets/color_picker.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/widgets/icon_picker.dart';
 import 'package:tawakad_app/features/home/model/pack_list.dart';
 import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
+import 'map_ble_item_page.dart';
 
 class CreateBleItemPage extends StatefulWidget {
-  const CreateBleItemPage({super.key});
+  final VoidCallback? onItemSaved;
+  final BleItem? existing;
+
+  const CreateBleItemPage({
+    super.key,
+    this.onItemSaved,
+    this.existing,
+  });
 
   @override
   State<CreateBleItemPage> createState() => _CreateBleItemPageState();
@@ -18,13 +27,31 @@ class CreateBleItemPage extends StatefulWidget {
 
 class _CreateBleItemPageState extends State<CreateBleItemPage> {
   final TextEditingController _nameController = TextEditingController();
-  Color _selectedColor = BleColorsPicker.colors[0];
-  String _selectedIcon = BleIconsPicker.icons[0];
+  late Color _selectedColor;
+  late String _selectedIcon;
+  late bool _isFavorite;
   bool _nameInvalid = false;
   bool _listInvalid = false;
-  PackList? _selectedList;
+  final List<PackList> _selectedLists = [];
 
+  bool get _isEditing => widget.existing != null;
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    if (e != null) {
+      _nameController.text = e.name;
+      _selectedColor = e.color;
+      _selectedIcon = e.iconPath;
+      _isFavorite = e.isFavorite;
+    } else {
+      _selectedColor = BleColorsPicker.colors[0];
+      _selectedIcon = BleIconsPicker.icons[0];
+      _isFavorite = false;
+    }
+  }
 
   @override
   void dispose() {
@@ -32,30 +59,66 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
     super.dispose();
   }
 
+  void _toggleList(PackList list) {
+    setState(() {
+      if (_selectedLists.any((l) => l.id == list.id)) {
+        _selectedLists.removeWhere((l) => l.id == list.id);
+      } else {
+        _selectedLists.add(list);
+      }
+      if (_selectedLists.isNotEmpty) _listInvalid = false;
+    });
+  }
+
   void _submit() {
     FocusScope.of(context).unfocus();
     final name = _nameController.text.trim();
     setState(() {
       _nameInvalid = name.isEmpty;
-      _listInvalid = _selectedList == null;
+      _listInvalid = !_isEditing && _selectedLists.isEmpty;
     });
     if (_nameInvalid || _listInvalid) return;
 
-    context.read<PackListProvider>().addItem(_selectedList!.id, name);
+    if (_isEditing) {
+      final updated = widget.existing!.copyWith(
+        name: name,
+        iconPath: _selectedIcon,
+        colorValue: _selectedColor.value,
+        isFavorite: _isFavorite,
+      );
+      context.read<BleItemProvider>().updateSavedItem(updated);
+      Navigator.maybePop(context);
+      widget.onItemSaved?.call();
+    } else {
+      final packListProvider = context.read<PackListProvider>();
+      for (final list in _selectedLists) {
+        packListProvider.addItem(list.id, name);
+      }
 
-    context.read<BleProvider>().addSavedItem(
-          BleItem(
-            deviceId: DateTime.now().millisecondsSinceEpoch.toString(),
-            name: name,
-            rssi: 0,
-            smoothedRssi: 0,
-            lastSeen: DateTime.now(),
-            iconPath: _selectedIcon,
-            colorValue: _selectedColor.value,
+      final newItem = BleItem(
+        deviceId: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: name,
+        rssi: 0,
+        smoothedRssi: 0,
+        lastSeen: DateTime.now(),
+        iconPath: _selectedIcon,
+        colorValue: _selectedColor.value,
+        isFavorite: _isFavorite,
+        listIds: _selectedLists.map((l) => l.id).toList(),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MapBleItemPage(
+            item: newItem,
+            listId: _selectedLists.first.id,
+            checklistItemName:
+                name, // ← FIXED: name is exactly what was added to PackList.items above
+            onItemSaved: widget.onItemSaved,
           ),
-        );
-
-    Navigator.maybePop(context);
+        ),
+      );
+    }
   }
 
   Widget _sectionTitle(String text) {
@@ -105,12 +168,8 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
   @override
   Widget build(BuildContext context) {
     final lists = context.watch<PackListProvider>().lists;
-
-    if (_selectedList != null && !lists.any((l) => l.id == _selectedList!.id)) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() => _selectedList = null);
-      });
-    }
+    final validIds = lists.map((l) => l.id).toSet();
+    _selectedLists.removeWhere((l) => !validIds.contains(l.id));
 
     final bgColor =
         _isDark ? AppDarkColors.background : const Color(0xFFF1F4F8);
@@ -152,7 +211,7 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
                     alignment: Alignment.center,
                     children: [
                       Text(
-                        'إضافة غرض',
+                        _isEditing ? 'تعديل الغرض' : 'إضافة غرض',
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: _isDark ? AppDarkColors.textPrimary : null,
                             ),
@@ -173,18 +232,28 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
                             onTap: () => Navigator.maybePop(context),
                             backgroundColor: closeBtnBg,
                           ),
-                          _circleButton(
-                            child: const CustomPaint(
-                              size: Size(22, 22),
-                              painter: BoldIconPainter(
-                                icon: Icons.check,
-                                color: Colors.white,
-                                size: 22,
-                                strokeExtra: 1.2,
+                          Row(
+                            children: [
+                              FavoriteToggleButton(
+                                isFavorite: _isFavorite,
+                                onToggle: () =>
+                                    setState(() => _isFavorite = !_isFavorite),
                               ),
-                            ),
-                            onTap: _submit,
-                            backgroundColor: const Color(0xFF1F8EFA),
+                              const SizedBox(width: 10),
+                              _circleButton(
+                                child: const CustomPaint(
+                                  size: Size(22, 22),
+                                  painter: BoldIconPainter(
+                                    icon: Icons.check,
+                                    color: Colors.white,
+                                    size: 22,
+                                    strokeExtra: 1.2,
+                                  ),
+                                ),
+                                onTap: _submit,
+                                backgroundColor: const Color(0xFF1F8EFA),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -315,122 +384,159 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 22),
-                _sectionTitle('أضف إلى قائمة'),
-                Container(
-                  width: double.infinity,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(24),
-                    border: _listInvalid
-                        ? Border.all(color: const Color(0xFFE53935), width: 1.5)
-                        : null,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(_isDark ? 0.25 : 0.06),
-                        blurRadius: 22,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: lists.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Text(
-                            'لا توجد قوائم بعد',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: hintColor,
-                              fontSize: 14,
-                            ),
-                          ),
-                        )
-                      : DropdownButtonHideUnderline(
-                          child: DropdownButton<PackList>(
-                            value: lists.any((l) => l.id == _selectedList?.id)
-                                ? _selectedList
-                                : null,
-                            isExpanded: true,
-                            hint: Text(
-                              'اختر قائمة',
-                              textDirection: TextDirection.rtl,
+                if (!_isEditing) ...[
+                  const SizedBox(height: 22),
+                  _sectionTitle('أضف إلى قوائم'),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: cardBg,
+                      borderRadius: BorderRadius.circular(24),
+                      border: _listInvalid
+                          ? Border.all(
+                              color: const Color(0xFFE53935), width: 1.5)
+                          : null,
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                              Colors.black.withOpacity(_isDark ? 0.25 : 0.06),
+                          blurRadius: 22,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: lists.isEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Text(
+                              'لا توجد قوائم بعد',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: _listInvalid
-                                    ? const Color(0xFFE53935)
-                                    : hintColor,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
+                                color: hintColor,
+                                fontSize: 14,
                               ),
                             ),
-                            dropdownColor: cardBg,
-                            borderRadius: BorderRadius.circular(18),
-                            icon: Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: _listInvalid
-                                  ? const Color(0xFFE53935)
-                                  : hintColor,
-                            ),
-                            items: lists.map((list) {
-                              return DropdownMenuItem<PackList>(
-                                value: list,
-                                child: Row(
+                          )
+                        : Column(
+                            children: lists.asMap().entries.map((entry) {
+                              final i = entry.key;
+                              final list = entry.value;
+                              final isChecked =
+                                  _selectedLists.any((l) => l.id == list.id);
+                              final isLast = i == lists.length - 1;
+
+                              return InkWell(
+                                onTap: () => _toggleList(list),
+                                borderRadius: BorderRadius.vertical(
+                                  top: i == 0
+                                      ? const Radius.circular(24)
+                                      : Radius.zero,
+                                  bottom: isLast
+                                      ? const Radius.circular(24)
+                                      : Radius.zero,
+                                ),
+                                child: Column(
                                   children: [
-                                    CircleAvatar(
-                                      radius: 14,
-                                      backgroundColor: list.color,
-                                      child: Image.asset(
-                                        list.iconPath,
-                                        width: 16,
-                                        height: 16,
-                                        color: Colors.white,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(
-                                          Icons.list_alt_rounded,
-                                          color: Colors.white,
-                                          size: 14,
-                                        ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16, vertical: 13),
+                                      child: Row(
+                                        children: [
+                                          AnimatedContainer(
+                                            duration: const Duration(
+                                                milliseconds: 200),
+                                            width: 24,
+                                            height: 24,
+                                            decoration: BoxDecoration(
+                                              color: isChecked
+                                                  ? list.color
+                                                  : Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(7),
+                                              border: Border.all(
+                                                color: isChecked
+                                                    ? list.color
+                                                    : _isDark
+                                                        ? AppDarkColors
+                                                            .placeholder
+                                                        : const Color(
+                                                            0xFFB2B2B8),
+                                                width: 1.8,
+                                              ),
+                                            ),
+                                            child: isChecked
+                                                ? const Icon(
+                                                    Icons.check_rounded,
+                                                    color: Colors.white,
+                                                    size: 15,
+                                                  )
+                                                : null,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          CircleAvatar(
+                                            radius: 16,
+                                            backgroundColor: list.color,
+                                            child: Image.asset(
+                                              list.iconPath,
+                                              width: 18,
+                                              height: 18,
+                                              color: Colors.white,
+                                              errorBuilder: (_, __, ___) =>
+                                                  const Icon(
+                                                Icons.list_alt_rounded,
+                                                color: Colors.white,
+                                                size: 14,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Expanded(
+                                            child: Text(
+                                              list.title,
+                                              textDirection: TextDirection.rtl,
+                                              style: TextStyle(
+                                                color: textColor,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(width: 10),
-                                    Text(
-                                      list.title,
-                                      textDirection: TextDirection.rtl,
-                                      style: TextStyle(
-                                        color: textColor,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
+                                    if (!isLast)
+                                      Divider(
+                                        height: 1,
+                                        indent: 16,
+                                        endIndent: 16,
+                                        color: _isDark
+                                            ? AppDarkColors.fieldBorder
+                                            : const Color(0xFFEEEEF0),
                                       ),
-                                    ),
                                   ],
                                 ),
                               );
                             }).toList(),
-                            onChanged: (v) => setState(() {
-                              _selectedList = v;
-                              _listInvalid = false;
-                            }),
                           ),
-                        ),
-                ),
-                if (_listInvalid) ...[
-                  const SizedBox(height: 6),
-                  const Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 8),
-                      child: Text(
-                        'الرجاء اختيار قائمة',
-                        textDirection: TextDirection.rtl,
-                        style: TextStyle(
-                          color: Color(0xFFE53935),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
+                  ),
+                  if (_listInvalid) ...[
+                    const SizedBox(height: 6),
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 8),
+                        child: Text(
+                          'الرجاء اختيار قائمة واحدة على الأقل',
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            color: Color(0xFFE53935),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
                 const SizedBox(height: 22),
                 _sectionTitle('لون الغرض'),

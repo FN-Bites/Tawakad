@@ -12,6 +12,8 @@ import 'package:tawakad_app/features/signIn/providers/signIn_flow_provider.dart'
 import 'features/signIn/providers/forgotPassword_flow_provider.dart';
 import 'features/home/provider/pack_list_provider.dart';
 import 'package:tawakad_app/features/ble_scanning/provider/ble_provider.dart';
+import 'package:tawakad_app/core/app_shell.dart';
+import 'package:tawakad_app/features/ble_scanning/provider/ble_item_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,18 +45,51 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => BleProvider(),
         ),
+        ChangeNotifierProxyProvider2<BleProvider, PackListProvider,
+            BleItemProvider>(
+          create: (ctx) {
+            final bleItems = BleItemProvider(ctx.read<BleProvider>());
+            _wireAutoScan(bleItems, ctx.read<PackListProvider>());
+            return bleItems;
+          },
+          update: (ctx, ble, packLists, previous) {
+            previous!.updateBle(ble);
+            _wireAutoScan(previous, packLists);
+            return previous;
+          },
+        ),
       ],
       child: const TawakadApp(),
     ),
   );
 }
 
-class TawakadApp extends StatelessWidget {
+void _wireAutoScan(BleItemProvider bleItems, PackListProvider packLists) {
+  bleItems.onAutoScanResult =
+      (String checklistItemName, String listId, bool isPresent) {
+    if (isPresent) {
+      packLists.checkItemByName(listId, checklistItemName);
+      debugPrint(
+          'Auto-check: "$checklistItemName" in list "$listId" marked as ✓ (BLE present)');
+    } else {
+      debugPrint(
+          'Auto-check: "$checklistItemName" in list "$listId" — signal absent, not checked.');
+    }
+  };
+}
+
+class TawakadApp extends StatefulWidget {
   const TawakadApp({super.key});
 
   @override
+  State<TawakadApp> createState() => _TawakadAppState();
+}
+
+class _TawakadAppState extends State<TawakadApp> {
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: rootNavigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

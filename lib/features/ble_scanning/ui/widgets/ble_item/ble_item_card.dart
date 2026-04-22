@@ -14,7 +14,7 @@ class BleItemCard extends StatelessWidget {
       iconPath: item.iconPath,
       title: item.name,
       subtitle: const Text(
-        'غرض محفوظ',
+        '',
         style: TextStyle(
           fontFamily: 'Montserrat',
           fontSize: 13,

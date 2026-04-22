@@ -4,53 +4,33 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/ble_item.dart';
+import '../../../core/services/ble_background_service.dart';
 
-class BleProvider extends ChangeNotifier {
+class BleProvider extends ChangeNotifier with WidgetsBindingObserver {
   final Map<String, BleItem> _devices = {};
-  final List<BleItem> _savedItems = [];
 
   StreamSubscription<List<ScanResult>>? _scanSub;
   StreamSubscription<BluetoothAdapterState>? _adapterSub;
   Timer? _uiTimer;
-  Timer? _watchdog;
 
   bool _scanning = false;
-  bool _checkMode = false;
   BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
 
-  final Map<String, String> _mappings = {};
-
-  static const String _prefMapPrefix = 'ble_mapping_';
-  static const String _prefMappedItems = 'ble_mapped_items';
-
   bool get scanning => _scanning;
-  bool get checkMode => _checkMode;
   BluetoothAdapterState get adapterState => _adapterState;
-  Map<String, String> get mappings => Map.unmodifiable(_mappings);
-  List<BleItem> get savedItems => List.unmodifiable(_savedItems);
 
   List<BleItem> get deviceList => _devices.values.toList()
     ..sort((a, b) => b.smoothedRssi.compareTo(a.smoothedRssi));
 
-  String? mappedDeviceId(String itemName) => _mappings[itemName];
+  bool isDevicePresent(String deviceId) =>
+      _devices[deviceId]?.isPresent(DateTime.now()) ?? false;
 
-  bool isItemPresent(String itemName, DateTime now) {
-    final deviceId = _mappings[itemName];
-    if (deviceId == null) return false;
-    return _devices[deviceId]?.isPresent(now) ?? false;
-  }
-
-  BleItem? deviceForItem(String itemName) {
-    final deviceId = _mappings[itemName];
-    if (deviceId == null) return null;
-    return _devices[deviceId];
-  }
+  BleItem? deviceById(String deviceId) => _devices[deviceId];
 
   BleProvider() {
-    _loadPrefs();
+    WidgetsBinding.instance.addObserver(this);
     _listenAdapter();
     _listenScan();
     _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -60,56 +40,177 @@ class BleProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _scanSub?.cancel();
     _adapterSub?.cancel();
     _uiTimer?.cancel();
-    _watchdog?.cancel();
     FlutterBluePlus.stopScan();
     super.dispose();
   }
 
-  // ── Saved Items ──────────────────────────────────────────
+  // ── App lifecycle ─────────────────────────────────────────────────────
 
-  void addSavedItem(BleItem item) {
-    _savedItems.add(item);
-    notifyListeners();
-  }
-
-  void removeSavedItem(String deviceId) {
-    _savedItems.removeWhere((i) => i.deviceId == deviceId);
-    notifyListeners();
-  }
-
-  void toggleFavorite(String deviceId) {
-    final index = _savedItems.indexWhere((i) => i.deviceId == deviceId);
-    if (index == -1) return;
-    _savedItems[index] = _savedItems[index].copyWith(
-      isFavorite: !_savedItems[index].isFavorite,
-    );
-    notifyListeners();
-  }
-
-  // ── Prefs ────────────────────────────────────────────────
-
-  Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final mappedItems = prefs.getStringList(_prefMappedItems) ?? [];
-    for (final itemName in mappedItems) {
-      final deviceId = prefs.getString('$_prefMapPrefix$itemName');
-      if (deviceId != null) _mappings[itemName] = deviceId;
-    }
-    notifyListeners();
-  }
-
-  Future<void> _savePrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefMappedItems, _mappings.keys.toList());
-    for (final entry in _mappings.entries) {
-      await prefs.setString('$_prefMapPrefix${entry.key}', entry.value);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_scanning) return;
+    if (!Platform.isAndroid) return;
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        _handOffToBackground();
+      case AppLifecycleState.resumed:
+        _reclaimFromBackground();
+      default:
+        break;
     }
   }
 
-  // ── BLE ──────────────────────────────────────────────────
+  Future<void> _handOffToBackground() async {
+    try {
+      if (FlutterBluePlus.isScanningNow) await FlutterBluePlus.stopScan();
+    } catch (_) {}
+    await BleBackgroundService.start();
+    debugPrint('BleProvider: handed off to background service');
+  }
+
+  Future<void> _reclaimFromBackground() async {
+    await BleBackgroundService.stop();
+    await Future.delayed(const Duration(milliseconds: 300));
+    try {
+      await FlutterBluePlus.startScan(
+        androidUsesFineLocation: true,
+        androidScanMode: AndroidScanMode.lowLatency,
+        continuousUpdates: true,
+        continuousDivisor: 1,
+      );
+    } catch (e) {
+      debugPrint('BleProvider: reclaim scan failed: $e');
+    }
+    debugPrint('BleProvider: reclaimed scan from background service');
+  }
+
+  // ── Scanning ──────────────────────────────────────────────────────────
+
+  Future<void> startScan() async {
+    if (_adapterState != BluetoothAdapterState.on) return;
+    if (!await _requestPermissions()) return;
+    _scanning = true;
+    _devices.clear();
+    notifyListeners();
+    try {
+      if (FlutterBluePlus.isScanningNow) await FlutterBluePlus.stopScan();
+      await FlutterBluePlus.startScan(
+        androidUsesFineLocation: true,
+        androidScanMode: AndroidScanMode.lowLatency,
+        continuousUpdates: true,
+        continuousDivisor: 1,
+      );
+    } catch (e) {
+      debugPrint('Scan start failed: $e');
+      _scanning = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> stopScan() async {
+    await BleBackgroundService.stop();
+    try {
+      if (FlutterBluePlus.isScanningNow) await FlutterBluePlus.stopScan();
+    } catch (e) {
+      debugPrint('Scan stop error: $e');
+    }
+    _scanning = false;
+    _devices.clear();
+    notifyListeners();
+  }
+
+  // ── Auto-scan probe (isolated, does not affect shared state) ──────────
+
+  Future<bool> probeSingleDevice(
+    String deviceId, {
+    Duration listenDuration = const Duration(minutes: 5),
+  }) async {
+    if (_adapterState != BluetoothAdapterState.on) {
+      debugPrint('probeSingleDevice: BT adapter is off, aborting.');
+      return false;
+    }
+    if (!await _requestPermissions()) {
+      debugPrint('probeSingleDevice: permissions denied, aborting.');
+      return false;
+    }
+
+    final completer = Completer<bool>();
+    StreamSubscription<List<ScanResult>>? sub;
+    Timer? timeout;
+
+    Future<void> cleanup() async {
+      await sub?.cancel();
+      timeout?.cancel();
+      try {
+        if (FlutterBluePlus.isScanningNow) await FlutterBluePlus.stopScan();
+      } catch (_) {}
+    }
+
+    try {
+      if (FlutterBluePlus.isScanningNow) {
+        await FlutterBluePlus.stopScan();
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      // Record when this probe started — reject anything older
+      final probeStarted = DateTime.now();
+
+      sub = FlutterBluePlus.scanResults.listen((results) {
+        for (final r in results) {
+          final id = r.device.remoteId.str;
+          final rssi = r.rssi;
+
+          debugPrint(
+              'probeSingleDevice: saw $id rssi=$rssi (looking for $deviceId)');
+
+          // ✅ Reject stale cached results from before this probe started
+          if (r.timeStamp.isBefore(probeStarted)) {
+            debugPrint('probeSingleDevice: skipping stale result for $id');
+            continue;
+          }
+
+          if (id == deviceId &&
+              rssi != 127 &&
+              rssi != -127 &&
+              rssi != 0 &&
+              rssi >= kPresenceRssi) {
+            debugPrint('probeSingleDevice: FOUND $deviceId at rssi=$rssi ✓');
+            if (!completer.isCompleted) completer.complete(true);
+          }
+        }
+      });
+
+      timeout = Timer(listenDuration, () {
+        debugPrint('probeSingleDevice: timeout reached, $deviceId NOT FOUND');
+        if (!completer.isCompleted) completer.complete(false);
+      });
+
+      await FlutterBluePlus.startScan(
+        androidUsesFineLocation: true,
+        androidScanMode: AndroidScanMode.lowLatency,
+        continuousUpdates: true,
+        continuousDivisor: 1,
+      );
+
+      debugPrint(
+          'probeSingleDevice: scan started, listening for $deviceId for ${listenDuration.inSeconds}s...');
+
+      return await completer.future;
+    } catch (e) {
+      debugPrint('probeSingleDevice error: $e');
+      if (!completer.isCompleted) completer.complete(false);
+      return false;
+    } finally {
+      await cleanup();
+    }
+  }
+
+  // ── Internals ─────────────────────────────────────────────────────────
 
   void _listenAdapter() {
     _adapterSub = FlutterBluePlus.adapterState.listen((s) {
@@ -124,19 +225,16 @@ class BleProvider extends ChangeNotifier {
       for (final r in results) {
         if (r.rssi == 127 || r.rssi == -127 || r.rssi == 0) continue;
         final id = r.device.remoteId.str;
-        final name = _resolveName(r);
         final existing = _devices[id];
         final smoothed = existing == null
             ? r.rssi.toDouble()
             : existing.smoothedRssi * (1 - kRssiAlpha) + r.rssi * kRssiAlpha;
         _devices[id] = BleItem(
           deviceId: id,
-          name: name,
+          name: _resolveName(r),
           rssi: r.rssi,
           smoothedRssi: smoothed,
           lastSeen: now,
-          iconPath: '',
-          colorValue: 0xFF1F8EFA,
         );
       }
       notifyListeners();
@@ -159,77 +257,5 @@ class BleProvider extends ChangeNotifier {
       Permission.location,
     ].request();
     return !statuses.values.any((s) => s.isDenied || s.isPermanentlyDenied);
-  }
-
-  Future<void> startScan({bool checkMode = false}) async {
-    if (_adapterState != BluetoothAdapterState.on) return;
-    if (!await _requestPermissions()) return;
-    _scanning = true;
-    _checkMode = checkMode;
-    _devices.clear();
-    notifyListeners();
-    try {
-      if (FlutterBluePlus.isScanningNow) await FlutterBluePlus.stopScan();
-      await FlutterBluePlus.startScan(
-        androidUsesFineLocation: true,
-        androidScanMode: AndroidScanMode.lowLatency,
-        continuousUpdates: true,
-        continuousDivisor: 1,
-      );
-      _startWatchdog();
-    } catch (e) {
-      debugPrint('Scan start failed: $e');
-      _scanning = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> stopScan() async {
-    _watchdog?.cancel();
-    try {
-      if (FlutterBluePlus.isScanningNow) await FlutterBluePlus.stopScan();
-    } catch (e) {
-      debugPrint('Scan stop error: $e');
-    }
-    _scanning = false;
-    _checkMode = false;
-    _devices.clear();
-    notifyListeners();
-  }
-
-  void _startWatchdog() {
-    _watchdog?.cancel();
-    _watchdog = Timer.periodic(const Duration(seconds: 6), (_) async {
-      if (!_scanning) return;
-      if (!FlutterBluePlus.isScanningNow) {
-        debugPrint('Watchdog: restarting scan…');
-        try {
-          await FlutterBluePlus.startScan(
-            androidUsesFineLocation: true,
-            androidScanMode: AndroidScanMode.lowLatency,
-            continuousUpdates: true,
-            continuousDivisor: 1,
-          );
-        } catch (e) {
-          debugPrint('Watchdog restart failed: $e');
-        }
-      }
-    });
-  }
-
-  void mapItem(String itemName, String deviceId) {
-    _mappings[itemName] = deviceId;
-    _savePrefs();
-    notifyListeners();
-  }
-
-  void unmapItem(String itemName) {
-    _mappings.remove(itemName);
-    _savePrefs();
-    notifyListeners();
-  }
-
-  void onItemRemoved(String itemName) {
-    unmapItem(itemName);
   }
 }

@@ -4,6 +4,8 @@ import 'package:tawakad_app/core/widgets/glass_elements/glass_search_button.dart
 import 'package:tawakad_app/features/home/ui/pages/home_page.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/pages/ble_scan.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -37,6 +39,8 @@ class _AppShellState extends State<AppShell>
     super.dispose();
   }
 
+  void _goToScan() => setState(() => _index = 2);
+
   static const List<GlassNavItem> _items = [
     GlassNavItem(assetPath: 'assets/icons/nav_bar/home.png', label: 'الرئيسية'),
     GlassNavItem(
@@ -49,7 +53,7 @@ class _AppShellState extends State<AppShell>
     final page = switch (_index) {
       0 => HomePage(searchQuery: _searchQuery),
       1 => const _PlaceholderPage(label: 'التقويم'),
-      2 => const BleScanPage(),
+      2 => BleScanPage(searchQuery: _searchQuery, onGoToScan: _goToScan),
       _ => const _PlaceholderPage(label: ''),
     };
 
@@ -60,7 +64,10 @@ class _AppShellState extends State<AppShell>
         navSlide: _navSlide,
         currentIndex: _index,
         items: _items,
-        onNavTap: (i) => setState(() => _index = i),
+        onNavTap: (i) => setState(() {
+          _index = i;
+          _searchQuery = '';
+        }),
         onSearchOpened: () => _navCtrl.forward(),
         onSearchClosed: () => _navCtrl.reverse(),
         onSearchChanged: (q) => setState(() => _searchQuery = q),
@@ -100,6 +107,8 @@ class _SearchNavRow extends StatelessWidget {
     const searchCollapsedW = 64.0;
     final navW = screenW - _sidePad * 2 - searchCollapsedW - _rowGap;
 
+    final hintText = currentIndex == 2 ? 'ابحث عن غرض' : 'ابحث عن قائمة';
+
     return SizedBox(
       height: _rowHeight + _bottomPad + bottomInset,
       child: Padding(
@@ -115,10 +124,11 @@ class _SearchNavRow extends StatelessWidget {
             children: [
               Expanded(
                 child: GlassSearchButton(
+                  key: ValueKey(currentIndex),
                   onOpened: onSearchOpened,
                   onClosed: onSearchClosed,
                   onChanged: onSearchChanged,
-                  hintText: 'ابحث عن قائمة',
+                  hintText: hintText,
                 ),
               ),
               AnimatedBuilder(
