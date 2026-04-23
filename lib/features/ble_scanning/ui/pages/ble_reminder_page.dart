@@ -10,10 +10,8 @@ class BleReminderPage extends StatefulWidget {
   final BleItem item;
   final String listId;
 
-  /// The exact string stored in PackList.items for this checklist entry
-  /// (e.g. "جواز السفر"). Passed to scheduleAutoScan so the auto-scan
-  /// callback can call checkItemByName with the right name.
-  final String checklistItemName; // ← NEW
+
+  final String checklistItemName; 
 
   final VoidCallback? onItemSaved;
 
@@ -21,7 +19,7 @@ class BleReminderPage extends StatefulWidget {
     super.key,
     required this.item,
     required this.listId,
-    required this.checklistItemName, // ← NEW
+    required this.checklistItemName,
     this.onItemSaved,
   });
 
@@ -63,7 +61,7 @@ class _BleReminderPageState extends State<BleReminderPage> {
           bleItems.scheduleAutoScan(
             item: updatedItem,
             listId: listId,
-            checklistItemName: widget.checklistItemName, // ← pass it through
+            checklistItemName: widget.checklistItemName, 
             minutesBefore: _selected!,
             listTime: listTime,
             listDate: list.date,
@@ -161,7 +159,6 @@ class _BleReminderPageState extends State<BleReminderPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Show the checklist item name, not the BLE device name
                             Text(
                               widget.checklistItemName,
                               style: TextStyle(

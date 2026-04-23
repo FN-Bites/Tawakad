@@ -124,28 +124,26 @@ class BleProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  // ── Auto-scan probe (isolated, does not affect shared state) ──────────
-
-  Future<bool> probeSingleDevice(
-    String deviceId, {
-    Duration listenDuration = const Duration(minutes: 5),
+  Future<Map<String, bool>> probeMultipleDevices(
+    List<String> deviceIds, {
+    Duration listenDuration = const Duration(seconds: 20),
   }) async {
+    final results = {for (final id in deviceIds) id: false};
+    final bestRssi = {for (final id in deviceIds) id: -999};
+
     if (_adapterState != BluetoothAdapterState.on) {
-      debugPrint('probeSingleDevice: BT adapter is off, aborting.');
-      return false;
+      debugPrint('probeMultipleDevices: BT adapter is off, aborting.');
+      return results;
     }
     if (!await _requestPermissions()) {
-      debugPrint('probeSingleDevice: permissions denied, aborting.');
-      return false;
+      debugPrint('probeMultipleDevices: permissions denied, aborting.');
+      return results;
     }
 
-    final completer = Completer<bool>();
     StreamSubscription<List<ScanResult>>? sub;
-    Timer? timeout;
 
     Future<void> cleanup() async {
       await sub?.cancel();
-      timeout?.cancel();
       try {
         if (FlutterBluePlus.isScanningNow) await FlutterBluePlus.stopScan();
       } catch (_) {}
@@ -157,37 +155,25 @@ class BleProvider extends ChangeNotifier with WidgetsBindingObserver {
         await Future.delayed(const Duration(milliseconds: 500));
       }
 
-      // Record when this probe started — reject anything older
       final probeStarted = DateTime.now();
 
-      sub = FlutterBluePlus.scanResults.listen((results) {
-        for (final r in results) {
+      sub = FlutterBluePlus.scanResults.listen((scanResults) {
+        for (final r in scanResults) {
           final id = r.device.remoteId.str;
-          final rssi = r.rssi;
-
-          debugPrint(
-              'probeSingleDevice: saw $id rssi=$rssi (looking for $deviceId)');
-
-          // ✅ Reject stale cached results from before this probe started
+          if (!deviceIds.contains(id)) continue;
           if (r.timeStamp.isBefore(probeStarted)) {
-            debugPrint('probeSingleDevice: skipping stale result for $id');
+            debugPrint('probeMultipleDevices: skipping stale result for $id');
             continue;
           }
 
-          if (id == deviceId &&
-              rssi != 127 &&
-              rssi != -127 &&
-              rssi != 0 &&
-              rssi >= kPresenceRssi) {
-            debugPrint('probeSingleDevice: FOUND $deviceId at rssi=$rssi ✓');
-            if (!completer.isCompleted) completer.complete(true);
+          final rssi = r.rssi;
+          if (rssi == 127 || rssi == -127 || rssi == 0) continue;
+
+          if (rssi > (bestRssi[id] ?? -999)) {
+            bestRssi[id] = rssi;
+            debugPrint('probe: $id best rssi now $rssi');
           }
         }
-      });
-
-      timeout = Timer(listenDuration, () {
-        debugPrint('probeSingleDevice: timeout reached, $deviceId NOT FOUND');
-        if (!completer.isCompleted) completer.complete(false);
       });
 
       await FlutterBluePlus.startScan(
@@ -197,17 +183,23 @@ class BleProvider extends ChangeNotifier with WidgetsBindingObserver {
         continuousDivisor: 1,
       );
 
-      debugPrint(
-          'probeSingleDevice: scan started, listening for $deviceId for ${listenDuration.inSeconds}s...');
+      debugPrint('probeMultipleDevices: scan started, listening for '
+          '${deviceIds.join(", ")} for ${listenDuration.inSeconds}s…');
 
-      return await completer.future;
+      await Future.delayed(listenDuration);
     } catch (e) {
-      debugPrint('probeSingleDevice error: $e');
-      if (!completer.isCompleted) completer.complete(false);
-      return false;
+      debugPrint('probeMultipleDevices error: $e');
     } finally {
       await cleanup();
     }
+
+    for (final id in deviceIds) {
+      results[id] = (bestRssi[id] ?? -999) >= kPresenceRssi;
+      debugPrint('probe final: $id rssi=${bestRssi[id]} → '
+          '${results[id]! ? "PRESENT ✓" : "ABSENT ✗"}');
+    }
+
+    return results;
   }
 
   // ── Internals ─────────────────────────────────────────────────────────

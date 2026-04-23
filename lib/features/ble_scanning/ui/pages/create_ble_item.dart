@@ -112,8 +112,7 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
           builder: (_) => MapBleItemPage(
             item: newItem,
             listId: _selectedLists.first.id,
-            checklistItemName:
-                name, // ← FIXED: name is exactly what was added to PackList.items above
+            checklistItemName: name,
             onItemSaved: widget.onItemSaved,
           ),
         ),
@@ -167,7 +166,8 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
 
   @override
   Widget build(BuildContext context) {
-    final lists = context.watch<PackListProvider>().lists;
+    final allLists = context.watch<PackListProvider>().lists;
+    final lists = allLists.where((l) => l.time != null).toList();
     final validIds = lists.map((l) => l.id).toSet();
     _selectedLists.removeWhere((l) => !validIds.contains(l.id));
 
@@ -386,7 +386,23 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
                 ),
                 if (!_isEditing) ...[
                   const SizedBox(height: 22),
-                  _sectionTitle('أضف إلى قوائم'),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 4, bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _sectionTitle('أضف إلى قوائم'),
+                        Text(
+                          'تُعرض فقط القوائم ذات الوقت المحدد، لأن المسح التلقائي يعتمد عليه.',
+                          textDirection: TextDirection.rtl,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: hintColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -409,7 +425,7 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
                         ? Padding(
                             padding: const EdgeInsets.symmetric(vertical: 20),
                             child: Text(
-                              'لا توجد قوائم بعد',
+                              'لا توجد قوائم بوقت محدد بعد',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: hintColor,

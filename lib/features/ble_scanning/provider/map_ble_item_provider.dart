@@ -5,12 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const double kRssiAlpha = 0.08;
 const Duration kFreshWindow = Duration(seconds: 6);
-
-// ─── Scanned device model ─────────────────────────────────────────────────────
 
 class ScannedDevice {
   final String id;
@@ -32,8 +28,6 @@ class ScannedDevice {
   bool get isFresh => DateTime.now().difference(lastSeen) <= kFreshWindow;
 }
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
-
 class MapBleItemProvider extends ChangeNotifier {
   final Map<String, ScannedDevice> _devices = {};
   int _nextOrder = 0;
@@ -46,8 +40,6 @@ class MapBleItemProvider extends ChangeNotifier {
 
   Timer? _watchdog;
 
-  // ── Public getters ─────────────────────────────────────────────────────
-
   BluetoothAdapterState get adapterState => _adapterState;
   bool get scanning => _scanning;
   bool get isBluetoothOn => _adapterState == BluetoothAdapterState.on;
@@ -57,8 +49,6 @@ class MapBleItemProvider extends ChangeNotifier {
       ..sort((a, b) => a.discoveryOrder.compareTo(b.discoveryOrder));
     return list;
   }
-
-  // ── Lifecycle ──────────────────────────────────────────────────────────
 
   MapBleItemProvider() {
     _listenAdapter();
@@ -72,6 +62,15 @@ class MapBleItemProvider extends ChangeNotifier {
     _watchdog?.cancel();
     stopScan();
     super.dispose();
+  }
+
+  // ── Reset ──────────────────────────────────────────────────────────────
+
+  void reset() {
+    _devices.clear();
+    _nextOrder = 0;
+    _scanning = false;
+    notifyListeners();
   }
 
   // ── Adapter listener ───────────────────────────────────────────────────
@@ -127,8 +126,6 @@ class MapBleItemProvider extends ChangeNotifier {
     return '(Unknown)';
   }
 
-  // ── Permissions ────────────────────────────────────────────────────────
-
   Future<bool> _requestPermissions() async {
     if (!Platform.isAndroid) return true;
     final statuses = await [
@@ -138,8 +135,6 @@ class MapBleItemProvider extends ChangeNotifier {
     ].request();
     return !statuses.values.any((s) => s.isDenied || s.isPermanentlyDenied);
   }
-
-  // ── Start scan ─────────────────────────────────────────────────────────
 
   Future<void> startScan() async {
     if (!isBluetoothOn) return;
@@ -166,8 +161,6 @@ class MapBleItemProvider extends ChangeNotifier {
     }
   }
 
-  // ── Stop scan ──────────────────────────────────────────────────────────
-
   Future<void> stopScan() async {
     _watchdog?.cancel();
     try {
@@ -176,8 +169,6 @@ class MapBleItemProvider extends ChangeNotifier {
     _scanning = false;
     notifyListeners();
   }
-
-  // ── Watchdog ───────────────────────────────────────────────────────────
 
   void _startWatchdog() {
     _watchdog?.cancel();

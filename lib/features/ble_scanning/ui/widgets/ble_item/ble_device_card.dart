@@ -79,7 +79,6 @@ class BleDeviceCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
-                  // ── Selection circle ─────────────────────────────────
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     width: 22,
@@ -102,8 +101,6 @@ class BleDeviceCard extends StatelessWidget {
                         : null,
                   ),
                   const SizedBox(width: 12),
-
-                  // ── Bluetooth icon ───────────────────────────────────
                   Container(
                     width: 38,
                     height: 38,
@@ -126,8 +123,6 @@ class BleDeviceCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-
-                  // ── Name + ID ────────────────────────────────────────
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +158,6 @@ class BleDeviceCard extends StatelessWidget {
                     ),
                   ),
 
-                  // ── RSSI + bars ──────────────────────────────────────
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [

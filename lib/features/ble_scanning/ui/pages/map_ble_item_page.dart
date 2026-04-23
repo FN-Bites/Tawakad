@@ -64,8 +64,8 @@ class _MapBleItemPageState extends State<MapBleItemPage> {
       MaterialPageRoute(
         builder: (_) => BleReminderPage(
           item: widget.item.copyWith(
-            deviceId: _selectedId, // ✅ FIX: update deviceId too
-            mappedDeviceId: _selectedId, // keep this as well
+            deviceId: _selectedId,
+            mappedDeviceId: _selectedId,
           ),
           listId: widget.listId,
           checklistItemName: widget.checklistItemName,
@@ -78,7 +78,11 @@ class _MapBleItemPageState extends State<MapBleItemPage> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => MapBleItemProvider(),
+      create: (_) {
+        final provider = MapBleItemProvider();
+        provider.reset();
+        return provider;
+      },
       child: Consumer<MapBleItemProvider>(
         builder: (context, bleProvider, _) {
           return _MapBleItemView(

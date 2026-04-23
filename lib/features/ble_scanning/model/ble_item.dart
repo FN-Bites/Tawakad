@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 const double kRssiAlpha = 0.30;
-const Duration kFreshWindow = Duration(seconds: 6); // tightened from 8
-const int kPresenceRssi = -65; // tightened from -80
+const Duration kFreshWindow = Duration(seconds: 6); 
+const int kPresenceRssi = -65; 
 
 class BleItem {
   final String deviceId;

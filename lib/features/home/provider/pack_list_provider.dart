@@ -4,6 +4,10 @@ import '../model/pack_list.dart';
 class PackListProvider extends ChangeNotifier {
   final List<PackList> _lists = [];
 
+  /// BleItemProvider registers here to react to list time changes.
+  void Function(String listId, String? newTime, DateTime? newDate)?
+      onTimeChanged;
+
   // ─── Read ────────────────────────────────────────────────
   List<PackList> get lists => List.unmodifiable(_lists);
 
@@ -65,7 +69,11 @@ class PackListProvider extends ChangeNotifier {
   }) {
     final index = _lists.indexWhere((l) => l.id == id);
     if (index == -1) return;
-    _lists[index] = _lists[index].copyWith(
+
+    final old = _lists[index];
+    final timeChanged = old.time != time || old.date != date;
+
+    _lists[index] = old.copyWith(
       title: title,
       iconPath: iconPath,
       colorValue: color.value,
@@ -77,10 +85,22 @@ class PackListProvider extends ChangeNotifier {
       repeatDays: repeatDays,
       isShared: isShared,
     );
+
+    if (timeChanged && time != null) {
+      // Auto-uncheck items if the new scheduled time is in the future.
+      final newFireTime = _resolveFireTime(time, date);
+      if (newFireTime != null && newFireTime.isAfter(DateTime.now())) {
+        _lists[index] = _lists[index].copyWith(checkedIndices: {});
+      }
+
+      // Notify BleItemProvider to cancel the old schedule and set a new one.
+      onTimeChanged?.call(id, time, date);
+    }
+
     notifyListeners();
   }
 
-  // ─── Like ──────────────────────────────────────────────
+  // ─── Like ─────────────────────────────────────────────────
   void toggleFavorite(String id) {
     final index = _lists.indexWhere((l) => l.id == id);
     if (index == -1) return;
@@ -89,7 +109,7 @@ class PackListProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Items ───────────────────────────────────────────────
+  // ─── Items ────────────────────────────────────────────────
   void addItem(String listId, String item) {
     final index = _lists.indexWhere((l) => l.id == listId);
     if (index == -1) return;
@@ -106,7 +126,7 @@ class PackListProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Items extended ──────────────────────────────────────
+  // ─── Items extended ───────────────────────────────────────
   void renameItem(String listId, int index, String newName) {
     final i = _lists.indexWhere((l) => l.id == listId);
     if (i == -1) return;
@@ -143,30 +163,45 @@ class PackListProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Called by the BLE auto-scan: finds [itemName] inside [listId] and
-  /// marks it as checked.  If it is already checked nothing changes.
-  /// If [itemName] is not found the call is silently ignored.
   void checkItemByName(String listId, String itemName) {
     final i = _lists.indexWhere((l) => l.id == listId);
     if (i == -1) return;
 
     final itemIndex = _lists[i].items.indexOf(itemName);
-    if (itemIndex == -1) return; // item not in this list
+    if (itemIndex == -1) return;
 
     final current = Set<int>.from(_lists[i].checkedIndices);
-    if (current.contains(itemIndex)) return; // already checked — no-op
+    if (current.contains(itemIndex)) return;
 
     current.add(itemIndex);
     _lists[i] = _lists[i].copyWith(checkedIndices: current);
     notifyListeners();
   }
 
-  /// Returns the scheduled time string ("HH:mm") for a list, or null.
   String? listTime(String listId) {
     try {
       return _lists.firstWhere((l) => l.id == listId).time;
     } catch (_) {
       return null;
     }
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────
+
+  /// Resolves the concrete DateTime at which a list will fire.
+  /// Returns null if the time string is malformed.
+  DateTime? _resolveFireTime(String time, DateTime? date) {
+    final parts = time.split(':');
+    if (parts.length != 2) return null;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null) return null;
+    final now = DateTime.now();
+    if (date != null) {
+      return DateTime(date.year, date.month, date.day, h, m);
+    }
+    var fire = DateTime(now.year, now.month, now.day, h, m);
+    if (fire.isBefore(now)) fire = fire.add(const Duration(days: 1));
+    return fire;
   }
 }

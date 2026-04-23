@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../model/ble_item.dart';
 import 'ble_provider.dart';
+import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 
 class _ScheduleEntry {
   final BleItem item;
@@ -31,6 +32,8 @@ class BleItemProvider extends ChangeNotifier {
   final Map<String, String> _mappings = {};
   final Map<String, _ScheduleEntry> _schedules = {};
 
+  final Map<String, Future<void>> _activeBatches = {};
+
   void Function(String checklistItemName, String listId, bool isPresent)?
       onAutoScanResult;
 
@@ -54,8 +57,13 @@ class BleItemProvider extends ChangeNotifier {
     return _ble.deviceById(deviceId);
   }
 
-  BleItemProvider(this._ble) {
+  BleItemProvider(this._ble, PackListProvider packLists) {
     _loadPrefs();
+
+    // React when a list's scheduled time is edited.
+    packLists.onTimeChanged = (listId, newTime, newDate) {
+      _rescheduleForList(listId, newTime, newDate);
+    };
   }
 
   void updateBle(BleProvider ble) {
@@ -165,6 +173,7 @@ class BleItemProvider extends ChangeNotifier {
   }
 
   // ── Auto-scan scheduling ──────────────────────────────────────────────
+
   void scheduleAutoScan({
     required BleItem item,
     required String listId,
@@ -174,6 +183,10 @@ class BleItemProvider extends ChangeNotifier {
     DateTime? fireAt,
     DateTime? listDate,
   }) {
+    debugPrint('scheduleAutoScan called: ${item.name}, listId=$listId, '
+        'listTime=$listTime, fireAt=$fireAt, listDate=$listDate, '
+        'minutesBefore=$minutesBefore');
+
     final key = _scheduleKey(item.deviceId, listId);
     _schedules[key]?.timer?.cancel();
 
@@ -206,7 +219,7 @@ class BleItemProvider extends ChangeNotifier {
       minutesBefore: minutesBefore,
       listDate: listDate,
     );
-    entry.timer = Timer(delay, () => _runAutoScan(entry, listTime));
+    entry.timer = Timer(delay, () => _onTimerFired(entry, listTime));
     _schedules[key] = entry;
   }
 
@@ -225,34 +238,114 @@ class BleItemProvider extends ChangeNotifier {
     }
   }
 
+  // ── Reschedule on time edit ───────────────────────────────────────────
+
+  void _rescheduleForList(
+    String listId,
+    String? newTime,
+    DateTime? newDate,
+  ) {
+    // Find all saved items linked to this list.
+    final affected =
+        _savedItems.where((item) => item.listIds.contains(listId)).toList();
+
+    for (final item in affected) {
+      // Cancel the existing schedule for this device+list pair.
+      cancelSchedule(item.deviceId, listId);
+
+      if (newTime == null) continue;
+
+      // Recover the checklist item name and minutesBefore from the old entry,
+      // falling back to sensible defaults if it had already been removed.
+      final key = _scheduleKey(item.deviceId, listId);
+      final existing = _schedules[key]; // will be null after cancel — see note
+      final checklistItemName = existing?.checklistItemName ?? item.name;
+      final minutesBefore =
+          existing?.minutesBefore ?? item.reminderMinutesBefore ?? 0;
+
+      scheduleAutoScan(
+        item: item,
+        listId: listId,
+        checklistItemName: checklistItemName,
+        minutesBefore: minutesBefore,
+        listTime: newTime,
+        listDate: newDate,
+      );
+
+      debugPrint(
+          'Rescheduled ${item.name}@$listId for new time $newTime (date: $newDate)');
+    }
+  }
+
   // ── Internal ──────────────────────────────────────────────────────────
 
-  Future<void> _runAutoScan(_ScheduleEntry entry, String? listTime) async {
-    debugPrint('Auto-scan firing for ${entry.item.name}@${entry.listId} '
-        '(checklist: ${entry.checklistItemName})');
+  Future<void> _onTimerFired(_ScheduleEntry fired, String? listTime) async {
+    final listId = fired.listId;
 
-    if (_ble.adapterState != BluetoothAdapterState.on) {
-      debugPrint('Auto-scan: adapter off, aborting.');
-      if (entry.listDate == null) _reschedule(entry, listTime);
+    // If a batch is already running for this listId, wait for it then probe solo.
+    if (_activeBatches.containsKey(listId)) {
+      debugPrint('Auto-scan: late arrival ${fired.item.name}@$listId, '
+          'waiting for running batch then probing solo.');
+      await _activeBatches[listId];
+      final result = await _ble.probeMultipleDevices(
+        [fired.item.deviceId],
+        listenDuration: const Duration(seconds: 20),
+      );
+      final present = result[fired.item.deviceId] ?? false;
+      debugPrint('Auto-scan (late) result for ${fired.item.name}@$listId: '
+          '${present ? "PRESENT ✓" : "ABSENT ✗"}');
+      onAutoScanResult?.call(fired.checklistItemName, listId, present);
+      if (fired.listDate == null) _reschedule(fired, listTime);
       return;
     }
 
-    // Use probeSingleDevice — checks raw RSSI directly, no smoothing drift
-    final present = await _ble.probeSingleDevice(
-      entry.item.deviceId,
-      listenDuration: const Duration(seconds: 15),
+    if (_ble.adapterState != BluetoothAdapterState.on) {
+      debugPrint('Auto-scan: adapter off, aborting.');
+      if (fired.listDate == null) _reschedule(fired, listTime);
+      return;
+    }
+
+    // Wait briefly so any other timers that fired at the same moment land first.
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final dueEntries =
+        _schedules.values.where((e) => e.listId == listId).toList();
+
+    debugPrint('Auto-scan: batching ${dueEntries.length} device(s) for '
+        'list $listId → ${dueEntries.map((e) => e.item.name).join(", ")}');
+
+    final batchFuture = _runBatchProbe(dueEntries, listTime);
+    _activeBatches[listId] = batchFuture;
+    try {
+      await batchFuture;
+    } finally {
+      _activeBatches.remove(listId);
+    }
+  }
+
+  Future<void> _runBatchProbe(
+      List<_ScheduleEntry> entries, String? listTime) async {
+    final deviceIds = entries.map((e) => e.item.deviceId).toList();
+
+    final results = await _ble.probeMultipleDevices(
+      deviceIds,
+      listenDuration: const Duration(seconds: 20),
     );
 
-    debugPrint('Auto-scan result for ${entry.item.name}@${entry.listId}: '
-        '${present ? "PRESENT ✓" : "ABSENT ✗"}');
+    for (final entry in entries) {
+      final present = results[entry.item.deviceId] ?? false;
 
-    onAutoScanResult?.call(entry.checklistItemName, entry.listId, present);
+      debugPrint('Auto-scan result for ${entry.item.name}@${entry.listId}: '
+          '${present ? "PRESENT ✓" : "ABSENT ✗"}');
 
-    if (entry.listDate == null) {
-      _reschedule(entry, listTime);
-    } else {
-      debugPrint(
-          'Auto-scan: one-shot complete for ${entry.item.name}@${entry.listId}, not rescheduling.');
+      onAutoScanResult?.call(entry.checklistItemName, entry.listId, present);
+
+      if (entry.listDate == null) {
+        _reschedule(entry, listTime);
+      } else {
+        debugPrint('Auto-scan: one-shot complete for '
+            '${entry.item.name}@${entry.listId}, not rescheduling.');
+      }
     }
   }
 
@@ -272,7 +365,7 @@ class BleItemProvider extends ChangeNotifier {
       listDate: null,
     );
     newEntry.timer = Timer(next.difference(DateTime.now()),
-        () => _runAutoScan(newEntry, listTime));
+        () => _onTimerFired(newEntry, listTime));
     _schedules[key] = newEntry;
   }
 
@@ -287,9 +380,10 @@ class BleItemProvider extends ChangeNotifier {
     final now = DateTime.now();
 
     if (listDate != null) {
-      final fire = DateTime(listDate.year, listDate.month, listDate.day, h, m)
+      var fire = DateTime(listDate.year, listDate.month, listDate.day, h, m)
           .subtract(Duration(minutes: minutesBefore));
-      return fire.isBefore(now) ? null : fire;
+      if (fire.isBefore(now)) fire = fire.add(const Duration(days: 1));
+      return fire;
     }
 
     var fire = DateTime(now.year, now.month, now.day, h, m)

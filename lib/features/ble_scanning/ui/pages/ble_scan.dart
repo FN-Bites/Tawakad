@@ -9,6 +9,7 @@ import '../widgets/ble_item/ble_item_card.dart';
 import '../widgets/ble_empty_state.dart';
 import 'package:tawakad_app/core/widgets/search_empty_state.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/pages/create_ble_item.dart';
+import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 
 enum BleFilterOption { all, today, favorites }
 
@@ -65,7 +66,10 @@ class _BleScanPageState extends State<BleScanPage> {
     if (filtered.isNotEmpty) {
       mainContent = ListView.builder(
         itemCount: filtered.length,
-        itemBuilder: (ctx, index) => BleItemCard(item: filtered[index]),
+        itemBuilder: (ctx, index) => BleItemCard(
+          item: filtered[index],
+          allLists: context.read<PackListProvider>().lists,
+        ),
       );
     } else if (widget.searchQuery.isNotEmpty && filtered.isEmpty) {
       mainContent = const Padding(
