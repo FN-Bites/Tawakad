@@ -96,5 +96,12 @@
         </dict>
     </array>
 
+    <key>NSCalendarsUsageDescription</key>
+<string>التطبيق يحتاج إلى الوصول للتقويم لعرض الأحداث.</string>
+<key>NSContactsUsageDescription</key>
+<string>التطبيق يحتاج إلى الوصول للجهات لإضافة الأحداث.</string>
+<key>CFBundleDevelopmentRegion</key>
+<string>ar</string>
+
 </dict>
 </plist>

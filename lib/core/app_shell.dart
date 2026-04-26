@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_nav_bar.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_search_button.dart';
 import 'package:tawakad_app/features/home/ui/pages/home_page.dart';
-import 'package:tawakad_app/features/home/ui/pages/calendar_page.dart';
+import 'package:tawakad_app/features/home/ui/pages/caleander_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -40,7 +40,7 @@ class _AppShellState extends State<AppShell>
   static const List<GlassNavItem> _items = [
     GlassNavItem(assetPath: 'assets/icons/nav_bar/home.png', label: 'الرئيسية'),
     GlassNavItem(
-        assetPath: 'assets/icons/nav_bar/calender.png', label: 'التقويم'),
+        assetPath: 'assets/icons/nav_bar/calender.png', label: 'المهام'),
     GlassNavItem(assetPath: 'assets/icons/nav_bar/signal.png', label: 'المسح'),
   ];
 
@@ -49,7 +49,7 @@ class _AppShellState extends State<AppShell>
     final page = _index == 0
         ? HomePage(searchQuery: _searchQuery)
         : _index == 1
-            ? CalendarPage()
+            ? const CalendarPage()
             : const _PlaceholderPage(label: 'المسح');
 
     return Scaffold(

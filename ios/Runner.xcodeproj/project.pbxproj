@@ -10,15 +10,15 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
-		48C6BC6E2F94374900BE55D4 /* SwiftUICalendarFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C6BC6B2F94374900BE55D4 /* SwiftUICalendarFactory.swift */; };
-		48C6BC6F2F94374900BE55D4 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C6BC6A2F94374900BE55D4 /* CalendarView.swift */; };
-		48C6BC702F94374900BE55D4 /* SwiftUICalendarPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48C6BC6C2F94374900BE55D4 /* SwiftUICalendarPlatformView.swift */; };
+		4840B3482F9EC706003991E6 /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4840B3442F9EADEE003991E6 /* CalendarKit */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		87D91DE8FAF3C4C33E6D73E9 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 56DEEEFAE193C5B9D81E995E /* Pods_Runner.framework */; };
 		8AC76809682C63B39382B226 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B610DFE4D7AA208C0D20477 /* Pods_RunnerTests.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A1B2C3D41E832DC501510002 /* PlatformViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41E832DC501510012 /* PlatformViewFactory.swift */; };
+		A1B2C3D41E832DC501510003 /* SwiftUICalendarPlatformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41E832DC501510013 /* SwiftUICalendarPlatformView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,9 +52,6 @@
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
-		48C6BC6A2F94374900BE55D4 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
-		48C6BC6B2F94374900BE55D4 /* SwiftUICalendarFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUICalendarFactory.swift; sourceTree = "<group>"; };
-		48C6BC6C2F94374900BE55D4 /* SwiftUICalendarPlatformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUICalendarPlatformView.swift; sourceTree = "<group>"; };
 		516B3E167CB776968D644B7D /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		56DEEEFAE193C5B9D81E995E /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -67,6 +64,8 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A1B2C3D41E832DC501510012 /* PlatformViewFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlatformViewFactory.swift; sourceTree = "<group>"; };
+		A1B2C3D41E832DC501510013 /* SwiftUICalendarPlatformView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftUICalendarPlatformView.swift; sourceTree = "<group>"; };
 		A5C488AB2BFF153D8DF321BB /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		AB97355E5E1CA596FCE089E3 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		B41A98D6A1C26D4AB1D37D46 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -86,6 +85,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4840B3482F9EC706003991E6 /* CalendarKit in Frameworks */,
 				87D91DE8FAF3C4C33E6D73E9 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -99,16 +99,6 @@
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 			);
 			path = RunnerTests;
-			sourceTree = "<group>";
-		};
-		48C6BC6D2F94374900BE55D4 /* IOSPlatformViews */ = {
-			isa = PBXGroup;
-			children = (
-				48C6BC6A2F94374900BE55D4 /* CalendarView.swift */,
-				48C6BC6B2F94374900BE55D4 /* SwiftUICalendarFactory.swift */,
-				48C6BC6C2F94374900BE55D4 /* SwiftUICalendarPlatformView.swift */,
-			);
-			path = IOSPlatformViews;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -125,7 +115,6 @@
 		97C146E51CF9000F007C117D = {
 			isa = PBXGroup;
 			children = (
-				48C6BC6D2F94374900BE55D4 /* IOSPlatformViews */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
@@ -147,6 +136,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D41E832DC501510020 /* PlatformViews */,
 				97C146FA1CF9000F007C117D /* Main.storyboard */,
 				97C146FD1CF9000F007C117D /* Assets.xcassets */,
 				97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */,
@@ -157,6 +147,15 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		A1B2C3D41E832DC501510020 /* PlatformViews */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D41E832DC501510012 /* PlatformViewFactory.swift */,
+				A1B2C3D41E832DC501510013 /* SwiftUICalendarPlatformView.swift */,
+			);
+			path = PlatformViews;
 			sourceTree = "<group>";
 		};
 		EB8BA49674E4CD968A3614A6 /* Pods */ = {
@@ -222,6 +221,9 @@
 			dependencies = (
 			);
 			name = Runner;
+			packageProductDependencies = (
+				4840B3442F9EADEE003991E6 /* CalendarKit */,
+			);
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
@@ -255,6 +257,9 @@
 				Base,
 			);
 			mainGroup = 97C146E51CF9000F007C117D;
+			packageReferences = (
+				4840B3432F9EADEE003991E6 /* XCRemoteSwiftPackageReference "CalendarKit" */,
+			);
 			productRefGroup = 97C146EF1CF9000F007C117D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -411,9 +416,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				48C6BC6E2F94374900BE55D4 /* SwiftUICalendarFactory.swift in Sources */,
-				48C6BC6F2F94374900BE55D4 /* CalendarView.swift in Sources */,
-				48C6BC702F94374900BE55D4 /* SwiftUICalendarPlatformView.swift in Sources */,
+				A1B2C3D41E832DC501510002 /* PlatformViewFactory.swift in Sources */,
+				A1B2C3D41E832DC501510003 /* SwiftUICalendarPlatformView.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
@@ -778,6 +782,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4840B3432F9EADEE003991E6 /* XCRemoteSwiftPackageReference "CalendarKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/richardtop/CalendarKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.13;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4840B3442F9EADEE003991E6 /* CalendarKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4840B3432F9EADEE003991E6 /* XCRemoteSwiftPackageReference "CalendarKit" */;
+			productName = CalendarKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 97C146E61CF9000F007C117D /* Project object */;
 }
