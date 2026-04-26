@@ -33,6 +33,7 @@ class MapBleItemPage extends StatefulWidget {
 
 class _MapBleItemPageState extends State<MapBleItemPage> {
   String? _selectedId;
+  bool _deviceInvalid = false;
   Timer? _uiTimer;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
@@ -54,9 +55,7 @@ class _MapBleItemPageState extends State<MapBleItemPage> {
 
   void _proceed(MapBleItemProvider bleProvider) {
     if (_selectedId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء اختيار جهاز أولاً')),
-      );
+      setState(() => _deviceInvalid = true);
       return;
     }
     bleProvider.stopScan();
@@ -94,7 +93,11 @@ class _MapBleItemPageState extends State<MapBleItemPage> {
             accent: _accent,
             bleProvider: bleProvider,
             selectedId: _selectedId,
-            onSelectDevice: (id) => setState(() => _selectedId = id),
+            deviceInvalid: _deviceInvalid,
+            onSelectDevice: (id) => setState(() {
+              _selectedId = id;
+              _deviceInvalid = false;
+            }),
             onProceed: () => _proceed(bleProvider),
           );
         },
@@ -109,6 +112,7 @@ class _MapBleItemView extends StatelessWidget {
   final Color accent;
   final MapBleItemProvider bleProvider;
   final String? selectedId;
+  final bool deviceInvalid;
   final ValueChanged<String> onSelectDevice;
   final VoidCallback onProceed;
 
@@ -118,6 +122,7 @@ class _MapBleItemView extends StatelessWidget {
     required this.accent,
     required this.bleProvider,
     required this.selectedId,
+    required this.deviceInvalid,
     required this.onSelectDevice,
     required this.onProceed,
   });
@@ -305,6 +310,23 @@ class _MapBleItemView extends StatelessWidget {
                   ),
                 ),
               ),
+              if (deviceInvalid)
+                Padding(
+                  padding: const EdgeInsets.only(right: 20, top: 2),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      'الرجاء اختيار جهاز أولاً',
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(
+                        color: Color(0xFFE53935),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 4),
               Expanded(
                 child: devices.isEmpty

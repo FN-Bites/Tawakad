@@ -157,7 +157,6 @@ class BleDeviceCard extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [

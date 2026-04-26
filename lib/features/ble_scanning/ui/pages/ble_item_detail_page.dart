@@ -16,6 +16,22 @@ class BleItemDetailPage extends StatelessWidget {
     this.onItemSaved,
   });
 
+  String _toArabicNumerals(int number) {
+    const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const eastern = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number.toString().split('').map((d) {
+      final idx = western.indexOf(d);
+      return idx != -1 ? eastern[idx] : d;
+    }).join();
+  }
+
+  String _reminderLabel(int minutes) {
+    if (minutes == 0) return 'عند الوقت تماماً';
+    final arabicNum = _toArabicNumerals(minutes);
+    final unit = (minutes == 5 || minutes == 10) ? 'دقائق' : 'دقيقة';
+    return 'قبل $arabicNum $unit';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -45,14 +61,12 @@ class BleItemDetailPage extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              // ── Top bar ──────────────────────────────────────────
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Close button (right in RTL = visual right)
                     GestureDetector(
                       onTap: () => Navigator.maybePop(context),
                       child: Container(
@@ -77,24 +91,18 @@ class BleItemDetailPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Title
                     Text(
                       'تفاصيل الغرض',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: isDark ? AppDarkColors.textPrimary : null,
                           ),
                     ),
-                    // Edit pill button (left in RTL = visual left)
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => CreateBleItemPage(
                             existing: item,
-                            // Pass onItemSaved directly — do NOT wrap it with
-                            // a Navigator.maybePop here. BleReminderPage owns
-                            // the full navigation after the edit cycle completes
-                            // and will pop back to the BLE page on its own.
                             onItemSaved: onItemSaved,
                           ),
                         ),
@@ -282,9 +290,7 @@ class BleItemDetailPage extends StatelessWidget {
                             icon: Icons.alarm_rounded,
                             iconColor: item.color,
                             label: 'وقت الفحص',
-                            value: item.reminderMinutesBefore == 0
-                                ? 'عند الوقت تماماً'
-                                : 'قبل ${item.reminderMinutesBefore} دقيقة',
+                            value: _reminderLabel(item.reminderMinutesBefore!),
                             textColor: textColor,
                             subColor: subColor,
                             divColor: divColor,

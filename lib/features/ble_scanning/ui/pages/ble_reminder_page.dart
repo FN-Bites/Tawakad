@@ -29,10 +29,26 @@ class BleReminderPage extends StatefulWidget {
 class _BleReminderPageState extends State<BleReminderPage> {
   static const List<int> _minuteOptions = [5, 10, 15, 20, 25, 30];
 
-  int? _selected;
+  int _selected = 0;
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
   Color get _accent => widget.item.color;
+
+  /// Converts a Western Arabic integer to Eastern Arabic-Indic numeral string.
+  String _toArabicNumerals(int number) {
+    const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const eastern = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number.toString().split('').map((d) {
+      final idx = western.indexOf(d);
+      return idx != -1 ? eastern[idx] : d;
+    }).join();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = widget.item.reminderMinutesBefore ?? 0;
+  }
 
   void _save() {
     final bleItems = context.read<BleItemProvider>();
@@ -42,50 +58,34 @@ class _BleReminderPageState extends State<BleReminderPage> {
       reminderMinutesBefore: _selected,
     );
 
-    // Use updateSavedItem when editing to avoid duplicating the entry.
     if (widget.isEditing) {
       bleItems.updateSavedItem(updatedItem);
     } else {
       bleItems.addSavedItem(updatedItem);
     }
 
-    if (_selected != null) {
-      final targetListIds = updatedItem.listIds.isNotEmpty
-          ? updatedItem.listIds
-          : [widget.listId];
+    final targetListIds =
+        updatedItem.listIds.isNotEmpty ? updatedItem.listIds : [widget.listId];
 
-      for (final listId in targetListIds) {
-        final list = packLists.lists.firstWhere(
-          (l) => l.id == listId,
-          orElse: () =>
-              packLists.lists.firstWhere((l) => l.id == widget.listId),
+    for (final listId in targetListIds) {
+      final list = packLists.lists.firstWhere(
+        (l) => l.id == listId,
+        orElse: () => packLists.lists.firstWhere((l) => l.id == widget.listId),
+      );
+      final listTime = list.time;
+      if (listTime != null) {
+        bleItems.scheduleAutoScan(
+          item: updatedItem,
+          listId: listId,
+          checklistItemName: widget.checklistItemName,
+          minutesBefore: _selected,
+          listTime: listTime,
+          listDate: list.date,
         );
-        final listTime = list.time;
-        if (listTime != null) {
-          bleItems.scheduleAutoScan(
-            item: updatedItem,
-            listId: listId,
-            checklistItemName: widget.checklistItemName,
-            minutesBefore: _selected!,
-            listTime: listTime,
-            listDate: list.date,
-          );
-        }
       }
     }
 
     widget.onItemSaved?.call();
-
-    // Stack when editing:
-    //   BLE Page → DetailPage → CreateBleItemPage -[pushReplacement]→ MapBleItemPage → ReminderPage
-    // pushReplacement removed CreateBleItemPage and put MapBleItemPage in its place, so:
-    //   BLE Page → DetailPage → MapBleItemPage → ReminderPage
-    // We need 3 pops to get back to BLE Page (pop ReminderPage, MapBleItemPage, DetailPage).
-    //
-    // Stack when adding:
-    //   BLE Page → CreateBleItemPage → MapBleItemPage → ReminderPage
-    // 2 pops to get back (pop ReminderPage, MapBleItemPage); CreateBleItemPage
-    // is left on stack and the caller handles it (or it self-closes).
     final navigator = Navigator.of(context);
     if (widget.isEditing) {
       navigator.pop(); // ReminderPage
@@ -291,6 +291,11 @@ class _BleReminderPageState extends State<BleReminderPage> {
                   itemBuilder: (ctx, i) {
                     final mins = _minuteOptions[i];
                     final isSelected = _selected == mins;
+                    // Eastern Arabic-Indic numeral
+                    final arabicNum = _toArabicNumerals(mins);
+                    // 5 and 10 are plural → دقايق, others → دقيقة
+                    final label =
+                        (mins == 5 || mins == 10) ? 'دقايق قبل' : 'دقيقة قبل';
                     return GestureDetector(
                       onTap: () => setState(() => _selected = mins),
                       child: AnimatedContainer(
@@ -327,7 +332,7 @@ class _BleReminderPageState extends State<BleReminderPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              '$mins',
+                              arabicNum,
                               style: TextStyle(
                                 fontSize: 26,
                                 fontWeight: FontWeight.w800,
@@ -339,7 +344,7 @@ class _BleReminderPageState extends State<BleReminderPage> {
                               ),
                             ),
                             Text(
-                              'دقيقة قبل',
+                              label,
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w500,

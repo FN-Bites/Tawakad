@@ -10,6 +10,8 @@ import '../widgets/ble_empty_state.dart';
 import 'package:tawakad_app/core/widgets/search_empty_state.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/pages/create_ble_item.dart';
 import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
+import 'package:tawakad_app/features/ble_scanning/ui/pages/how_to_use_sheet.dart';
+import 'package:tawakad_app/core/widgets/cards/app_swipe_to_delete.dart';
 
 enum BleFilterOption { all, today, favorites }
 
@@ -66,10 +68,22 @@ class _BleScanPageState extends State<BleScanPage> {
     if (filtered.isNotEmpty) {
       mainContent = ListView.builder(
         itemCount: filtered.length,
-        itemBuilder: (ctx, index) => BleItemCard(
-          item: filtered[index],
-          allLists: context.read<PackListProvider>().lists,
-        ),
+        itemBuilder: (ctx, index) {
+          final item = filtered[index];
+          return AppSwipeToDelete(
+            onDelete: () {
+              context.read<BleItemProvider>().removeSavedItem(item.deviceId);
+            },
+            dialogTitle: 'حذف الغرض',
+            dialogMessage: 'هل أنت متأكد أنك تريد حذف "${item.name}"؟',
+            confirmLabel: 'حذف',
+            cancelLabel: 'إلغاء',
+            child: BleItemCard(
+              item: item,
+              allLists: context.read<PackListProvider>().lists,
+            ),
+          );
+        },
       );
     } else if (widget.searchQuery.isNotEmpty && filtered.isEmpty) {
       mainContent = const Padding(
@@ -93,12 +107,16 @@ class _BleScanPageState extends State<BleScanPage> {
           const SizedBox(width: 16),
           Text('المسح', style: theme.textTheme.bodyLarge),
           const Spacer(),
+          AppLiquidButtons.icon(
+            icon: Icons.info_outline,
+            onPressed: () => HowToUseSheet.show(context),
+          ),
+          const SizedBox(width: 10),
           AppLiquidButtons.iconWithLabel(
             icon: Icons.add,
             label: 'إضافة غرض',
             onPressed: () {
               final shellNavigator = Navigator.of(context);
-
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,

@@ -119,6 +119,7 @@ flutter:
     - assets/animation/devices.riv
     - assets/animation/devices_dark.riv
     - assets/animation/bluetooth_scan.riv
+    - assets/animation/BLE_tag.riv
     - assets/animation/location_icon.riv
     - assets/animation/searchin.riv
     - assets/icons/nav_bar/calender.png
