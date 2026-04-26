@@ -7,15 +7,16 @@ class BleEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(
+          SizedBox(
             width: 200,
             height: 200,
-            child: DevicesRive(),
+            child: DevicesRive(isDark: isDark),
           ),
           Text(
             'لا توجد أغراض حالياً',

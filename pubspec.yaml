@@ -117,6 +117,7 @@ flutter:
     - assets/animation/lists.riv
     - assets/animation/scanning.riv
     - assets/animation/devices.riv
+    - assets/animation/devices_dark.riv
     - assets/animation/bluetooth_scan.riv
     - assets/animation/location_icon.riv
     - assets/animation/searchin.riv

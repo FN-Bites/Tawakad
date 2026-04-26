@@ -46,6 +46,15 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
       _selectedColor = e.color;
       _selectedIcon = e.iconPath;
       _isFavorite = e.isFavorite;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final allLists = context.read<PackListProvider>().lists;
+        setState(() {
+          _selectedLists.clear();
+          _selectedLists.addAll(
+            allLists.where((l) => e.listIds.contains(l.id)),
+          );
+        });
+      });
     } else {
       _selectedColor = BleColorsPicker.colors[0];
       _selectedIcon = BleIconsPicker.icons[0];
@@ -75,7 +84,7 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
     final name = _nameController.text.trim();
     setState(() {
       _nameInvalid = name.isEmpty;
-      _listInvalid = !_isEditing && _selectedLists.isEmpty;
+      _listInvalid = _selectedLists.isEmpty;
     });
     if (_nameInvalid || _listInvalid) return;
 
@@ -85,10 +94,35 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
         iconPath: _selectedIcon,
         colorValue: _selectedColor.value,
         isFavorite: _isFavorite,
+        listIds: _selectedLists.map((l) => l.id).toList(),
       );
       context.read<BleItemProvider>().updateSavedItem(updated);
-      Navigator.maybePop(context);
-      widget.onItemSaved?.call();
+
+      final packListProvider = context.read<PackListProvider>();
+      final oldListIds = widget.existing!.listIds.toSet();
+      final newListIds = _selectedLists.map((l) => l.id).toSet();
+
+      for (final listId in newListIds.difference(oldListIds)) {
+        packListProvider.addItem(listId, name);
+      }
+      for (final listId in oldListIds.difference(newListIds)) {
+        packListProvider.removeItem(listId, widget.existing!.name);
+      }
+
+      final listId = _selectedLists.first.id;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MapBleItemPage(
+            item: updated,
+            listId: listId,
+            checklistItemName: name,
+            onItemSaved: widget.onItemSaved,
+            isEditing: true,
+          ),
+        ),
+      );
     } else {
       final packListProvider = context.read<PackListProvider>();
       for (final list in _selectedLists) {
@@ -121,12 +155,14 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
   }
 
   Widget _sectionTitle(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 4, bottom: 10),
-      child: Align(
-        alignment: Alignment.centerRight,
+    return SizedBox(
+      width: double.infinity,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 4, bottom: 10),
         child: Text(
           text,
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.right,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: _isDark
@@ -161,6 +197,187 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
         ),
         child: Center(child: child),
       ),
+    );
+  }
+
+  Widget _buildListsSection(
+    List<PackList> lists,
+    Color cardBg,
+    Color hintColor,
+    Color textColor,
+  ) {
+    return Column(
+      children: [
+        const SizedBox(height: 22),
+        SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Text(
+              'أضف إلى قوائم',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: _isDark
+                        ? AppDarkColors.placeholder
+                        : const Color(0xFF8A8A8E),
+                  ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 4, bottom: 10),
+            child: Text(
+              'تُعرض فقط القوائم ذات الوقت المحدد، لأن المسح التلقائي يعتمد عليه.',
+              textDirection: TextDirection.rtl,
+              textAlign: TextAlign.right,
+              style: TextStyle(fontSize: 11, color: hintColor),
+            ),
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(24),
+            border: _listInvalid
+                ? Border.all(color: const Color(0xFFE53935), width: 1.5)
+                : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isDark ? 0.25 : 0.06),
+                blurRadius: 22,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: lists.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'لا توجد قوائم بوقت محدد بعد',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: hintColor, fontSize: 14),
+                  ),
+                )
+              : Column(
+                  children: lists.asMap().entries.map((entry) {
+                    final i = entry.key;
+                    final list = entry.value;
+                    final isChecked =
+                        _selectedLists.any((l) => l.id == list.id);
+                    final isLast = i == lists.length - 1;
+
+                    return InkWell(
+                      onTap: () => _toggleList(list),
+                      borderRadius: BorderRadius.vertical(
+                        top: i == 0 ? const Radius.circular(24) : Radius.zero,
+                        bottom:
+                            isLast ? const Radius.circular(24) : Radius.zero,
+                      ),
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 13),
+                            child: Row(
+                              children: [
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: isChecked
+                                        ? list.color
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(7),
+                                    border: Border.all(
+                                      color: isChecked
+                                          ? list.color
+                                          : _isDark
+                                              ? AppDarkColors.placeholder
+                                              : const Color(0xFFB2B2B8),
+                                      width: 1.8,
+                                    ),
+                                  ),
+                                  child: isChecked
+                                      ? const Icon(
+                                          Icons.check_rounded,
+                                          color: Colors.white,
+                                          size: 15,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: list.color,
+                                  child: Image.asset(
+                                    list.iconPath,
+                                    width: 18,
+                                    height: 18,
+                                    color: Colors.white,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.list_alt_rounded,
+                                      color: Colors.white,
+                                      size: 14,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    list.title,
+                                    textDirection: TextDirection.rtl,
+                                    style: TextStyle(
+                                      color: textColor,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!isLast)
+                            Divider(
+                              height: 1,
+                              indent: 16,
+                              endIndent: 16,
+                              color: _isDark
+                                  ? AppDarkColors.fieldBorder
+                                  : const Color(0xFFEEEEF0),
+                            ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+        ),
+        if (_listInvalid) ...[
+          const SizedBox(height: 6),
+          const SizedBox(
+            width: double.infinity,
+            child: Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Text(
+                'الرجاء اختيار قائمة واحدة على الأقل',
+                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  color: Color(0xFFE53935),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -365,13 +582,14 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
                       ),
                       if (_nameInvalid) ...[
                         const SizedBox(height: 6),
-                        const Align(
-                          alignment: Alignment.centerRight,
+                        const SizedBox(
+                          width: double.infinity,
                           child: Padding(
-                            padding: EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.only(right: 8),
                             child: Text(
                               'الرجاء ادخال اسم الغرض',
                               textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.right,
                               style: TextStyle(
                                 color: Color(0xFFE53935),
                                 fontSize: 12,
@@ -384,176 +602,7 @@ class _CreateBleItemPageState extends State<CreateBleItemPage> {
                     ],
                   ),
                 ),
-                if (!_isEditing) ...[
-                  const SizedBox(height: 22),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4, bottom: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _sectionTitle('أضف إلى قوائم'),
-                        Text(
-                          'تُعرض فقط القوائم ذات الوقت المحدد، لأن المسح التلقائي يعتمد عليه.',
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: hintColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(24),
-                      border: _listInvalid
-                          ? Border.all(
-                              color: const Color(0xFFE53935), width: 1.5)
-                          : null,
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                              Colors.black.withOpacity(_isDark ? 0.25 : 0.06),
-                          blurRadius: 22,
-                          offset: const Offset(0, 8),
-                        ),
-                      ],
-                    ),
-                    child: lists.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Text(
-                              'لا توجد قوائم بوقت محدد بعد',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: hintColor,
-                                fontSize: 14,
-                              ),
-                            ),
-                          )
-                        : Column(
-                            children: lists.asMap().entries.map((entry) {
-                              final i = entry.key;
-                              final list = entry.value;
-                              final isChecked =
-                                  _selectedLists.any((l) => l.id == list.id);
-                              final isLast = i == lists.length - 1;
-
-                              return InkWell(
-                                onTap: () => _toggleList(list),
-                                borderRadius: BorderRadius.vertical(
-                                  top: i == 0
-                                      ? const Radius.circular(24)
-                                      : Radius.zero,
-                                  bottom: isLast
-                                      ? const Radius.circular(24)
-                                      : Radius.zero,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 13),
-                                      child: Row(
-                                        children: [
-                                          AnimatedContainer(
-                                            duration: const Duration(
-                                                milliseconds: 200),
-                                            width: 24,
-                                            height: 24,
-                                            decoration: BoxDecoration(
-                                              color: isChecked
-                                                  ? list.color
-                                                  : Colors.transparent,
-                                              borderRadius:
-                                                  BorderRadius.circular(7),
-                                              border: Border.all(
-                                                color: isChecked
-                                                    ? list.color
-                                                    : _isDark
-                                                        ? AppDarkColors
-                                                            .placeholder
-                                                        : const Color(
-                                                            0xFFB2B2B8),
-                                                width: 1.8,
-                                              ),
-                                            ),
-                                            child: isChecked
-                                                ? const Icon(
-                                                    Icons.check_rounded,
-                                                    color: Colors.white,
-                                                    size: 15,
-                                                  )
-                                                : null,
-                                          ),
-                                          const SizedBox(width: 12),
-                                          CircleAvatar(
-                                            radius: 16,
-                                            backgroundColor: list.color,
-                                            child: Image.asset(
-                                              list.iconPath,
-                                              width: 18,
-                                              height: 18,
-                                              color: Colors.white,
-                                              errorBuilder: (_, __, ___) =>
-                                                  const Icon(
-                                                Icons.list_alt_rounded,
-                                                color: Colors.white,
-                                                size: 14,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(
-                                              list.title,
-                                              textDirection: TextDirection.rtl,
-                                              style: TextStyle(
-                                                color: textColor,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    if (!isLast)
-                                      Divider(
-                                        height: 1,
-                                        indent: 16,
-                                        endIndent: 16,
-                                        color: _isDark
-                                            ? AppDarkColors.fieldBorder
-                                            : const Color(0xFFEEEEF0),
-                                      ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                  ),
-                  if (_listInvalid) ...[
-                    const SizedBox(height: 6),
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 8),
-                        child: Text(
-                          'الرجاء اختيار قائمة واحدة على الأقل',
-                          textDirection: TextDirection.rtl,
-                          style: TextStyle(
-                            color: Color(0xFFE53935),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+                _buildListsSection(lists, cardBg, hintColor, textColor),
                 const SizedBox(height: 22),
                 _sectionTitle('لون الغرض'),
                 Container(

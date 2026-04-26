@@ -9,11 +9,9 @@ import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 class BleReminderPage extends StatefulWidget {
   final BleItem item;
   final String listId;
-
-
-  final String checklistItemName; 
-
+  final String checklistItemName;
   final VoidCallback? onItemSaved;
+  final bool isEditing;
 
   const BleReminderPage({
     super.key,
@@ -21,6 +19,7 @@ class BleReminderPage extends StatefulWidget {
     required this.listId,
     required this.checklistItemName,
     this.onItemSaved,
+    this.isEditing = false,
   });
 
   @override
@@ -43,7 +42,12 @@ class _BleReminderPageState extends State<BleReminderPage> {
       reminderMinutesBefore: _selected,
     );
 
-    bleItems.addSavedItem(updatedItem);
+    // Use updateSavedItem when editing to avoid duplicating the entry.
+    if (widget.isEditing) {
+      bleItems.updateSavedItem(updatedItem);
+    } else {
+      bleItems.addSavedItem(updatedItem);
+    }
 
     if (_selected != null) {
       final targetListIds = updatedItem.listIds.isNotEmpty
@@ -61,7 +65,7 @@ class _BleReminderPageState extends State<BleReminderPage> {
           bleItems.scheduleAutoScan(
             item: updatedItem,
             listId: listId,
-            checklistItemName: widget.checklistItemName, 
+            checklistItemName: widget.checklistItemName,
             minutesBefore: _selected!,
             listTime: listTime,
             listDate: list.date,
@@ -70,9 +74,27 @@ class _BleReminderPageState extends State<BleReminderPage> {
       }
     }
 
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
     widget.onItemSaved?.call();
+
+    // Stack when editing:
+    //   BLE Page → DetailPage → CreateBleItemPage -[pushReplacement]→ MapBleItemPage → ReminderPage
+    // pushReplacement removed CreateBleItemPage and put MapBleItemPage in its place, so:
+    //   BLE Page → DetailPage → MapBleItemPage → ReminderPage
+    // We need 3 pops to get back to BLE Page (pop ReminderPage, MapBleItemPage, DetailPage).
+    //
+    // Stack when adding:
+    //   BLE Page → CreateBleItemPage → MapBleItemPage → ReminderPage
+    // 2 pops to get back (pop ReminderPage, MapBleItemPage); CreateBleItemPage
+    // is left on stack and the caller handles it (or it self-closes).
+    final navigator = Navigator.of(context);
+    if (widget.isEditing) {
+      navigator.pop(); // ReminderPage
+      navigator.pop(); // MapBleItemPage
+      navigator.pop(); // DetailPage
+    } else {
+      navigator.pop(); // ReminderPage
+      navigator.pop(); // MapBleItemPage
+    }
   }
 
   @override

@@ -16,6 +16,7 @@ class MapBleItemPage extends StatefulWidget {
   final String listId;
   final String checklistItemName;
   final VoidCallback? onItemSaved;
+  final bool isEditing;
 
   const MapBleItemPage({
     super.key,
@@ -23,6 +24,7 @@ class MapBleItemPage extends StatefulWidget {
     required this.listId,
     required this.checklistItemName,
     this.onItemSaved,
+    this.isEditing = false,
   });
 
   @override
@@ -70,6 +72,7 @@ class _MapBleItemPageState extends State<MapBleItemPage> {
           listId: widget.listId,
           checklistItemName: widget.checklistItemName,
           onItemSaved: widget.onItemSaved,
+          isEditing: widget.isEditing,
         ),
       ),
     );

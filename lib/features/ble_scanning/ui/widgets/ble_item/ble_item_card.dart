@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/cards/app_list_card.dart';
+import 'package:tawakad_app/core/widgets/cards/app_count_badge.dart';
 import 'package:tawakad_app/features/ble_scanning/model/ble_item.dart';
+import 'package:tawakad_app/features/ble_scanning/ui/pages/ble_item_detail_page.dart';
 import 'package:tawakad_app/features/home/model/pack_list.dart';
 
 class BleItemCard extends StatelessWidget {
@@ -18,13 +20,23 @@ class BleItemCard extends StatelessWidget {
     final affiliated =
         allLists.where((l) => item.listIds.contains(l.id)).toList();
 
+    const badgeLabel = 'تفاصيل الغرض';
+
     return AppListCard(
       color: item.color,
       iconPath: item.iconPath,
       title: item.name,
-      subtitle: affiliated.isEmpty
-          ? const SizedBox.shrink()
-          : _AffiliatedListsWidget(lists: affiliated),
+      subtitle:
+          affiliated.isEmpty ? null : _AffiliatedListsWidget(lists: affiliated),
+      trailing: AppCountBadge(
+        label: badgeLabel,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BleItemDetailPage(item: item),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -36,23 +48,26 @@ class _AffiliatedListsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = <List<PackList>>[];
-    for (var i = 0; i < lists.length; i += 3) {
-      rows.add(lists.sublist(i, i + 3 > lists.length ? lists.length : i + 3));
-    }
+    final display = lists.take(2).toList();
+    final extra = lists.length - display.length;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       mainAxisSize: MainAxisSize.min,
-      children: rows.map((row) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: row.map((list) => _ListChip(list: list)).toList(),
+      children: [
+        ...display.map((list) => _ListChip(list: list)),
+        if (extra > 0)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Text(
+              '+$extra',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: Colors.white.withOpacity(0.75),
+              ),
+            ),
           ),
-        );
-      }).toList(),
+      ],
     );
   }
 }
@@ -76,7 +91,7 @@ class _ListChip extends StatelessWidget {
           ),
           const SizedBox(width: 3),
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 72),
+            constraints: const BoxConstraints(maxWidth: 68),
             child: Text(
               list.title,
               maxLines: 1,
