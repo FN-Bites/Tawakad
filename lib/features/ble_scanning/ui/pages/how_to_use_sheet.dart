@@ -47,8 +47,6 @@ class HowToUseSheet extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // العنوان الرئيسي
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -63,9 +61,7 @@ class HowToUseSheet extends StatelessWidget {
                   ),
                 ),
               ),
-
               Divider(height: 1, color: subtleColor),
-
               Expanded(
                 child: SingleChildScrollView(
                   controller: scrollController,
@@ -74,7 +70,6 @@ class HowToUseSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // وصف الميزة
                       Text(
                         'المسح التلقائي',
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -91,17 +86,12 @@ class HowToUseSheet extends StatelessWidget {
                         style: theme.textTheme.bodyMedium
                             ?.copyWith(color: textColor),
                       ),
-
                       const SizedBox(height: 24),
-
                       const SizedBox(
                         height: 220,
                         child: ScanningRive(),
                       ),
-
                       const SizedBox(height: 32),
-
-                      // طريقة الاستخدام
                       Text(
                         'طريقة الاستخدام',
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -116,9 +106,7 @@ class HowToUseSheet extends StatelessWidget {
                         style: theme.textTheme.bodyMedium
                             ?.copyWith(color: textColor),
                       ),
-
                       const SizedBox(height: 16),
-
                       _StepTile(
                         number: '١',
                         text: 'اشترِ وسم BLE المناسب لك.',
@@ -150,14 +138,11 @@ class HowToUseSheet extends StatelessWidget {
                         theme: theme,
                         textColor: textColor,
                       ),
-
                       const SizedBox(height: 24),
-
                       const SizedBox(
                         height: 220,
                         child: BleTagRive(),
                       ),
-
                       const SizedBox(height: 32),
                     ],
                   ),

@@ -1,7 +1,5 @@
-import Flutter
 import UIKit
-import Firebase
-import SwiftUI
+import Flutter
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -11,10 +9,13 @@ import SwiftUI
     ) -> Bool {
         GeneratedPluginRegistrant.register(with: self)
 
-        let registrar = self.registrar(forPlugin: "SwiftUICalendarFactory")!
-        let factory = SwiftUICalendarFactory(messenger: registrar.messenger())
-        registrar.register(factory, withId: "ios-calendar-view")
+        if let registrar = self.registrar(forPlugin: "CalendarView") {
+            registrar.register(
+                CalendarViewFactory(messenger: registrar.messenger()),
+                withId: "calendar-view"
+            )
+        }
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-} 
+}

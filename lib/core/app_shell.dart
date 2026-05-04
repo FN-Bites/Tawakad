@@ -44,7 +44,7 @@ class _AppShellState extends State<AppShell>
   static const List<GlassNavItem> _items = [
     GlassNavItem(assetPath: 'assets/icons/nav_bar/home.png', label: 'الرئيسية'),
     GlassNavItem(
-        assetPath: 'assets/icons/nav_bar/calender.png', label: 'التقويم'),
+        assetPath: 'assets/icons/nav_bar/calender.png', label: 'المهام'),
     GlassNavItem(assetPath: 'assets/icons/nav_bar/signal.png', label: 'المسح'),
   ];
 

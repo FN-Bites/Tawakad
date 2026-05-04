@@ -5,10 +5,10 @@ import 'primary_create_list_page.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/field_card.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
+import 'package:tawakad_app/core/widgets/cards/circle_btn.dart';
 
 class PackListItemsPage extends StatefulWidget {
   final String listId;
-
   const PackListItemsPage({super.key, required this.listId});
 
   @override
@@ -57,28 +57,10 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
     Future.delayed(const Duration(milliseconds: 50), _addFocus.requestFocus);
   }
 
-  Widget _circleButton({
-    required Widget child,
-    required VoidCallback onTap,
-    required Color backgroundColor,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          shape: BoxShape.circle,
-        ),
-        child: Center(child: child),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     final list = context
         .watch<PackListProvider>()
@@ -88,6 +70,11 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
     final accentColor = list.color;
     final items = list.items;
     final checkedIndices = list.checkedIndices;
+
+    final textPrimary = theme.colorScheme.onSurface;
+    final textMuted = textPrimary.withOpacity(0.38);
+    final dividerColor =
+        isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE5E5EA);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -101,29 +88,27 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
           const SizedBox(width: 16),
           Text(list.title, style: theme.textTheme.bodyLarge),
           const Spacer(),
-          AppLiquidButtons.icon(
+          AppLiquidButtons.iconWithLabel(
             icon: _isEditing ? Icons.check_rounded : Icons.edit_outlined,
+            label: 'تعديل الأغراض',
             iconColor: _isEditing ? accentColor : null,
-            iconSize: 20,
-            onPressed: () {
-              setState(() {
-                _isEditing = !_isEditing;
-                _editingIndex = null;
-                _isAdding = false;
-              });
-            },
+            iconSize: 18,
+            onPressed: () => setState(() {
+              _isEditing = !_isEditing;
+              _editingIndex = null;
+              _isAdding = false;
+            }),
           ),
-          const SizedBox(width: 10),
-          AppLiquidButtons.icon(
+          const SizedBox(width: 8),
+          AppLiquidButtons.iconWithLabel(
             icon: Icons.tune_rounded,
-            iconSize: 20,
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => PrimaryCreateListPage(existing: list),
-                ),
-              );
-            },
+            label: 'تعديل القائمة',
+            iconSize: 18,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => PrimaryCreateListPage(existing: list),
+              ),
+            ),
           ),
           const SizedBox(width: 24),
         ],
@@ -131,13 +116,14 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: items.isEmpty && !_isAdding
-                  ? const Center(
+                  ? Center(
                       child: Text(
                         'لا توجد أغراض بعد',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        style: TextStyle(color: textMuted, fontSize: 16),
                       ),
                     )
                   : ListView(
@@ -224,7 +210,7 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                                   style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.w500,
-                                                    color: Colors.black87,
+                                                    color: textPrimary,
                                                     decoration: isChecked
                                                         ? TextDecoration
                                                             .lineThrough
@@ -268,8 +254,8 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                                       fontWeight:
                                                           FontWeight.w500,
                                                       color: isChecked
-                                                          ? Colors.grey
-                                                          : Colors.black87,
+                                                          ? textMuted
+                                                          : textPrimary,
                                                       decoration: isChecked
                                                           ? TextDecoration
                                                               .lineThrough
@@ -282,10 +268,10 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                     ),
                                   ),
                                   if (i < items.length - 1 || _isAdding)
-                                    const Divider(
+                                    Divider(
                                       height: 1,
                                       thickness: 0.5,
-                                      color: Color(0xFFE5E5EA),
+                                      color: dividerColor,
                                       indent: 18,
                                       endIndent: 18,
                                     ),
@@ -298,14 +284,11 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                     horizontal: 18, vertical: 12),
                                 child: Row(
                                   children: [
-                                    _circleButton(
-                                      child: const Icon(
-                                        Icons.check_rounded,
-                                        color: Colors.white,
-                                        size: 16,
-                                      ),
+                                    CircleBtn(
+                                      icon: Icons.check_rounded,
+                                      iconColor: Colors.white,
+                                      bg: accentColor,
                                       onTap: () => _submitAdd(widget.listId),
-                                      backgroundColor: accentColor,
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -315,17 +298,21 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                         textDirection: TextDirection.rtl,
                                         textAlign: TextAlign.right,
                                         autofocus: true,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500,
-                                          color: Colors.black87,
+                                          color: textPrimary,
                                         ),
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           hintText: 'اسم الغرض',
                                           hintTextDirection: TextDirection.rtl,
                                           border: InputBorder.none,
                                           isDense: true,
                                           contentPadding: EdgeInsets.zero,
+                                          hintStyle: TextStyle(
+                                            color: textMuted,
+                                            fontWeight: FontWeight.w400,
+                                          ),
                                         ),
                                         onSubmitted: (_) =>
                                             _submitAdd(widget.listId),
@@ -333,64 +320,32 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                     ),
                                   ],
                                 ),
-                              )
-                            else
-                              GestureDetector(
-                                onTap: _startAdding,
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 18, vertical: 14),
-                                  child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: CustomPaint(
-                                      size: Size(26, 26),
-                                      painter: _DashedCirclePainter(
-                                          color: Color(0xFFB0B0B8)),
-                                    ),
-                                  ),
-                                ),
                               ),
                           ],
                         ),
                       ],
                     ),
             ),
-            const SizedBox(height: 100),
+
+            // ── Bottom: إضافة غرض — natural size, right aligned ────────────
+            if (!_isAdding)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 36, top: 16),
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    AppLiquidButtons.iconWithLabel(
+                      icon: Icons.add_rounded,
+                      label: 'إضافة غرض',
+                      iconSize: 20,
+                      onPressed: _startAdding,
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),
     );
   }
-}
-
-class _DashedCirclePainter extends CustomPainter {
-  final Color color;
-  const _DashedCirclePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 1;
-    const dashCount = 12;
-    const dashAngle = 3.14159 * 2 / dashCount;
-    const gapFraction = 0.4;
-
-    for (int i = 0; i < dashCount; i++) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        i * dashAngle,
-        dashAngle * (1 - gapFraction),
-        false,
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedCirclePainter old) => old.color != color;
 }

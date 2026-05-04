@@ -34,7 +34,6 @@ class _BleReminderPageState extends State<BleReminderPage> {
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
   Color get _accent => widget.item.color;
 
-  /// Converts a Western Arabic integer to Eastern Arabic-Indic numeral string.
   String _toArabicNumerals(int number) {
     const western = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     const eastern = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -291,9 +290,7 @@ class _BleReminderPageState extends State<BleReminderPage> {
                   itemBuilder: (ctx, i) {
                     final mins = _minuteOptions[i];
                     final isSelected = _selected == mins;
-                    // Eastern Arabic-Indic numeral
                     final arabicNum = _toArabicNumerals(mins);
-                    // 5 and 10 are plural → دقايق, others → دقيقة
                     final label =
                         (mins == 5 || mins == 10) ? 'دقايق قبل' : 'دقيقة قبل';
                     return GestureDetector(
