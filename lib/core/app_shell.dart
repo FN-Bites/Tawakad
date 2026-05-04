@@ -3,6 +3,7 @@ import 'package:tawakad_app/core/widgets/glass_elements/glass_nav_bar.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_search_button.dart';
 import 'package:tawakad_app/features/home/ui/pages/home_page.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/pages/ble_scan.dart';
+import 'package:tawakad_app/features/home/ui/pages/caleander_page.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -44,7 +45,7 @@ class _AppShellState extends State<AppShell>
   static const List<GlassNavItem> _items = [
     GlassNavItem(assetPath: 'assets/icons/nav_bar/home.png', label: 'الرئيسية'),
     GlassNavItem(
-        assetPath: 'assets/icons/nav_bar/calender.png', label: 'المهام'),
+        assetPath: 'assets/icons/nav_bar/calender.png', label: 'التقويم'),
     GlassNavItem(assetPath: 'assets/icons/nav_bar/signal.png', label: 'المسح'),
   ];
 
@@ -52,7 +53,7 @@ class _AppShellState extends State<AppShell>
   Widget build(BuildContext context) {
     final page = switch (_index) {
       0 => HomePage(searchQuery: _searchQuery),
-      1 => const _PlaceholderPage(label: 'التقويم'),
+      1 => const CalendarPage(),
       2 => BleScanPage(searchQuery: _searchQuery, onGoToScan: _goToScan),
       _ => const _PlaceholderPage(label: ''),
     };
@@ -66,7 +67,7 @@ class _AppShellState extends State<AppShell>
         items: _items,
         onNavTap: (i) => setState(() {
           _index = i;
-          _searchQuery = '';
+          _searchQuery = ''; // important reset
         }),
         onSearchOpened: () => _navCtrl.forward(),
         onSearchClosed: () => _navCtrl.reverse(),
