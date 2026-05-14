@@ -1,0 +1,278 @@
+% SYSTEM IMPLEMENTATION AND VALIDATION
+% Aligned with the Tawakad Flutter codebase (lib/, android/, ios/).
+% Compile as part of your main thesis; adjust packages (babel/polyglossia) if needed.
+
+\chapter{SYSTEM IMPLEMENTATION AND VALIDATION}
+
+\section{Introduction}
+
+This chapter presents the implementation and validation processes of the Tawakad
+application. It describes how the system requirements introduced in previous chapters
+were transformed into functional system components through an iterative Agile-Scrum
+development process.
+
+\vspace{0.3cm}
+
+The implementation follows a \textbf{cross-platform Flutter architecture}: a shared
+Dart implementation under \texttt{lib/} targets Android and iOS, with small amounts
+of native code where platform capabilities require it (notably the iOS calendar
+integration). Cloud services are provided through \textbf{Firebase Authentication} and
+\textbf{Cloud Firestore} for user-centric persistence. Intelligent recommendations are
+\textbf{specified in the product experience} (including onboarding messaging and
+stored questionnaire answers); the current repository focuses on \textbf{data
+foundations and client UX}, while full machine-learning deployment is treated as a
+\textbf{planned extension} rather than a shipped training and inference pipeline in
+this codebase.
+
+\vspace{0.3cm}
+
+The chapter also explains the implementation details of the user interface, client-side
+state management, Firebase integration, and platform-specific modules. Validation and
+testing procedures are discussed to evaluate functionality, usability, and reliability
+within the scope of the implemented prototype.
+
+\vspace{0.3cm}
+
+The implementation activities were organized into multiple development sprints aligned
+with the sprint planning methodology and system requirements defined in the Software
+Requirements Specification (SRS).
+
+% ============================================================
+\section{Implementation by Sprints}
+
+% ------------------------------------------------------------
+\subsection{Sprint 1: Authentication Module}
+
+This sprint focused on implementing the user authentication system, including login,
+registration, email verification, password recovery, and secure linkage to cloud user
+records. In addition to email and password authentication, \textbf{Google Sign-In} was
+integrated as an alternative identity provider.
+
+% ------------------------------------------------------------
+\subsubsection{Frontend Implementation}
+
+The frontend implementation included:
+
+\begin{itemize}
+    \item Designing login and registration user interfaces (including Arabic UX copy),
+    \item Responsive authentication and onboarding-related screens,
+    \item Client-side form validation and input checking (including password-strength rules on sign-up),
+    \item Error message handling for authentication failures,
+    \item Password visibility controls where applicable,
+    \item Navigation between authentication pages (sign-in, sign-up, verification, forgot password),
+    \item Integration with Firebase Authentication APIs (email/password and Google credential flows).
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection{Backend Implementation}
+
+The backend implementation included:
+
+\begin{itemize}
+    \item Firebase Authentication integration for account lifecycle operations,
+    \item User account creation and management (including Google-based accounts),
+    \item Email verification workflow (verification email dispatch and enforcement before sign-in for email/password users),
+    \item Password reset services via Firebase,
+    \item Authentication state as managed by the Firebase client SDK (session continuity on the device),
+    \item Associated Firestore user document creation to store onboarding answers and password-history metadata (hashed) for policy support.
+\end{itemize}
+
+% ============================================================
+\subsection{Sprint 2: Home Dashboard and List Management Module}
+
+This sprint focused on implementing the main dashboard experience for \textbf{pack lists}
+(items the user intends to bring or check), including creation and editing flows,
+filtering, favorites, and in-app search. List state is managed on the \textbf{client}
+during this implementation phase.
+
+% ------------------------------------------------------------
+\subsubsection{Frontend Implementation}
+
+The frontend implementation included:
+
+\begin{itemize}
+    \item Home dashboard UI design and layout,
+    \item Pack list card rendering and list-centric interactions,
+    \item Dynamic filtering controls (for example, today, favorites, and all lists),
+    \item Favorite indicators and toggling,
+    \item Multi-step creation and editing flows (metadata such as date, time, repeat options, and sharing flags),
+    \item State management for list updates using a provider pattern,
+    \item Search-driven list filtering from the application shell,
+    \item Bottom navigation shell with Home, Calendar, and a placeholder tab reserved for future scanning features.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection{Backend Implementation}
+
+The backend implementation included:
+
+\begin{itemize}
+    \item Firebase project configuration for the mobile clients (core initialization),
+    \item \textbf{Firestore integration used for user profile documents} (not for per-list document CRUD in the current codebase),
+    \item In-memory list persistence within the running app session (prototype scope),
+    \item Client-side scheduling-related fields captured on list entities (date/time/repeat), without a separate push-notification scheduling service in the current dependency set,
+    \item Data modeling for lists and items suitable for future cloud persistence if extended.
+\end{itemize}
+
+% ============================================================
+\subsection{Sprint 3: Application Shell, Global Presentation, and Navigation}
+
+This sprint focused on implementing the \textbf{application shell} and global presentation
+defaults that affect the whole product, rather than a full standalone settings module.
+The codebase configures theming and localization at the application root, and provides
+primary navigation between major areas.
+
+% ------------------------------------------------------------
+\subsubsection{Frontend Implementation}
+
+The frontend implementation included:
+
+\begin{itemize}
+    \item Application shell with animated bottom navigation and integrated search affordances,
+    \item Global light and dark themes with system-driven theme mode selection where configured,
+    \item Localization scaffolding (for example, Arabic as the active locale with additional locales registered for future expansion),
+    \item Consistent typography and shared UI components across modules,
+    \item Navigation between Home, Calendar, and reserved tabs,
+    \item Placeholder screens where platform-specific or future functionality is not yet implemented (for example, non-iOS calendar presentation and scanning tab).
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection{Backend Implementation}
+
+The backend implementation included:
+
+\begin{itemize}
+    \item Continued reliance on Firebase-backed identity for associating future per-user cloud data with authenticated users,
+    \item Firestore-backed user document fields already created at registration time (onboarding answers) as a foundation for later personalization features,
+    \item No dedicated Firestore settings document model in the current prototype scope (settings persistence can be added as a future sprint).
+\end{itemize}
+
+% ============================================================
+\subsection{Sprint 4: Intelligent Recommendations: Data Foundations and Roadmap}
+
+This sprint focused on \textbf{establishing data foundations and product alignment} for
+an intelligent recommendation experience, while clearly separating \textbf{what is
+implemented now} from \textbf{planned machine-learning components}.
+
+% ------------------------------------------------------------
+\subsubsection{Data Collection}
+
+\textbf{Implemented in the current prototype:} onboarding questionnaire answers are
+captured in the client flow and persisted in the user's Firestore document at registration,
+alongside basic account metadata.
+
+\vspace{0.2cm}
+
+\textbf{Planned or partially available inputs for future recommendation logic:} reminder
+and list usage history once cloud persistence is extended, richer preference profiles,
+calendar context (the iOS implementation embeds a native calendar view for interaction
+with device calendars), environmental context such as weather, and longitudinal usage
+patterns. These sources are part of the system vision described in earlier requirements,
+but not all are fully wired into an automated training dataset in the current repository.
+
+% ------------------------------------------------------------
+\subsubsection{Data Preprocessing and Cleaning}
+
+For the data that is currently stored (notably onboarding answers), lightweight validation
+is enforced at input time in the client application. A full preprocessing pipeline for
+machine learning (normalization, deduplication, labeling, and feature engineering across
+heterogeneous signals) is \textbf{planned} as part of a future analytics and model-training
+workflow, rather than implemented as a batch processing service in this codebase snapshot.
+
+% ------------------------------------------------------------
+\subsubsection{Model Comparison}
+
+Model comparison (for example, classical baselines versus contextual models, on-device
+constraints versus cloud inference) is part of the \textbf{planned evaluation strategy}
+for the recommendation subsystem. At the prototype stage documented here, the mobile
+client does not include an integrated training or batch evaluation harness; comparative
+experiments would be conducted in an offline research environment before model selection
+for deployment.
+
+% ------------------------------------------------------------
+\subsubsection{Selected Model}
+
+No single deployed ML model is claimed as the final production recommender within this
+implementation chapter. Instead, the selection criteria are recorded as requirements:
+\textbf{contextual adaptability}, \textbf{latency acceptable for mobile UX}, and
+\textbf{maintainability} (including privacy and updateability). The eventual model choice
+should be justified against those criteria once training data and serving infrastructure
+are in place.
+
+% ------------------------------------------------------------
+\subsubsection{Evaluation Metrics}
+
+When a recommendation model is integrated, evaluation is expected to include standard
+classification-style metrics where applicable (accuracy, precision, recall, F1-score)
+plus product-facing measures such as \textbf{recommendation relevance} and
+\textbf{user satisfaction} in usability studies. For the prototype without an integrated
+model server, AI-specific quantitative validation is deferred; the validation section below
+focuses on implemented flows.
+
+% ============================================================
+\section{Validation and Testing}
+
+This section describes the testing and validation procedures used to evaluate the
+correctness, reliability, usability, and performance of the Tawakad application within
+the scope of the implemented features.
+
+% ------------------------------------------------------------
+\subsection{UI Validation}
+
+UI validation focused on evaluating:
+
+\begin{itemize}
+    \item Visual consistency across authentication, onboarding, and home flows,
+    \item Layout behavior across common phone sizes (Android and iOS),
+    \item Basic accessibility considerations (contrast, tap targets) as applicable,
+    \item Navigation flow between shell tabs and authentication routes,
+    \item Readability of Arabic UI strings and hierarchy of primary actions.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsection{Backend and Firebase Validation}
+
+Backend validation focused on:
+
+\begin{itemize}
+    \item Email/password authentication workflows, including verification and password reset,
+    \item Google Sign-In credential exchange and Firebase user creation or linkage,
+    \item Firestore write and read behavior for the user document created at registration,
+    \item Client-side error handling for common failure modes (network, invalid credentials, cancelled Google sign-in),
+    \item Email-based account recovery paths provided by Firebase.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsection{AI and Recommendation Readiness}
+
+Validation for the intelligent recommendation subsystem is currently \textbf{requirements-level
+and architectural}: onboarding data is persisted to support future personalization, and
+the UX communicates the intended assistant behavior. \textbf{Quantitative model validation}
+(offline metrics, A/B tests, latency under load) is planned for a later milestone when a
+model and serving approach are integrated.
+
+% ------------------------------------------------------------
+\subsection{System Testing Procedures}
+
+The following testing methods were applied or are applicable to the prototype scope:
+
+\begin{itemize}
+    \item Functional testing of authentication, list creation/editing, filtering, favorites, and search,
+    \item Integration testing across Flutter UI, Firebase SDKs, and (on iOS) native calendar platform views,
+    \item Usability testing for primary task completion (sign up/in, create a list, filter, favorite),
+    \item Lightweight performance checks for typical navigation and list sizes on mobile devices,
+    \item Compatibility testing across Android and iOS builds from the same \texttt{lib/} codebase, noting platform differences (for example, calendar tab behavior),
+    \item User acceptance testing (UAT) with representative users once stable builds are distributed.
+\end{itemize}
+
+% ============================================================
+\section{Summary}
+
+This chapter presented the implementation and validation phases of the Tawakad
+application. The system was developed incrementally through Agile-based development sprints
+covering authentication (including Google Sign-In), pack list management with client-side
+state in the prototype scope, an application shell with navigation and global presentation
+defaults, and the \textbf{foundations and roadmap} for contextual recommendations backed
+by onboarding data stored in Firestore. Validation emphasized implemented Firebase workflows,
+UI consistency, and cross-platform behavior, while deferring full AI model evaluation until
+a recommender is integrated into the product.
