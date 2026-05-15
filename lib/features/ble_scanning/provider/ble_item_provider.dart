@@ -60,7 +60,6 @@ class BleItemProvider extends ChangeNotifier {
   BleItemProvider(this._ble, PackListProvider packLists) {
     _loadPrefs();
 
-    // React when a list's scheduled time is edited.
     packLists.onTimeChanged = (listId, newTime, newDate) {
       _rescheduleForList(listId, newTime, newDate);
     };
@@ -245,20 +244,17 @@ class BleItemProvider extends ChangeNotifier {
     String? newTime,
     DateTime? newDate,
   ) {
-    // Find all saved items linked to this list.
     final affected =
         _savedItems.where((item) => item.listIds.contains(listId)).toList();
 
     for (final item in affected) {
-      // Cancel the existing schedule for this device+list pair.
       cancelSchedule(item.deviceId, listId);
 
       if (newTime == null) continue;
 
-      // Recover the checklist item name and minutesBefore from the old entry,
-      // falling back to sensible defaults if it had already been removed.
+
       final key = _scheduleKey(item.deviceId, listId);
-      final existing = _schedules[key]; // will be null after cancel — see note
+      final existing = _schedules[key]; 
       final checklistItemName = existing?.checklistItemName ?? item.name;
       final minutesBefore =
           existing?.minutesBefore ?? item.reminderMinutesBefore ?? 0;
@@ -281,8 +277,6 @@ class BleItemProvider extends ChangeNotifier {
 
   Future<void> _onTimerFired(_ScheduleEntry fired, String? listTime) async {
     final listId = fired.listId;
-
-    // If a batch is already running for this listId, wait for it then probe solo.
     if (_activeBatches.containsKey(listId)) {
       debugPrint('Auto-scan: late arrival ${fired.item.name}@$listId, '
           'waiting for running batch then probing solo.');
@@ -305,7 +299,7 @@ class BleItemProvider extends ChangeNotifier {
       return;
     }
 
-    // Wait briefly so any other timers that fired at the same moment land first.
+
     await Future.delayed(const Duration(milliseconds: 300));
 
     final dueEntries =

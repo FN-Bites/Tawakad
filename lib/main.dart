@@ -48,14 +48,10 @@ void main() async {
         ChangeNotifierProxyProvider2<BleProvider, PackListProvider,
             BleItemProvider>(
           create: (ctx) {
-            // Pass both BleProvider and PackListProvider to the constructor.
-            // BleItemProvider internally hooks onTimeChanged via PackListProvider.
             final bleItems = BleItemProvider(
               ctx.read<BleProvider>(),
               ctx.read<PackListProvider>(),
             );
-            // _wireAutoScan only sets up the onAutoScanResult callback
-            // (auto-checking list items when BLE presence is confirmed).
             _wireAutoScan(bleItems, ctx.read<PackListProvider>());
             return bleItems;
           },
@@ -71,9 +67,7 @@ void main() async {
   );
 }
 
-/// Wires the BLE auto-scan result back into the checklist.
-/// Called on both create and update so the callback always points to the
-/// current PackListProvider instance.
+
 void _wireAutoScan(BleItemProvider bleItems, PackListProvider packLists) {
   bleItems.onAutoScanResult =
       (String checklistItemName, String listId, bool isPresent) {

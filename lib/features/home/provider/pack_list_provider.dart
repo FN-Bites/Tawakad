@@ -4,7 +4,7 @@ import '../model/pack_list.dart';
 class PackListProvider extends ChangeNotifier {
   final List<PackList> _lists = [];
 
-  /// BleItemProvider registers here to react to list time changes.
+
   void Function(String listId, String? newTime, DateTime? newDate)?
       onTimeChanged;
 
@@ -87,13 +87,11 @@ class PackListProvider extends ChangeNotifier {
     );
 
     if (timeChanged && time != null) {
-      // Auto-uncheck items if the new scheduled time is in the future.
       final newFireTime = _resolveFireTime(time, date);
       if (newFireTime != null && newFireTime.isAfter(DateTime.now())) {
         _lists[index] = _lists[index].copyWith(checkedIndices: {});
       }
 
-      // Notify BleItemProvider to cancel the old schedule and set a new one.
       onTimeChanged?.call(id, time, date);
     }
 
@@ -188,8 +186,6 @@ class PackListProvider extends ChangeNotifier {
 
   // ─── Helpers ──────────────────────────────────────────────
 
-  /// Resolves the concrete DateTime at which a list will fire.
-  /// Returns null if the time string is malformed.
   DateTime? _resolveFireTime(String time, DateTime? date) {
     final parts = time.split(':');
     if (parts.length != 2) return null;

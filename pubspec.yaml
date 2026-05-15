@@ -52,6 +52,7 @@ dependencies:
   convert: ^3.0.0
   shared_preferences: ^2.3.0
   flutter_foreground_task: ^9.2.2
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:

@@ -20,7 +20,7 @@ class BleItemCard extends StatelessWidget {
     final affiliated =
         allLists.where((l) => item.listIds.contains(l.id)).toList();
 
-    const badgeLabel = 'تفاصيل الغرض';
+  const badgeLabel = ' تفاصيل الغرض';
 
     return AppListCard(
       color: item.color,
