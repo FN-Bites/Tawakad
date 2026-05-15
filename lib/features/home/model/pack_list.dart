@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
@@ -125,37 +126,44 @@ class PackList {
       'colorValue': colorValue,
       'items': items,
       'checkedIndices': checkedIndices.toList(),
-      'date': date?.toIso8601String(),
+      'date': date != null ? Timestamp.fromDate(date!) : null,
       'time': time,
       'event': event,
       'repeat': repeat,
       'repeatDays': repeatDays,
       'isShared': isShared,
-      'createdAt': createdAt.toIso8601String(),
+      'createdAt': Timestamp.fromDate(createdAt),
       'isFavorite': isFavorite,
     };
   }
 
-  factory PackList.fromMap(Map<String, dynamic> map) {
+  factory PackList.fromMap(Map<String, dynamic> map, String id) {
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is Timestamp) return value.toDate();
+      if (value is String) return DateTime.tryParse(value);
+      return null;
+    }
+
     return PackList(
-      id: map['id'] as String,
-      userId: map['userId'] as String,
-      title: map['title'] as String,
-      iconPath: map['iconPath'] as String,
-      colorValue: map['colorValue'] as int,
-      items: List<String>.from(map['items'] as List),
+      id: map['id'] as String? ?? id,
+      userId: map['userId'] as String? ?? '',
+      title: map['title'] as String? ?? 'بدون عنوان',
+      iconPath: map['iconPath'] as String? ?? '',
+      colorValue: map['colorValue'] as int? ?? 0xFF2196F3,
+      items:
+          map['items'] != null ? List<String>.from(map['items'] as List) : [],
       checkedIndices: map['checkedIndices'] != null
           ? Set<int>.from(map['checkedIndices'] as List)
           : {},
-      date: map['date'] != null ? DateTime.parse(map['date'] as String) : null,
-      time: map['time'] as String?,
+      date: parseDate(map['date']),
       event: map['event'] as String?,
       repeat: map['repeat'] as bool? ?? false,
       repeatDays: map['repeatDays'] != null
           ? List<int>.from(map['repeatDays'] as List)
           : [],
       isShared: map['isShared'] as bool? ?? false,
-      createdAt: DateTime.parse(map['createdAt'] as String),
+      createdAt: parseDate(map['createdAt']) ?? DateTime.now(),
       isFavorite: map['isFavorite'] as bool? ?? false,
     );
   }

@@ -1,23 +1,52 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tawakad_app/core/services/firestore_service.dart';
 import '../model/pack_list.dart';
 
 class PackListProvider extends ChangeNotifier {
   final List<PackList> _lists = [];
+  final FirestoreService _service = FirestoreService();
+  StreamSubscription<User?>? _authSub;
 
+  Function(String listId, String? newTime, DateTime? newDate)? onTimeChanged;
 
-  void Function(String listId, String? newTime, DateTime? newDate)?
-      onTimeChanged;
+  PackListProvider() {
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user != null) {
+        fetchLists();
+      } else {
+        _lists.clear();
+        notifyListeners();
+      }
+    });
+  }
 
-  // ─── Read ────────────────────────────────────────────────
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
+  }
+
+  // ───────── READ ─────────
   List<PackList> get lists => List.unmodifiable(_lists);
 
-  // ─── Create ──────────────────────────────────────────────
-  void addList(PackList list) {
-    _lists.add(list);
+  Future<void> fetchLists() async {
+    final docs = await _service.fetchLists();
+
+    _lists.clear();
+
+    for (var doc in docs) {
+      final data = doc.data();
+      _lists.add(PackList.fromMap(data, doc.id));
+    }
+
     notifyListeners();
   }
 
-  void createList({
+  // ───────── CREATE ─────────
+  Future<void> createList({
     required String title,
     required String iconPath,
     required Color color,
@@ -29,32 +58,39 @@ class PackListProvider extends ChangeNotifier {
     bool repeat = false,
     List<int> repeatDays = const [],
     bool isShared = false,
-  }) {
-    _lists.add(PackList.create(
-      userId: 'local',
-      title: title,
-      iconPath: iconPath,
-      color: color,
-      items: items,
-      date: date,
-      time: time,
-      event: event,
-      repeat: repeat,
-      repeatDays: repeatDays,
-      isShared: isShared,
-      isFavorite: isFavorite,
-    ));
-    notifyListeners();
+  }) async {
+    final data = {
+      'title': title,
+      'iconPath': iconPath,
+      'colorValue': color.value,
+      'isFavorite': isFavorite,
+      'items': items,
+      'date': date != null ? Timestamp.fromDate(date) : null,
+      'time': time,
+      'event': event,
+      'repeat': repeat,
+      'repeatDays': repeatDays,
+      'isShared': isShared,
+      'checkedIndices': [],
+      'createdAt': Timestamp.fromDate(DateTime.now()),
+      'userId': _service.userId ?? '',
+    };
+
+    await _service.createList(data);
+
+    await fetchLists();
   }
 
-  // ─── Delete ──────────────────────────────────────────────
-  void removeList(String id) {
+  // ───────── DELETE ─────────
+  Future<void> removeList(String id) async {
+    await _service.removeList(id);
+
     _lists.removeWhere((l) => l.id == id);
     notifyListeners();
   }
 
-  // ─── Update ──────────────────────────────────────────────
-  void editList({
+  // ───────── UPDATE LIST ─────────
+  Future<void> editList({
     required String id,
     required String title,
     required String iconPath,
@@ -66,138 +102,185 @@ class PackListProvider extends ChangeNotifier {
     bool repeat = false,
     List<int> repeatDays = const [],
     bool isShared = false,
-  }) {
+  }) async {
+    final data = {
+      'title': title,
+      'iconPath': iconPath,
+      'colorValue': color.value,
+      'isFavorite': isFavorite,
+      'date': date != null ? Timestamp.fromDate(date) : null,
+      'time': time,
+      'event': event,
+      'repeat': repeat,
+      'repeatDays': repeatDays,
+      'isShared': isShared,
+    };
+
+    await _service.editList(id, data);
+
     final index = _lists.indexWhere((l) => l.id == id);
-    if (index == -1) return;
-
-    final old = _lists[index];
-    final timeChanged = old.time != time || old.date != date;
-
-    _lists[index] = old.copyWith(
-      title: title,
-      iconPath: iconPath,
-      colorValue: color.value,
-      isFavorite: isFavorite,
-      date: date,
-      time: time,
-      event: event,
-      repeat: repeat,
-      repeatDays: repeatDays,
-      isShared: isShared,
-    );
-
-    if (timeChanged && time != null) {
-      final newFireTime = _resolveFireTime(time, date);
-      if (newFireTime != null && newFireTime.isAfter(DateTime.now())) {
-        _lists[index] = _lists[index].copyWith(checkedIndices: {});
-      }
-
+    if (index != -1) {
+      _lists[index] = _lists[index].copyWith(
+        title: title,
+        iconPath: iconPath,
+        colorValue: color.value,
+        isFavorite: isFavorite,
+        date: date,
+        time: time,
+        event: event,
+        repeat: repeat,
+        repeatDays: repeatDays,
+        isShared: isShared,
+      );
+      notifyListeners();
       onTimeChanged?.call(id, time, date);
     }
-
-    notifyListeners();
   }
 
-  // ─── Like ─────────────────────────────────────────────────
-  void toggleFavorite(String id) {
+  // ───────── FAVORITE ─────────
+  Future<void> toggleFavorite(String id) async {
     final index = _lists.indexWhere((l) => l.id == id);
     if (index == -1) return;
-    _lists[index] =
-        _lists[index].copyWith(isFavorite: !_lists[index].isFavorite);
+
+    final newValue = !_lists[index].isFavorite;
+
+    await _service.toggleFavorite(id, newValue);
+
+    _lists[index] = _lists[index].copyWith(isFavorite: newValue);
+
     notifyListeners();
   }
 
-  // ─── Items ────────────────────────────────────────────────
-  void addItem(String listId, String item) {
+  // ───────── ITEMS CRUD ─────────
+
+  Future<void> addItem(String listId, String item) async {
     final index = _lists.indexWhere((l) => l.id == listId);
     if (index == -1) return;
-    final updated = List<String>.from(_lists[index].items)..add(item);
+
+    final currentItems = _lists[index].items;
+
+    await _service.addItem(listId, currentItems, item);
+
+    final updated = List<String>.from(currentItems)..add(item);
+
     _lists[index] = _lists[index].copyWith(items: updated);
     notifyListeners();
   }
 
-  void removeItem(String listId, String item) {
+  Future<void> renameItem(String listId, int itemIndex, String newName) async {
     final index = _lists.indexWhere((l) => l.id == listId);
     if (index == -1) return;
-    final updated = List<String>.from(_lists[index].items)..remove(item);
+
+    final currentItems = _lists[index].items;
+
+    await _service.renameItem(listId, currentItems, itemIndex, newName);
+
+    final updated = List<String>.from(currentItems);
+    updated[itemIndex] = newName;
+
     _lists[index] = _lists[index].copyWith(items: updated);
     notifyListeners();
   }
 
-  // ─── Items extended ───────────────────────────────────────
-  void renameItem(String listId, int index, String newName) {
-    final i = _lists.indexWhere((l) => l.id == listId);
-    if (i == -1) return;
-    final updated = List<String>.from(_lists[i].items);
-    updated[index] = newName;
-    _lists[i] = _lists[i].copyWith(items: updated);
+  Future<void> removeItem(String listId, String item) async {
+    final index = _lists.indexWhere((l) => l.id == listId);
+    if (index == -1) return;
+
+    final currentItems = _lists[index].items;
+
+    await _service.removeItem(listId, currentItems, item);
+
+    final updated = List<String>.from(currentItems)..remove(item);
+
+    _lists[index] = _lists[index].copyWith(items: updated);
     notifyListeners();
   }
 
-  void removeItemAt(String listId, int index) {
-    final i = _lists.indexWhere((l) => l.id == listId);
-    if (i == -1) return;
-    final updated = List<String>.from(_lists[i].items)..removeAt(index);
-    final updatedChecked = _lists[i]
-        .checkedIndices
-        .where((idx) => idx != index)
-        .map((idx) => idx > index ? idx - 1 : idx)
-        .toSet();
-    _lists[i] =
-        _lists[i].copyWith(items: updated, checkedIndices: updatedChecked);
+  Future<void> removeItemAt(String listId, int itemIndex) async {
+    final index = _lists.indexWhere((l) => l.id == listId);
+    if (index == -1) return;
+
+    final currentItems = _lists[index].items;
+
+    await _service.removeItemAt(listId, currentItems, itemIndex);
+
+    final updated = List<String>.from(currentItems)..removeAt(itemIndex);
+
+    _lists[index] = _lists[index].copyWith(items: updated);
     notifyListeners();
   }
 
-  void toggleItemChecked(String listId, int index) {
-    final i = _lists.indexWhere((l) => l.id == listId);
-    if (i == -1) return;
-    final current = Set<int>.from(_lists[i].checkedIndices);
-    if (current.contains(index)) {
-      current.remove(index);
+  Future<void> toggleItemChecked(String listId, int itemIndex) async {
+    final index = _lists.indexWhere((l) => l.id == listId);
+    if (index == -1) return;
+
+    final currentChecked = _lists[index].checkedIndices;
+
+    await _service.toggleItemChecked(
+      listId,
+      currentChecked.toList(),
+      itemIndex,
+    );
+
+    final updated = Set<int>.from(currentChecked);
+
+    if (updated.contains(itemIndex)) {
+      updated.remove(itemIndex);
     } else {
-      current.add(index);
+      updated.add(itemIndex);
     }
-    _lists[i] = _lists[i].copyWith(checkedIndices: current);
+
+    _lists[index] = _lists[index].copyWith(checkedIndices: updated);
+
     notifyListeners();
   }
 
-  void checkItemByName(String listId, String itemName) {
-    final i = _lists.indexWhere((l) => l.id == listId);
-    if (i == -1) return;
+  Future<void> checkItemByName(String listId, String itemName) async {
+    final listIndex = _lists.indexWhere((l) => l.id == listId);
 
-    final itemIndex = _lists[i].items.indexOf(itemName);
-    if (itemIndex == -1) return;
+    if (listIndex == -1) return;
 
-    final current = Set<int>.from(_lists[i].checkedIndices);
-    if (current.contains(itemIndex)) return;
+    final items = _lists[listIndex].items;
 
-    current.add(itemIndex);
-    _lists[i] = _lists[i].copyWith(checkedIndices: current);
+    final itemIndex = items.indexWhere(
+      (item) => item.toLowerCase().trim() == itemName.toLowerCase().trim(),
+    );
+
+    if (itemIndex == -1) {
+      debugPrint(
+          'checkItemByName: Item "$itemName" not found in list "$listId"');
+      return;
+    }
+
+    final currentChecked = Set<int>.from(_lists[listIndex].checkedIndices);
+
+    if (currentChecked.contains(itemIndex)) {
+      debugPrint('checkItemByName: "$itemName" already checked');
+      return;
+    }
+
+    currentChecked.add(itemIndex);
+    await _service.toggleItemChecked(
+        listId, currentChecked.toList(), itemIndex);
+
+    _lists[listIndex] = _lists[listIndex].copyWith(
+      checkedIndices: currentChecked,
+    );
+
     notifyListeners();
+
+    debugPrint('checkItemByName: "$itemName" marked as checked ✓');
   }
 
   String? listTime(String listId) {
-    try {
-      return _lists.firstWhere((l) => l.id == listId).time;
-    } catch (_) {
-      return null;
-    }
+    final index = _lists.indexWhere((l) => l.id == listId);
+    if (index == -1) return null;
+    return _lists[index].time;
   }
 
-  // ─── Helpers ──────────────────────────────────────────────
-
-  DateTime? _resolveFireTime(String time, DateTime? date) {
-    final parts = time.split(':');
-    if (parts.length != 2) return null;
-    final h = int.tryParse(parts[0]);
-    final m = int.tryParse(parts[1]);
-    if (h == null || m == null) return null;
-    final now = DateTime.now();
-    if (date != null) {
-      return DateTime(date.year, date.month, date.day, h, m);
-    }
-    var fire = DateTime(now.year, now.month, now.day, h, m);
-    if (fire.isBefore(now)) fire = fire.add(const Duration(days: 1));
-    return fire;
+  DateTime? listDate(String listId) {
+    final index = _lists.indexWhere((l) => l.id == listId);
+    if (index == -1) return null;
+    return _lists[index].date;
   }
 }

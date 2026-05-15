@@ -34,8 +34,9 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
     super.dispose();
   }
 
-  void _submitEdit(String listId, int index) {
-    final text = _editController.text.trim();
+  // Accept the submitted value directly from onSubmitted, fall back to controller
+  void _submitEdit(String listId, int index, [String? submittedText]) {
+    final text = (submittedText ?? _editController.text).trim();
     if (text.isNotEmpty) {
       context.read<PackListProvider>().renameItem(listId, index, text);
     }
@@ -223,7 +224,12 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                                     contentPadding:
                                                         EdgeInsets.zero,
                                                   ),
-                                                  onSubmitted: (_) =>
+                                                  // FIX 1: pass the submitted value directly
+                                                  onSubmitted: (value) =>
+                                                      _submitEdit(widget.listId,
+                                                          i, value),
+                                                  // FIX 2: also commit when user taps outside
+                                                  onTapOutside: (_) =>
                                                       _submitEdit(
                                                           widget.listId, i),
                                                 )
@@ -327,7 +333,7 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                     ),
             ),
 
-            // ── Bottom: إضافة غرض — natural size, right aligned ────────────
+            // ── Bottom: إضافة غرض ────────────
             if (!_isAdding)
               Padding(
                 padding: const EdgeInsets.only(bottom: 36, top: 16),
