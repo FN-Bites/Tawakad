@@ -17,7 +17,7 @@ class VerifyEmailPage extends StatelessWidget {
       if (flow.isEmailVerified) {
         Navigator.pushReplacementNamed(
           context,
-          '/home',
+          '/app-shell',
         );
       }
     });

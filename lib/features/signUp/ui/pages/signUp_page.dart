@@ -32,14 +32,13 @@ class SingupPage extends StatelessWidget {
               final success =
                   await flow.signInWithGoogle(onboardingFlow.answers);
               if (success && context.mounted) {
-                Navigator.pushReplacementNamed(context, '/home');
+                Navigator.pushReplacementNamed(context, '/app-shell');
               }
             },
       bottomPrefixText: 'لديك حساب؟ ',
       bottomActionText: 'قم بتسجيل الدخول',
       onBottomActionPressed: () =>
           Navigator.pushReplacementNamed(context, '/signin'),
-          
       child: SignUpContent(
         emailController: flow.emailController,
         passwordController: flow.passwordController,
@@ -56,9 +55,9 @@ class SingupPage extends StatelessWidget {
         hasNumber: flow.hasNumber,
         hasMinLength: flow.hasMinLength,
         hasSpecialChar: flow.hasSpecialChar,
-        isPasswordEmpty: flow.password.isEmpty, 
-        emailInvalid: flow.emailInvalid, 
-        passwordInvalid: flow.passwordInvalid, 
+        isPasswordEmpty: flow.password.isEmpty,
+        emailInvalid: flow.emailInvalid,
+        passwordInvalid: flow.passwordInvalid,
         confirmPasswordInvalid: flow.confirmPasswordInvalid,
       ),
     );

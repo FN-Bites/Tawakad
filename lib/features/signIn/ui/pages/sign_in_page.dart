@@ -23,7 +23,7 @@ class SignInPage extends StatelessWidget {
           : () async {
               final success = await flow.signInWithEmail();
               if (success && context.mounted) {
-                Navigator.pushReplacementNamed(context, '/home');
+                Navigator.pushReplacementNamed(context, '/app-shell');
               }
             },
       onGooglePressed: flow.isLoading
@@ -31,7 +31,7 @@ class SignInPage extends StatelessWidget {
           : () async {
               final success = await flow.signInWithGoogle();
               if (success && context.mounted) {
-                Navigator.pushReplacementNamed(context, '/home');
+                Navigator.pushReplacementNamed(context, '/app-shell');
               }
             },
       bottomPrefixText: 'ليس لديك حساب؟ ',
@@ -45,8 +45,8 @@ class SignInPage extends StatelessWidget {
         emailServerError: flow.emailServerError,
         passwordServerError: flow.passwordServerError,
         onEmailChanged: flow.setEmail,
-        onPasswordChanged: flow.setPassword, 
-        emailInvalid: flow.emailInvalid, 
+        onPasswordChanged: flow.setPassword,
+        emailInvalid: flow.emailInvalid,
         passwordInvalid: flow.passwordInvalid,
       ),
     );
