@@ -11,6 +11,7 @@ import 'features/signUp/providers/verifyEmail_flow_provider.dart';
 import 'package:tawakad_app/features/signIn/providers/signIn_flow_provider.dart';
 import 'features/signIn/providers/forgotPassword_flow_provider.dart';
 import 'features/home/provider/pack_list_provider.dart';
+import 'features/profile/providers/profile_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,9 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => PackListProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(),
+        ),
       ],
       child: const TawakadApp(),
     ),
@@ -50,11 +54,13 @@ class TawakadApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<ProfileProvider>().themeMode;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routes: AppRoutes.routes,
       initialRoute: AppRoutes.appShell,
       locale: const Locale('ar'),

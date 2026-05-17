@@ -56,6 +56,24 @@ class UserService {
     }
   }
 
+  Future<Map<String, dynamic>?> getUserDocument(String uid) async {
+    final snapshot = await _firestore.collection('users').doc(uid).get();
+    if (!snapshot.exists) return null;
+    return snapshot.data();
+  }
+
+  Future<void> updateUserProfile({
+    required String uid,
+    required List<String> answers,
+    String? medicationNotes,
+  }) async {
+    await _firestore.collection('users').doc(uid).update({
+      'answers': answers,
+      if (medicationNotes != null) 'medicationNotes': medicationNotes,
+      'updatedAt': Timestamp.now(),
+    });
+  }
+
   // Hash password before storing in history
   String _generatePasswordHash(String password, String email) {
     final String salt = email.toLowerCase().trim();

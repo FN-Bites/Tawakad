@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_nav_bar.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_search_button.dart';
 import 'package:tawakad_app/features/home/ui/pages/home_page.dart';
-import 'package:tawakad_app/features/home/ui/pages/caleander_page.dart';
+import 'package:tawakad_app/features/home/ui/pages/calendar_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
