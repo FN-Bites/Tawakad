@@ -9,6 +9,7 @@ import '../../../../core/widgets/search_empty_state.dart';
 import '../pages/primary_create_list_page.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
+import 'package:tawakad_app/features/profile/ui/pages/profile_page.dart';
 
 enum FilterOption { today, favorites, all }
 
@@ -89,6 +90,11 @@ class _HomeState extends State<HomePage> {
           AppIconBadge(
             icon: Icons.person,
             iconColor: theme.iconTheme.color ?? theme.colorScheme.onSurface,
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const ProfilePage()),
+              );
+            },
           ),
           const SizedBox(width: 16),
           Text(

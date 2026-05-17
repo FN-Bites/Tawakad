@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tawakad_app/features/home/ui/widgets/flutter_device_calendar_view.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -35,6 +36,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
+    // iOS — native calendar (EventKit / CalendarKit). Do not modify this branch.
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       return UiKitView(
         viewType: 'calendar-view',
@@ -45,13 +47,14 @@ class _CalendarPageState extends State<CalendarPage> {
       );
     }
 
+    // Android — Flutter calendar that reads the device calendar.
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return const FlutterDeviceCalendarView();
+    }
+
     return const Directionality(
       textDirection: TextDirection.rtl,
-      child: Scaffold(
-        body: Center(
-          child: Text('التقويم'),
-        ),
-      ),
+      child: Center(child: Text('التقويم غير متاح على هذه المنصة')),
     );
   }
 }
