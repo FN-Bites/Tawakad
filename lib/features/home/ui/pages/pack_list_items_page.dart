@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/pack_list_provider.dart';
 import 'primary_create_list_page.dart';
+import 'package:tawakad_app/features/rewards/ui/pages/list_completion.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/field_card.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import 'package:tawakad_app/core/widgets/cards/circle_btn.dart';
+import 'package:tawakad_app/features/rewards/model/badge_model.dart';
+import 'package:tawakad_app/features/rewards/provider/reward_provider.dart';
 
 class PackListItemsPage extends StatefulWidget {
   final String listId;
@@ -25,6 +28,8 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
   final TextEditingController _addController = TextEditingController();
   final FocusNode _addFocus = FocusNode();
 
+  bool _navigatingToCompletion = false;
+
   @override
   void dispose() {
     _editController.dispose();
@@ -34,7 +39,6 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
     super.dispose();
   }
 
-  // Accept the submitted value directly from onSubmitted, fall back to controller
   void _submitEdit(String listId, int index, [String? submittedText]) {
     final text = (submittedText ?? _editController.text).trim();
     if (text.isNotEmpty) {
@@ -67,6 +71,26 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
         .watch<PackListProvider>()
         .lists
         .firstWhere((l) => l.id == widget.listId);
+
+    // ── Navigate to completion page when a list finishes ─────────────────
+    final event = context.watch<RewardProvider>().pendingCompletion;
+    if (event != null && !_navigatingToCompletion) {
+      _navigatingToCompletion = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<RewardProvider>().clearPendingCompletion();
+
+        final page = switch (event) {
+          BadgeCompletion(:final badge) => ListCompletionPage(badge: badge),
+          DefaultCompletion() => const ListCompletionPage(),
+        };
+
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => page))
+            .then((_) => _navigatingToCompletion = false);
+      });
+    }
+    // ─────────────────────────────────────────────────────────────────────
 
     final accentColor = list.color;
     final items = list.items;
@@ -224,11 +248,9 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                                                     contentPadding:
                                                         EdgeInsets.zero,
                                                   ),
-                                                  // FIX 1: pass the submitted value directly
                                                   onSubmitted: (value) =>
                                                       _submitEdit(widget.listId,
                                                           i, value),
-                                                  // FIX 2: also commit when user taps outside
                                                   onTapOutside: (_) =>
                                                       _submitEdit(
                                                           widget.listId, i),
@@ -332,8 +354,6 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                       ],
                     ),
             ),
-
-            // ── Bottom: إضافة غرض ────────────
             if (!_isAdding)
               Padding(
                 padding: const EdgeInsets.only(bottom: 36, top: 16),

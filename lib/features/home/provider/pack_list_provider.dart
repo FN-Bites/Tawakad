@@ -3,12 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/services/firestore_service.dart';
+import 'package:tawakad_app/features/rewards/provider/reward_provider.dart';
 import '../model/pack_list.dart';
 
 class PackListProvider extends ChangeNotifier {
   final List<PackList> _lists = [];
   final FirestoreService _service = FirestoreService();
   StreamSubscription<User?>? _authSub;
+
+  RewardProvider? rewardProvider;
 
   Function(String listId, String? newTime, DateTime? newDate)? onTimeChanged;
 
@@ -34,14 +37,10 @@ class PackListProvider extends ChangeNotifier {
 
   Future<void> fetchLists() async {
     final docs = await _service.fetchLists();
-
     _lists.clear();
-
     for (var doc in docs) {
-      final data = doc.data();
-      _lists.add(PackList.fromMap(data, doc.id));
+      _lists.add(PackList.fromMap(doc.data(), doc.id));
     }
-
     notifyListeners();
   }
 
@@ -77,14 +76,12 @@ class PackListProvider extends ChangeNotifier {
     };
 
     await _service.createList(data);
-
     await fetchLists();
   }
 
   // ───────── DELETE ─────────
   Future<void> removeList(String id) async {
     await _service.removeList(id);
-
     _lists.removeWhere((l) => l.id == id);
     notifyListeners();
   }
@@ -143,11 +140,9 @@ class PackListProvider extends ChangeNotifier {
     if (index == -1) return;
 
     final newValue = !_lists[index].isFavorite;
-
     await _service.toggleFavorite(id, newValue);
 
     _lists[index] = _lists[index].copyWith(isFavorite: newValue);
-
     notifyListeners();
   }
 
@@ -158,12 +153,11 @@ class PackListProvider extends ChangeNotifier {
     if (index == -1) return;
 
     final currentItems = _lists[index].items;
-
     await _service.addItem(listId, currentItems, item);
 
-    final updated = List<String>.from(currentItems)..add(item);
-
-    _lists[index] = _lists[index].copyWith(items: updated);
+    _lists[index] = _lists[index].copyWith(
+      items: List<String>.from(currentItems)..add(item),
+    );
     notifyListeners();
   }
 
@@ -172,12 +166,9 @@ class PackListProvider extends ChangeNotifier {
     if (index == -1) return;
 
     final currentItems = _lists[index].items;
-
     await _service.renameItem(listId, currentItems, itemIndex, newName);
 
-    final updated = List<String>.from(currentItems);
-    updated[itemIndex] = newName;
-
+    final updated = List<String>.from(currentItems)..[itemIndex] = newName;
     _lists[index] = _lists[index].copyWith(items: updated);
     notifyListeners();
   }
@@ -187,12 +178,11 @@ class PackListProvider extends ChangeNotifier {
     if (index == -1) return;
 
     final currentItems = _lists[index].items;
-
     await _service.removeItem(listId, currentItems, item);
 
-    final updated = List<String>.from(currentItems)..remove(item);
-
-    _lists[index] = _lists[index].copyWith(items: updated);
+    _lists[index] = _lists[index].copyWith(
+      items: List<String>.from(currentItems)..remove(item),
+    );
     notifyListeners();
   }
 
@@ -201,12 +191,11 @@ class PackListProvider extends ChangeNotifier {
     if (index == -1) return;
 
     final currentItems = _lists[index].items;
-
     await _service.removeItemAt(listId, currentItems, itemIndex);
 
-    final updated = List<String>.from(currentItems)..removeAt(itemIndex);
-
-    _lists[index] = _lists[index].copyWith(items: updated);
+    _lists[index] = _lists[index].copyWith(
+      items: List<String>.from(currentItems)..removeAt(itemIndex),
+    );
     notifyListeners();
   }
 
@@ -215,15 +204,10 @@ class PackListProvider extends ChangeNotifier {
     if (index == -1) return;
 
     final currentChecked = _lists[index].checkedIndices;
-
     await _service.toggleItemChecked(
-      listId,
-      currentChecked.toList(),
-      itemIndex,
-    );
+        listId, currentChecked.toList(), itemIndex);
 
     final updated = Set<int>.from(currentChecked);
-
     if (updated.contains(itemIndex)) {
       updated.remove(itemIndex);
     } else {
@@ -232,28 +216,32 @@ class PackListProvider extends ChangeNotifier {
 
     _lists[index] = _lists[index].copyWith(checkedIndices: updated);
 
+    // ── Reward hook ───────────────────────────────────────────────────────
+
+    final list = _lists[index];
+    if (list.items.isNotEmpty && updated.length == list.items.length) {
+      rewardProvider?.onListCompleted();
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     notifyListeners();
   }
 
   Future<void> checkItemByName(String listId, String itemName) async {
     final listIndex = _lists.indexWhere((l) => l.id == listId);
-
     if (listIndex == -1) return;
 
     final items = _lists[listIndex].items;
-
     final itemIndex = items.indexWhere(
       (item) => item.toLowerCase().trim() == itemName.toLowerCase().trim(),
     );
 
     if (itemIndex == -1) {
-      debugPrint(
-          'checkItemByName: Item "$itemName" not found in list "$listId"');
+      debugPrint('checkItemByName: "$itemName" not found in "$listId"');
       return;
     }
 
     final currentChecked = Set<int>.from(_lists[listIndex].checkedIndices);
-
     if (currentChecked.contains(itemIndex)) {
       debugPrint('checkItemByName: "$itemName" already checked');
       return;
@@ -263,10 +251,8 @@ class PackListProvider extends ChangeNotifier {
     await _service.toggleItemChecked(
         listId, currentChecked.toList(), itemIndex);
 
-    _lists[listIndex] = _lists[listIndex].copyWith(
-      checkedIndices: currentChecked,
-    );
-
+    _lists[listIndex] =
+        _lists[listIndex].copyWith(checkedIndices: currentChecked);
     notifyListeners();
 
     debugPrint('checkItemByName: "$itemName" marked as checked ✓');

@@ -123,6 +123,12 @@ flutter:
     - assets/animation/BLE_tag.riv
     - assets/animation/location_icon.riv
     - assets/animation/searchin.riv
+    - assets/animation/badge_bronze.riv
+    - assets/animation/badge_silver.riv
+    - assets/animation/badge_gold.riv
+    - assets/animation/badge_platinum.riv
+    - assets/animation/badge_diamond.riv
+    - assets/animation/list_complete.riv
     - assets/icons/nav_bar/calender.png
     - assets/icons/nav_bar/home.png
     - assets/icons/nav_bar/signal.png
