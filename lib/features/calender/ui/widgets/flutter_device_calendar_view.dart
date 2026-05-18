@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import 'package:tawakad_app/features/home/services/device_calendar_service.dart';
+import 'package:tawakad_app/features/calender/services/device_calendar_service.dart';
 
 /// Calendar UI for Android (and other platforms without the native iOS view).
 /// Mirrors the week strip + date header + hourly timeline from iOS `CalendarView`.
@@ -131,8 +131,7 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final selectedColor = Colors.red;
-    final chipBg =
-        isDark ? const Color(0xFF2A2F38) : const Color(0xFFF0F2F5);
+    final chipBg = isDark ? const Color(0xFF2A2F38) : const Color(0xFFF0F2F5);
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -318,8 +317,8 @@ class _WeekStrip extends StatelessWidget {
                       shortWeekday(date),
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: theme.colorScheme.onSurface
-                            .withValues(alpha: 0.6),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -351,8 +350,8 @@ class _WeekStrip extends StatelessWidget {
                     Text(
                       arabicDigits(hijriDay(date)),
                       style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onSurface
-                            .withValues(alpha: 0.6),
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],

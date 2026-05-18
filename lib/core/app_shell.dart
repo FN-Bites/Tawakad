@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_nav_bar.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_search_button.dart';
 import 'package:tawakad_app/features/home/ui/pages/home_page.dart';
-import 'package:tawakad_app/features/home/ui/pages/calendar_page.dart';
+import 'package:tawakad_app/features/calender/ui/pages/calendar_page.dart';
 import 'package:tawakad_app/features/ble_scanning/ui/pages/ble_scan.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();

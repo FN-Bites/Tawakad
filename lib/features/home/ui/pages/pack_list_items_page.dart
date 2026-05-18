@@ -9,6 +9,7 @@ import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import 'package:tawakad_app/core/widgets/cards/circle_btn.dart';
 import 'package:tawakad_app/features/rewards/model/badge_model.dart';
 import 'package:tawakad_app/features/rewards/provider/reward_provider.dart';
+import 'package:tawakad_app/core/theme/app_colors.dart';
 
 class PackListItemsPage extends StatefulWidget {
   final String listId;
@@ -72,7 +73,6 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
         .lists
         .firstWhere((l) => l.id == widget.listId);
 
-    // ── Navigate to completion page when a list finishes ─────────────────
     final event = context.watch<RewardProvider>().pendingCompletion;
     if (event != null && !_navigatingToCompletion) {
       _navigatingToCompletion = true;
@@ -90,7 +90,6 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
             .then((_) => _navigatingToCompletion = false);
       });
     }
-    // ─────────────────────────────────────────────────────────────────────
 
     final accentColor = list.color;
     final items = list.items;
@@ -106,37 +105,86 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
         automaticallyImplyLeading: false,
-        toolbarHeight: kToolbarHeight + 40,
-        actions: [
-          const SizedBox(width: 24),
-          const GlassBackButton(),
-          const SizedBox(width: 16),
-          Text(list.title, style: theme.textTheme.bodyLarge),
-          const Spacer(),
-          AppLiquidButtons.iconWithLabel(
-            icon: _isEditing ? Icons.check_rounded : Icons.edit_outlined,
-            label: 'تعديل الأغراض',
-            iconColor: _isEditing ? accentColor : null,
-            iconSize: 18,
-            onPressed: () => setState(() {
-              _isEditing = !_isEditing;
-              _editingIndex = null;
-              _isAdding = false;
-            }),
-          ),
-          const SizedBox(width: 8),
-          AppLiquidButtons.iconWithLabel(
-            icon: Icons.tune_rounded,
-            label: 'تعديل القائمة',
-            iconSize: 18,
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => PrimaryCreateListPage(existing: list),
-              ),
+        toolbarHeight: kToolbarHeight + 70,
+        flexibleSpace: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Row 1: back button + action buttons ──────────────────
+                Row(
+                  children: [
+                    const GlassBackButton(),
+                    const Spacer(),
+                    AppLiquidButtons.iconWithLabel(
+                      icon: _isEditing
+                          ? Icons.check_rounded
+                          : Icons.edit_outlined,
+                      label: 'تعديل الأغراض',
+                      iconColor: _isEditing ? accentColor : null,
+                      iconSize: 18,
+                      onPressed: () => setState(() {
+                        _isEditing = !_isEditing;
+                        _editingIndex = null;
+                        _isAdding = false;
+                      }),
+                    ),
+                    const SizedBox(width: 8),
+                    AppLiquidButtons.iconWithLabel(
+                      icon: Icons.tune_rounded,
+                      label: 'تعديل القائمة',
+                      iconSize: 18,
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PrimaryCreateListPage(existing: list),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                // ── Row 2: circular icon + title ─────────────────────────
+                Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    ClipOval(
+                      child: Container(
+                        width: 44,
+                        height: 44,
+                        color: accentColor,
+                        padding: const EdgeInsets.all(10),
+                        child: Image.asset(
+                          list.iconPath,
+                          color: Colors.white,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.list_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        list.title,
+                        textDirection: TextDirection.rtl,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 24),
-        ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -365,6 +413,7 @@ class _PackListItemsPageState extends State<PackListItemsPage> {
                       label: 'إضافة غرض',
                       iconSize: 20,
                       onPressed: _startAdding,
+                      fillColor: AppColors.primary,
                     ),
                   ],
                 ),

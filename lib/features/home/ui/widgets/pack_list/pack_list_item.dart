@@ -44,7 +44,7 @@ class PackListItem extends StatelessWidget {
       color: packlist.color,
       iconPath: packlist.iconPath,
       title: packlist.title,
-      subtitle: packlist.date == null && packlist.time == null
+      subtitle: packlist.time == null
           ? null
           : Row(
               children: [
@@ -52,7 +52,7 @@ class PackListItem extends StatelessWidget {
                     color: Colors.white, size: 14),
                 const SizedBox(width: 4),
                 Text(
-                  packlist.time != null ? _formatTime(packlist.time!) : '',
+                  _formatTime(packlist.time!),
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 13,
@@ -64,6 +64,7 @@ class PackListItem extends StatelessWidget {
             ),
       trailing: AppCountBadge(
         label: _itemLabel(),
+        isCompleted: packlist.isCompleted,
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => PackListItemsPage(listId: packlist.id),

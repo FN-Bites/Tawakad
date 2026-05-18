@@ -41,6 +41,8 @@ class PackList {
 
   int get itemCount => items.length;
   Color get color => Color(colorValue);
+  bool get isCompleted =>
+      items.isNotEmpty && checkedIndices.length == items.length; // 👈
 
   @override
   bool operator ==(Object other) =>
@@ -157,6 +159,7 @@ class PackList {
           ? Set<int>.from(map['checkedIndices'] as List)
           : {},
       date: parseDate(map['date']),
+      time: map['time'] as String?,
       event: map['event'] as String?,
       repeat: map['repeat'] as bool? ?? false,
       repeatDays: map['repeatDays'] != null

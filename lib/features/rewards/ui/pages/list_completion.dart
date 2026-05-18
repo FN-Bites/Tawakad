@@ -3,6 +3,7 @@ import 'package:rive/rive.dart' as rive;
 import 'package:tawakad_app/features/rewards/model/badge_model.dart';
 import 'package:tawakad_app/features/rewards/ui/animation/badge_tier_rive.dart';
 import 'package:tawakad_app/features/rewards/ui/animation/list_completion_rive.dart';
+import 'package:tawakad_app/core/app_shell.dart';
 
 class ListCompletionPage extends StatefulWidget {
   final BadgeModel? badge;
@@ -163,7 +164,12 @@ class _ListCompletionPageState extends State<ListCompletionPage>
                 child: SizedBox(
                   width: double.infinity,
                   child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () {
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (_) => const AppShell()),
+                        (route) => false,
+                      );
+                    },
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.white.withOpacity(0.20),
                       shape: RoundedRectangleBorder(
@@ -172,7 +178,7 @@ class _ListCompletionPageState extends State<ListCompletionPage>
                       padding: const EdgeInsets.symmetric(vertical: 18),
                     ),
                     child: const Text(
-                      'العودة للقائمة',
+                      'العودة للمنزل',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,

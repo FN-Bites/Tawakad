@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tawakad_app/features/home/ui/widgets/flutter_device_calendar_view.dart';
+import 'package:tawakad_app/features/calender/ui/widgets/flutter_device_calendar_view.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
