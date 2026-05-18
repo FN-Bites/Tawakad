@@ -252,9 +252,8 @@ class BleItemProvider extends ChangeNotifier {
 
       if (newTime == null) continue;
 
-
       final key = _scheduleKey(item.deviceId, listId);
-      final existing = _schedules[key]; 
+      final existing = _schedules[key];
       final checklistItemName = existing?.checklistItemName ?? item.name;
       final minutesBefore =
           existing?.minutesBefore ?? item.reminderMinutesBefore ?? 0;
@@ -298,7 +297,6 @@ class BleItemProvider extends ChangeNotifier {
       if (fired.listDate == null) _reschedule(fired, listTime);
       return;
     }
-
 
     await Future.delayed(const Duration(milliseconds: 300));
 

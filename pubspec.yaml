@@ -47,6 +47,12 @@ dependencies:
   uuid: ^4.5.3
   intl: ^0.20.2
   share_plus: ^12.0.0
+  flutter_blue_plus: ^2.2.1
+  permission_handler: ^11.3.1
+  convert: ^3.0.0
+  shared_preferences: ^2.3.0
+  flutter_foreground_task: ^9.2.2
+  http: ^1.2.2
   animated_text_kit: ^4.2.2
   rive: ^0.14.0-dev.6
   device_calendar: ^4.3.3
@@ -56,18 +62,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_launcher_icons: ^0.13.1
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
-  flutter_launcher_icons: ^0.13.1
-
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: assets/icons/icon_picker/1-logo.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -118,8 +120,18 @@ flutter:
     - assets/animation/logo_glitter.riv
     - assets/animation/lists.riv
     - assets/animation/scanning.riv
+    - assets/animation/devices.riv
+    - assets/animation/devices_dark.riv
+    - assets/animation/bluetooth_scan.riv
+    - assets/animation/BLE_tag.riv
     - assets/animation/location_icon.riv
     - assets/animation/searchin.riv
+    - assets/animation/badge_bronze.riv
+    - assets/animation/badge_silver.riv
+    - assets/animation/badge_gold.riv
+    - assets/animation/badge_platinum.riv
+    - assets/animation/badge_diamond.riv
+    - assets/animation/list_complete.riv
     - assets/icons/nav_bar/calender.png
     - assets/icons/nav_bar/home.png
     - assets/icons/nav_bar/signal.png
@@ -143,6 +155,16 @@ flutter:
     - assets/icons/icon_picker/tree.png
     - assets/icons/icon_picker/work.png
     - assets/icons/trash.png
+    - assets/icons/icon_picker/bag.png
+    - assets/icons/icon_picker/glasses.png
+    - assets/icons/icon_picker/laptop.png
+    - assets/icons/icon_picker/charger.png
+    - assets/icons/icon_picker/wallet.png
+    - assets/icons/icon_picker/headphones.png
+    - assets/icons/icon_picker/bottle.png
+    - assets/icons/icon_picker/key.png
+    - assets/icons/icon_picker/ipad.png
+    - assets/icons/icon_picker/id.png
   fonts:
     - family: Montserrat
       fonts:
