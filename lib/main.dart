@@ -18,6 +18,7 @@ import 'features/home/provider/pack_list_provider.dart';
 import 'package:tawakad_app/features/ble_scanning/provider/ble_provider.dart';
 import 'package:tawakad_app/features/ble_scanning/provider/ble_item_provider.dart';
 import 'package:tawakad_app/features/rewards/provider/reward_provider.dart';
+import 'package:tawakad_app/features/settings/providers/profile_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,6 +44,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => ForgotPasswordFlowProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ProfileProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => RewardProvider(),
@@ -93,22 +97,19 @@ void _wireAutoScan(BleItemProvider bleItems, PackListProvider packLists) {
   };
 }
 
-class TawakadApp extends StatefulWidget {
+class TawakadApp extends StatelessWidget {
   const TawakadApp({super.key});
 
   @override
-  State<TawakadApp> createState() => _TawakadAppState();
-}
-
-class _TawakadAppState extends State<TawakadApp> {
-  @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<ProfileProvider>().themeMode;
+
     return MaterialApp(
       navigatorKey: rootNavigatorKey,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routes: AppRoutes.routes,
       initialRoute: AppRoutes.splashScreen,
       locale: const Locale('ar'),

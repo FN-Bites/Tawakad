@@ -74,6 +74,16 @@ class UserService {
     });
   }
 
+  Future<void> updateUserEmail({
+    required String uid,
+    required String email,
+  }) async {
+    await _firestore.collection('users').doc(uid).update({
+      'email': email,
+      'updatedAt': Timestamp.now(),
+    });
+  }
+
   // Hash password before storing in history
   String _generatePasswordHash(String password, String email) {
     final String salt = email.toLowerCase().trim();
