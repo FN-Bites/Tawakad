@@ -34,6 +34,7 @@ class AppColors {
 class AppDarkColors {
   static const background = Color(0xFF0E1116);
   static const surface = Color(0xFF171B22);
+  static const card = Color(0xFF1C2128);
 
   static const textPrimary = Color(0xFFF5F7FA);
   static const placeholder = Color(0xFF8E9AAF);

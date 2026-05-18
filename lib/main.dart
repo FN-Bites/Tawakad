@@ -11,7 +11,7 @@ import 'features/signUp/providers/verifyEmail_flow_provider.dart';
 import 'package:tawakad_app/features/signIn/providers/signIn_flow_provider.dart';
 import 'features/signIn/providers/forgotPassword_flow_provider.dart';
 import 'features/home/provider/pack_list_provider.dart';
-import 'features/profile/providers/profile_provider.dart';
+import 'package:tawakad_app/features/settings&/providers/profile_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

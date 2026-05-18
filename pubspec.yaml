@@ -51,6 +51,8 @@ dependencies:
   rive: ^0.14.0-dev.6
   device_calendar: ^4.3.3
   hijri: ^3.0.0
+  permission_handler: ^11.4.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
