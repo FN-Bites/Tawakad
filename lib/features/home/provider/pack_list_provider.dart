@@ -11,6 +11,8 @@ class PackListProvider extends ChangeNotifier {
   final FirestoreService _service = FirestoreService();
   StreamSubscription<User?>? _authSub;
 
+  final Map<String, Future<void>> _checkLocks = {};
+
   RewardProvider? rewardProvider;
 
   Function(String listId, String? newTime, DateTime? newDate)? onTimeChanged;
@@ -217,7 +219,6 @@ class PackListProvider extends ChangeNotifier {
     _lists[index] = _lists[index].copyWith(checkedIndices: updated);
 
     // ── Reward hook ───────────────────────────────────────────────────────
-
     final list = _lists[index];
     if (list.items.isNotEmpty && updated.length == list.items.length) {
       rewardProvider?.onListCompleted();
@@ -227,7 +228,20 @@ class PackListProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ───────── CHECK ITEM BY NAME ─────────
   Future<void> checkItemByName(String listId, String itemName) async {
+    final previous = _checkLocks[listId] ?? Future.value();
+    late Future<void> current;
+    current = previous.then((_) => _checkItemByNameLocked(listId, itemName));
+    _checkLocks[listId] = current;
+
+    await current;
+    if (_checkLocks[listId] == current) {
+      _checkLocks.remove(listId);
+    }
+  }
+
+  Future<void> _checkItemByNameLocked(String listId, String itemName) async {
     final listIndex = _lists.indexWhere((l) => l.id == listId);
     if (listIndex == -1) return;
 
@@ -257,6 +271,8 @@ class PackListProvider extends ChangeNotifier {
 
     debugPrint('checkItemByName: "$itemName" marked as checked ✓');
   }
+
+  // ───────── HELPERS ─────────
 
   String? listTime(String listId) {
     final index = _lists.indexWhere((l) => l.id == listId);

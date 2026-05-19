@@ -6,22 +6,17 @@ import 'password_bottom_action_text.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 
-class SignInScaffold extends StatelessWidget {
+class SignInScaffold extends StatefulWidget {
   final String title;
   final Widget child;
-
   final String primaryButtonText;
   final VoidCallback? onPrimaryPressed;
-
   final VoidCallback? onGooglePressed;
-
   final String forgotPasswordText;
   final VoidCallback? onForgotPasswordPressed;
-
   final String bottomPrefixText;
   final String bottomActionText;
   final VoidCallback? onBottomActionPressed;
-
   final VoidCallback? onBack;
 
   const SignInScaffold({
@@ -40,10 +35,27 @@ class SignInScaffold extends StatelessWidget {
   });
 
   @override
+  State<SignInScaffold> createState() => _SignInScaffoldState();
+}
+
+class _SignInScaffoldState extends State<SignInScaffold> {
+  bool _keyboardVisible = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final isKeyboardUp = MediaQuery.of(context).viewInsets.bottom > 100;
+    if (isKeyboardUp != _keyboardVisible) {
+      setState(() => _keyboardVisible = isKeyboardUp);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: isDark ? AppDarkColors.background : AppColors.background,
       body: SafeArea(
         top: true,
@@ -53,50 +65,81 @@ class SignInScaffold extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // ── Back button ───────────────────────────────────────────
               SizedBox(
                 height: 40,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: GlassBackButton(onPressed: onBack),
+                  child: GlassBackButton(onPressed: widget.onBack),
                 ),
               ),
-              const SizedBox(height: 30),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineLarge,
+
+              // ── Title: collapses when keyboard opens ──────────────────
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: _keyboardVisible
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
+                          const SizedBox(height: 30),
+                          Text(
+                            widget.title,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineLarge,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
               ),
-              const SizedBox(height: 20),
+
+              // ── All fields scroll freely ───────────────────────────────
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   child: Column(
                     children: [
-                      child,
+                      widget.child,
                       const SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: PasswordBottomActionText(
-                          actionText: forgotPasswordText,
-                          onTap: onForgotPasswordPressed,
+                          actionText: widget.forgotPasswordText,
+                          onTap: widget.onForgotPasswordPressed,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+
+              // ── Primary button: always pinned at bottom ───────────────
+              const SizedBox(height: 16),
               AppLiquidButtons.primary(
-                label: primaryButtonText,
-                onPressed: onPrimaryPressed,
+                label: widget.primaryButtonText,
+                onPressed: widget.onPrimaryPressed,
               ),
-              const SizedBox(height: 20),
-              GoogleSignInButton(onPressed: onGooglePressed),
-              const SizedBox(height: 30),
-              EntryBottomActionText(
-                prefixText: bottomPrefixText,
-                actionText: bottomActionText,
-                onTap: onBottomActionPressed,
+
+              // ── Google + sign-up link: only when keyboard is closed ───
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: _keyboardVisible
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          GoogleSignInButton(onPressed: widget.onGooglePressed),
+                          const SizedBox(height: 30),
+                          EntryBottomActionText(
+                            prefixText: widget.bottomPrefixText,
+                            actionText: widget.bottomActionText,
+                            onTap: widget.onBottomActionPressed,
+                          ),
+                        ],
+                      ),
               ),
             ],
           ),

@@ -41,11 +41,13 @@ class OnboardingScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 100;
 
     final progress =
         totalSteps <= 0 ? 0.0 : (currentStep / totalSteps).clamp(0.0, 1.0);
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         top: true,
@@ -75,26 +77,38 @@ class OnboardingScaffold extends StatelessWidget {
                 currentStep: currentStep,
                 totalSteps: totalSteps,
               ),
-              const SizedBox(height: 8),
-              MascotWithBubble(
-                mascotState: mascotState,
-                message: mascotMessage,
-                isError: isError,
-                showBubble: showBubble,
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: keyboardVisible
+                    ? const SizedBox.shrink()
+                    : Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          MascotWithBubble(
+                            mascotState: mascotState,
+                            message: mascotMessage,
+                            isError: isError,
+                            showBubble: showBubble,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            title,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.headlineLarge?.copyWith(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
               ),
-              const SizedBox(height: 24),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 32),
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   child: child,
                 ),
               ),
