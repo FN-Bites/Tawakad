@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:tawakad_app/core/services/ble_firestore_service.dart';
 import '../model/ble_item.dart';
 import 'ble_provider.dart';
+import 'package:tawakad_app/features/home/model/pack_list.dart';
 import 'package:tawakad_app/features/home/provider/pack_list_provider.dart';
 
 class _ScheduleEntry {
@@ -27,6 +30,8 @@ String _scheduleKey(String deviceId, String listId) => '$deviceId|$listId';
 
 class BleItemProvider extends ChangeNotifier {
   BleProvider _ble;
+  final PackListProvider _packLists;
+  final BleFirestoreService _service = BleFirestoreService();
 
   final List<BleItem> _savedItems = [];
   final Map<String, String> _mappings = {};
@@ -34,33 +39,46 @@ class BleItemProvider extends ChangeNotifier {
 
   final Map<String, Future<void>> _activeBatches = {};
 
+  StreamSubscription<User?>? _authSub;
+
   void Function(String checklistItemName, String listId, bool isPresent)?
       onAutoScanResult;
 
-  static const String _prefMapPrefix = 'ble_mapping_';
-  static const String _prefMappedItems = 'ble_mapped_items';
-
   List<BleItem> get savedItems => List.unmodifiable(_savedItems);
-  Map<String, String> get mappings => Map.unmodifiable(_mappings);
+  //Map<String, String> get mappings => Map.unmodifiable(_mappings);
+  Map<String, String> get mappings => Map.unmodifiable({
+        for (final item in _savedItems)
+          item.name: item.mappedDeviceId ?? item.deviceId,
+        ..._mappings,
+      });
 
-  String? mappedDeviceId(String itemName) => _mappings[itemName];
+  String? mappedDeviceId(String itemName) {
+    final saved = _findByName(itemName);
+    return saved?.mappedDeviceId ?? _mappings[itemName];
+  }
 
   bool isItemPresent(String itemName) {
-    final deviceId = _mappings[itemName];
+    final deviceId = mappedDeviceId(itemName);
     if (deviceId == null) return false;
     return _ble.isDevicePresent(deviceId);
   }
 
   BleItem? deviceForItem(String itemName) {
-    final deviceId = _mappings[itemName];
+    final deviceId = mappedDeviceId(itemName);
     if (deviceId == null) return null;
     return _ble.deviceById(deviceId);
   }
 
-  BleItemProvider(this._ble, PackListProvider packLists) {
-    _loadPrefs();
+  BleItemProvider(this._ble, this._packLists) {
+    _authSub = FirebaseAuth.instance.authStateChanges().listen((user) async {
+      if (user == null) {
+        _clearState();
+        return;
+      }
+      await fetchBleItems();
+    });
 
-    packLists.onTimeChanged = (listId, newTime, newDate) {
+    _packLists.onTimeChanged = (listId, newTime, newDate) {
       _rescheduleForList(listId, newTime, newDate);
     };
   }
@@ -72,6 +90,7 @@ class BleItemProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSub?.cancel();
     for (final e in _schedules.values) {
       e.timer?.cancel();
     }
@@ -80,25 +99,61 @@ class BleItemProvider extends ChangeNotifier {
 
   // ── Saved items ───────────────────────────────────────────────────────
 
-  void addSavedItem(BleItem item) {
-    _savedItems.add(item);
+  Future<void> fetchBleItems() async {
+    if (_packLists.lists.isEmpty) {
+      await _packLists.fetchLists();
+    }
+    final docs = await _service.fetchBleItems();
+    _savedItems.clear();
+    for (final doc in docs) {
+      _savedItems.add(BleItem.fromMap(doc.data()));
+    }
+    _mappings.clear();
+    _restoreSchedulesFromSavedItems();
     notifyListeners();
   }
 
-  void updateSavedItem(BleItem updated) {
-    final idx = _savedItems.indexWhere((i) => i.deviceId == updated.deviceId);
-    if (idx == -1) {
+  Future<void> addSavedItem(BleItem item) async {
+    final data = {
+      ...item.toMap(),
+      'createdAt': Timestamp.fromDate(DateTime.now()),
+      'updatedAt': Timestamp.fromDate(DateTime.now()),
+      'userId': _service.userId ?? '',
+    };
+
+    await _service.createBleItem(data);
+    _savedItems.add(item);
+    _mappings.remove(item.name);
+    notifyListeners();
+  }
+
+  Future<void> updateSavedItem(BleItem updated) async {
+    final data = {
+      ...updated.toMap(),
+      'updatedAt': Timestamp.fromDate(DateTime.now()),
+    };
+
+    await _service.editBleItem(updated.deviceId, data);
+    final index = _savedItems.indexWhere((i) => i.deviceId == updated.deviceId);
+    if (index == -1) {
       _savedItems.add(updated);
     } else {
-      _savedItems[idx] = updated;
+      _savedItems[index] = updated;
     }
+
+    _mappings.remove(updated.name);
     notifyListeners();
   }
+ 
+  Future<void> removeSavedItem(String bleIdentifier) async {
+    final item = _findByDeviceId(bleIdentifier);
+    if (item == null) return;
 
-  void removeSavedItem(String deviceId) {
-    _savedItems.removeWhere((i) => i.deviceId == deviceId);
-    final keysToRemove =
-        _schedules.keys.where((k) => k.startsWith('$deviceId|')).toList();
+    await _service.removeBleItem(item.deviceId);
+    _savedItems.removeWhere((i) => i.deviceId == item.deviceId);
+    final keysToRemove = _schedules.keys
+        .where((k) => k.startsWith('${item.deviceId}|'))
+        .toList();
     for (final k in keysToRemove) {
       _schedules[k]?.timer?.cancel();
       _schedules.remove(k);
@@ -106,69 +161,63 @@ class BleItemProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toggleFavorite(String deviceId) {
-    final index = _savedItems.indexWhere((i) => i.deviceId == deviceId);
-    if (index == -1) return;
-    _savedItems[index] = _savedItems[index].copyWith(
-      isFavorite: !_savedItems[index].isFavorite,
-    );
-    notifyListeners();
-  }
+  Future<void> toggleFavorite(String bleIdentifier) async {
+    final item = _findByDeviceId(bleIdentifier);
+    if (item == null) return;
 
-  // ── Multi-list helpers ────────────────────────────────────────────────
-
-  void addListToItem(String deviceId, String listId) {
-    final idx = _savedItems.indexWhere((i) => i.deviceId == deviceId);
-    if (idx == -1) return;
-    final current = List<String>.from(_savedItems[idx].listIds);
-    if (!current.contains(listId)) {
-      current.add(listId);
-      _savedItems[idx] = _savedItems[idx].copyWith(listIds: current);
+    final updatedValue = !item.isFavorite;
+    await _service.toggleFavorite(item.deviceId, updatedValue);
+    final index = _savedItems.indexWhere((i) => i.deviceId == item.deviceId);
+    if (index != -1) {
+      _savedItems[index] = _savedItems[index].copyWith(
+        isFavorite: updatedValue,
+      );
       notifyListeners();
     }
   }
 
-  void removeListFromItem(String deviceId, String listId) {
-    final idx = _savedItems.indexWhere((i) => i.deviceId == deviceId);
-    if (idx == -1) return;
-    final current = List<String>.from(_savedItems[idx].listIds)..remove(listId);
-    _savedItems[idx] = _savedItems[idx].copyWith(listIds: current);
+  // ── Multi-list helpers ────────────────────────────────────────────────
+ 
+  Future<void> addListToItem(String deviceId, String listId) async {
+    final item = _findByDeviceId(deviceId);
+    if (item == null) return;
+
+    final current = List<String>.from(item.listIds);
+    if (current.contains(listId)) return;
+
+    await _service.addListToItem(item.deviceId, current, listId);
+    current.add(listId);
+    final index = _savedItems.indexWhere((i) => i.deviceId == item.deviceId);
+    if (index != -1) {
+      _savedItems[index] = _savedItems[index].copyWith(listIds: current);
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeListFromItem(String deviceId, String listId) async {
+    final item = _findByDeviceId(deviceId);
+    if (item == null) return;
+
+    final current = List<String>.from(item.listIds)..remove(listId);
+    await _service.removeListFromItem(item.deviceId, item.listIds, listId);
+    final index = _savedItems.indexWhere((i) => i.deviceId == item.deviceId);
+    if (index != -1) {
+      _savedItems[index] = _savedItems[index].copyWith(listIds: current);
+      notifyListeners();
+    }
     cancelSchedule(deviceId, listId);
-    notifyListeners();
   }
 
   // ── Mappings ──────────────────────────────────────────────────────────
 
   void mapItem(String itemName, String deviceId) {
     _mappings[itemName] = deviceId;
-    _savePrefs();
     notifyListeners();
   }
 
   void unmapItem(String itemName) {
     _mappings.remove(itemName);
-    _savePrefs();
     notifyListeners();
-  }
-
-  // ── Persistence ───────────────────────────────────────────────────────
-
-  Future<void> _loadPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    final mappedItems = prefs.getStringList(_prefMappedItems) ?? [];
-    for (final itemName in mappedItems) {
-      final deviceId = prefs.getString('$_prefMapPrefix$itemName');
-      if (deviceId != null) _mappings[itemName] = deviceId;
-    }
-    notifyListeners();
-  }
-
-  Future<void> _savePrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_prefMappedItems, _mappings.keys.toList());
-    for (final entry in _mappings.entries) {
-      await prefs.setString('$_prefMapPrefix${entry.key}', entry.value);
-    }
   }
 
   // ── Auto-scan scheduling ──────────────────────────────────────────────
@@ -252,8 +301,7 @@ class BleItemProvider extends ChangeNotifier {
 
       if (newTime == null) continue;
 
-      final key = _scheduleKey(item.deviceId, listId);
-      final existing = _schedules[key];
+      final existing = _schedules[_scheduleKey(item.deviceId, listId)];
       final checklistItemName = existing?.checklistItemName ?? item.name;
       final minutesBefore =
           existing?.minutesBefore ?? item.reminderMinutesBefore ?? 0;
@@ -383,4 +431,65 @@ class BleItemProvider extends ChangeNotifier {
     if (fire.isBefore(now)) fire = fire.add(const Duration(days: 1));
     return fire;
   }
+
+void _restoreSchedulesFromSavedItems() {
+    for (final entry in _schedules.values) {
+      entry.timer?.cancel();
+    }
+    _schedules.clear();
+
+    for (final item in _savedItems) {
+      final minutesBefore = item.reminderMinutesBefore;
+      if (minutesBefore == null) continue;
+
+      for (final listId in item.listIds) {
+        final list = _findListById(listId);
+        if (list == null || list.time == null) continue;
+
+        scheduleAutoScan(
+          item: item,
+          listId: listId,
+          checklistItemName: item.name,
+          minutesBefore: minutesBefore,
+          listTime: list.time,
+          listDate: list.date,
+        );
+      }
+    }
+  }
+
+  BleItem? _findByDeviceId(String deviceId) {
+    try {
+      return _savedItems.firstWhere((item) => item.deviceId == deviceId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  BleItem? _findByName(String itemName) {
+    try {
+      return _savedItems.firstWhere((item) => item.name == itemName);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  PackList? _findListById(String listId) {
+    try {
+      return _packLists.lists.firstWhere((list) => list.id == listId);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _clearState() {
+    _savedItems.clear();
+    _mappings.clear();
+    for (final entry in _schedules.values) {
+      entry.timer?.cancel();
+    }
+    _schedules.clear();
+    notifyListeners();
+  }
+
 }

@@ -44,6 +44,8 @@ class MapBleItemProvider extends ChangeNotifier {
   bool get scanning => _scanning;
   bool get isBluetoothOn => _adapterState == BluetoothAdapterState.on;
 
+  ScannedDevice? deviceById(String id) => _devices[id];
+
   List<ScannedDevice> get sortedDevices {
     final list = _devices.values.toList()
       ..sort((a, b) => a.discoveryOrder.compareTo(b.discoveryOrder));

@@ -49,7 +49,7 @@ class _BleReminderPageState extends State<BleReminderPage> {
     _selected = widget.item.reminderMinutesBefore ?? 0;
   }
 
-  void _save() {
+  Future<void> _save() async {
     final bleItems = context.read<BleItemProvider>();
     final packLists = context.read<PackListProvider>();
 
@@ -58,9 +58,9 @@ class _BleReminderPageState extends State<BleReminderPage> {
     );
 
     if (widget.isEditing) {
-      bleItems.updateSavedItem(updatedItem);
+      await bleItems.updateSavedItem(updatedItem);
     } else {
-      bleItems.addSavedItem(updatedItem);
+      await bleItems.addSavedItem(updatedItem);
     }
 
     final targetListIds =

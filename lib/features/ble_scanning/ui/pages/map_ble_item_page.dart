@@ -58,6 +58,13 @@ class _MapBleItemPageState extends State<MapBleItemPage> {
       setState(() => _deviceInvalid = true);
       return;
     }
+
+    final selectedDevice = bleProvider.deviceById(_selectedId!);
+    if (selectedDevice == null) {
+      setState(() => _deviceInvalid = true);
+      return;
+    }
+
     bleProvider.stopScan();
     context.read<BleItemProvider>().mapItem(widget.item.name, _selectedId!);
 
@@ -67,6 +74,9 @@ class _MapBleItemPageState extends State<MapBleItemPage> {
           item: widget.item.copyWith(
             deviceId: _selectedId,
             mappedDeviceId: _selectedId,
+            rssi: selectedDevice.rawRssi,
+            smoothedRssi: selectedDevice.smoothedRssi,
+            lastSeen: selectedDevice.lastSeen,
           ),
           listId: widget.listId,
           checklistItemName: widget.checklistItemName,
