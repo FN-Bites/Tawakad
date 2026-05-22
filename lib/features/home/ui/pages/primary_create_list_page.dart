@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/field_card.dart';
@@ -8,6 +9,7 @@ import 'package:tawakad_app/core/widgets/glass_elements/favorite_button.dart';
 import 'package:tawakad_app/features/home/model/pack_list.dart';
 import 'package:tawakad_app/features/home/ui/pages/secondary_create_list_page.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
+import 'package:tawakad_app/core/services/recommendation_service.dart';
 
 class PrimaryCreateListPage extends StatefulWidget {
   final PackList? existing;
@@ -21,13 +23,17 @@ class PrimaryCreateListPage extends StatefulWidget {
 class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
   final TextEditingController _nameController = TextEditingController();
 
-  late String _selectedEvent;
   late Color _selectedColor;
   late String _selectedIcon;
   late bool _isFavorite;
   bool _nameInvalid = false;
 
-  final List<String> _eventOptions = ['لايوجد شيء', 'برزنتشين', 'اختبار'];
+  LocationResult _locationResult = LocationResult.empty();
+  String? _selectedEvent;
+  bool _eventRequired = false;
+  bool _locationLoading = false;
+
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -38,33 +44,78 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
       _selectedColor = e.color;
       _selectedIcon = e.iconPath;
       _isFavorite = e.isFavorite;
-      _selectedEvent = (e.event != null && _eventOptions.contains(e.event))
-          ? e.event!
-          : _eventOptions.first;
+      _selectedEvent = e.event;
+      if (e.title.isNotEmpty) {
+        _lookupLocation(e.title);
+      }
     } else {
-      _selectedEvent = _eventOptions.first;
       _selectedColor = ColorPicker.colors[0];
       _selectedIcon = "assets/icons/icon_picker/1-logo.png";
       _isFavorite = false;
     }
+
+    _nameController.addListener(_onNameChanged);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     super.dispose();
+  }
+
+  void _onNameChanged() {
+    if (_nameInvalid) setState(() => _nameInvalid = false);
+
+    _debounce?.cancel();
+    final text = _nameController.text.trim();
+
+    if (text.isEmpty) {
+      setState(() {
+        _locationResult = LocationResult.empty();
+        _selectedEvent = null;
+        _eventRequired = false;
+      });
+      return;
+    }
+
+    _debounce = Timer(const Duration(milliseconds: 600), () {
+      _lookupLocation(text);
+    });
+  }
+
+  Future<void> _lookupLocation(String name) async {
+    setState(() => _locationLoading = true);
+
+    final result = await RecommendationService.instance.normalizeLocation(name);
+
+    if (!mounted) return;
+    setState(() {
+      _locationLoading = false;
+      _locationResult = result;
+      if (_selectedEvent != null && !result.events.contains(_selectedEvent)) {
+        _selectedEvent = null;
+      }
+    });
   }
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
 
   void _goToNextPage() {
     FocusScope.of(context).unfocus();
+
     final title = _nameController.text.trim();
     if (title.isEmpty) {
       setState(() => _nameInvalid = true);
       return;
     }
     setState(() => _nameInvalid = false);
+    if (_locationResult.matched && _selectedEvent == null) {
+      setState(() => _eventRequired = true);
+      return;
+    }
+    setState(() => _eventRequired = false);
 
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -73,8 +124,9 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
           iconPath: _selectedIcon,
           color: _selectedColor,
           isFavorite: _isFavorite,
-          event: _selectedEvent == _eventOptions.first ? null : _selectedEvent,
+          event: _selectedEvent,
           existing: widget.existing,
+          canonicalLocation: _locationResult.canonical,
         ),
       ),
     );
@@ -128,32 +180,179 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                 const SizedBox(height: 22),
                 _buildImageNameCard(),
                 const SizedBox(height: 22),
-                _sectionTitle('حدث القائمة'),
-                FieldCard(
-                  gap: 14,
-                  children: [
-                    GlassPopUpList(
-                      title: 'الحدث',
-                      options: _eventOptions,
-                      initialValue: _selectedEvent,
-                      onChanged: (v) => setState(() => _selectedEvent = v),
-                      icon: Icons.flag_rounded,
-                      circleColor: const Color(0xFFC97070),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 22, width: 20),
+                _buildEventSection(),
+                const SizedBox(height: 22),
                 _sectionTitle('لون القائمة'),
                 _buildColorsCard(),
-                const SizedBox(height: 22, width: 20),
+                const SizedBox(height: 22),
                 _sectionTitle('أيقونة القائمة'),
                 _buildIconsCard(),
-                const SizedBox(height: 22, width: 20),
+                const SizedBox(height: 22),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildEventSection() {
+    final hasEvents =
+        _locationResult.matched && _locationResult.events.isNotEmpty;
+
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeInOut,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(child: _sectionTitle('حدث القائمة')),
+              if (_locationLoading)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 10),
+                  child: SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: _isDark
+                          ? AppDarkColors.placeholder
+                          : const Color(0xFF8A8A8E),
+                    ),
+                  ),
+                ),
+              if (_locationResult.matched && !_locationLoading)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8, bottom: 10),
+                  child: _locationBadge(),
+                ),
+            ],
+          ),
+          if (hasEvents) ...[
+            FieldCard(
+              gap: 14,
+              children: [
+                GlassPopUpList(
+                  title: _selectedEvent != null
+                      ? (_locationResult.eventsArabic[_selectedEvent] ??
+                          _selectedEvent!)
+                      : 'اختر حدثاً',
+                  options: _locationResult.events,
+                  displayLabels: _locationResult.events
+                      .map((e) => _locationResult.eventsArabic[e] ?? e)
+                      .toList(),
+                  initialValue: _selectedEvent ?? _locationResult.events.first,
+                  onChanged: (v) => setState(() {
+                    _selectedEvent = v;
+                    _eventRequired = false;
+                  }),
+                  icon: Icons.flag_rounded,
+                  circleColor: _eventRequired
+                      ? const Color(0xFFE53935)
+                      : const Color(0xFFC97070),
+                ),
+              ],
+            ),
+            if (_eventRequired) ...[
+              const SizedBox(height: 6),
+              const Padding(
+                padding: EdgeInsets.only(right: 8),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    'الرجاء اختيار حدث للقائمة',
+                    textDirection: TextDirection.rtl,
+                    style: const TextStyle(
+                      color: Color(0xFFE53935),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ] else if (!_locationLoading) ...[
+            FieldCard(
+              gap: 14,
+              children: [
+                _eventPlaceholderRow(),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _locationBadge() {
+    final canonical = _locationResult.canonical ?? '';
+    const locationArabic = {
+      'gym': 'صالة رياضية',
+      'university': 'جامعة',
+      'masjid_al_haram': 'المسجد الحرام',
+      'travel': 'سفر',
+    };
+
+    final label = locationArabic[canonical] ?? canonical;
+    final badgeBg = _isDark ? const Color(0xFF1A3A2A) : const Color(0xFFE8F5E9);
+    final badgeText =
+        _isDark ? const Color(0xFF66BB6A) : const Color(0xFF2E7D32);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+      decoration: BoxDecoration(
+        color: badgeBg,
+        borderRadius: BorderRadius.circular(99),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.location_on_rounded, size: 11, color: badgeText),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: badgeText,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _eventPlaceholderRow() {
+    final iconBg =
+        _isDark ? AppDarkColors.fieldBorder : const Color(0xFFEFEFF4);
+    final hintColor =
+        _isDark ? AppDarkColors.placeholder : const Color(0xFFB2B2B8);
+
+    return Row(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+          child: Icon(Icons.flag_rounded, size: 16, color: hintColor),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            'ستظهر الأحداث عند إدخال قائمة مدعومة',
+            textDirection: TextDirection.rtl,
+            style: TextStyle(
+              fontSize: 14,
+              color: hintColor,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+        Icon(Icons.chevron_right_rounded, color: hintColor, size: 20),
+      ],
     );
   }
 
@@ -311,9 +510,6 @@ class _PrimaryCreateListPageState extends State<PrimaryCreateListPage> {
                   fontWeight: FontWeight.w700,
                   color: textColor,
                 ),
-                onChanged: (_) {
-                  if (_nameInvalid) setState(() => _nameInvalid = false);
-                },
                 decoration: InputDecoration(
                   hintText: 'اسم القائمة',
                   hintTextDirection: TextDirection.rtl,

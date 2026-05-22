@@ -5,6 +5,7 @@ import 'package:tawakad_app/core/theme/app_colors.dart';
 class GlassPopUpList extends StatefulWidget {
   final String title;
   final List<String> options;
+  final List<String>? displayLabels;
   final String initialValue;
   final ValueChanged<String> onChanged;
   final IconData icon;
@@ -18,6 +19,7 @@ class GlassPopUpList extends StatefulWidget {
     required this.onChanged,
     required this.icon,
     required this.circleColor,
+    this.displayLabels,
   });
 
   @override
@@ -51,6 +53,19 @@ class _GlassPopUpListState extends State<GlassPopUpList>
   }
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  String _labelAt(int index) {
+    if (widget.displayLabels != null && index < widget.displayLabels!.length) {
+      return widget.displayLabels![index];
+    }
+    return widget.options[index];
+  }
+
+  String get _currentDisplayLabel {
+    final index = widget.options.indexOf(widget.initialValue);
+    if (index == -1) return widget.initialValue;
+    return _labelAt(index);
+  }
 
   void _toggle() => _isOpen ? _close() : _open();
 
@@ -108,9 +123,10 @@ class _GlassPopUpListState extends State<GlassPopUpList>
                     child: Directionality(
                       textDirection: TextDirection.rtl,
                       child: AppGlassDropdown(
-                        items: widget.options
-                            .map((o) => GlassDropdownItem(label: o))
-                            .toList(),
+                        items: List.generate(
+                          widget.options.length,
+                          (i) => GlassDropdownItem(label: _labelAt(i)),
+                        ),
                         selectedIndex: widget.options
                             .indexOf(widget.initialValue)
                             .clamp(0, widget.options.length - 1),
@@ -185,7 +201,7 @@ class _GlassPopUpListState extends State<GlassPopUpList>
             ),
             const Spacer(),
             Text(
-              widget.initialValue,
+              _currentDisplayLabel,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -194,9 +210,8 @@ class _GlassPopUpListState extends State<GlassPopUpList>
             ),
             const SizedBox(width: 6),
             AnimatedRotation(
-              turns: _isOpen ? 0.5 : 0,
+              turns: 0.0,
               duration: const Duration(milliseconds: 200),
-              curve: Curves.easeInOut,
               child: Icon(
                 Icons.keyboard_arrow_down_rounded,
                 color: subColor,

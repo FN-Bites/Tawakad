@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/features/onboarding/ui/animation/mascot_rive.dart';
+import 'package:tawakad_app/core/widgets/animation/mascot_rive.dart';
 import 'mascot_speech_bubble.dart';
 
 class MascotWithBubble extends StatelessWidget {

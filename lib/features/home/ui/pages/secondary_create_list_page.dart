@@ -8,6 +8,7 @@ import 'package:tawakad_app/core/theme/app_colors.dart';
 import '../widgets/item_card.dart';
 import '../widgets/date_time_card.dart';
 import '../widgets/sharing_card.dart';
+import 'recommendation_page.dart';
 
 class SecondaryCreateListPage extends StatefulWidget {
   final String title;
@@ -16,6 +17,7 @@ class SecondaryCreateListPage extends StatefulWidget {
   final bool isFavorite;
   final String? event;
   final PackList? existing;
+  final String? canonicalLocation;
 
   const SecondaryCreateListPage({
     super.key,
@@ -25,6 +27,7 @@ class SecondaryCreateListPage extends StatefulWidget {
     required this.isFavorite,
     this.event,
     this.existing,
+    this.canonicalLocation,
   });
 
   @override
@@ -38,6 +41,9 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
   final _sharingKey = GlobalKey<SharingCardState>();
 
   bool get _isDark => Theme.of(context).brightness == Brightness.dark;
+
+  bool get _canRecommend =>
+      widget.canonicalLocation != null && widget.event != null;
 
   String? _formatTime(TimeOfDay? t) {
     if (t == null) return null;
@@ -88,6 +94,21 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
     }
   }
 
+  void _openRecommendations() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RecommendationPage(
+          listName: widget.canonicalLocation!,
+          event: widget.event!,
+          existingItems: _itemsKey.currentState?.items.toList() ?? [],
+          onAddItem: (arabicName) {
+            _itemsKey.currentState?.addItemByName(arabicName);
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _sectionLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(right: 4, bottom: 10),
@@ -125,6 +146,8 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                 const SizedBox(height: 22),
                 _buildListPreviewHeader(),
                 const SizedBox(height: 22),
+
+                // ── Items section ─────────────────────────────────────────
                 _sectionLabel('الأغراض'),
                 e != null
                     ? ItemsCard(
@@ -137,6 +160,15 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                         accentColor: widget.color,
                       ),
                 const SizedBox(height: 22),
+
+                // ── Smart recommendations section ─────────────────────────
+                if (_canRecommend) ...[
+                  _sectionLabel('اقتراحات ذكية'),
+                  _buildRecommendationsRow(),
+                  const SizedBox(height: 22),
+                ],
+
+                // ── Date / time section ───────────────────────────────────
                 _sectionLabel('التاريخ و الوقت '),
                 DateTimeCard(
                   key: _dateTimeKey,
@@ -146,6 +178,8 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
                   initialRepeatDays: e?.repeatDays ?? [],
                 ),
                 const SizedBox(height: 22),
+
+                // ── Sharing section ───────────────────────────────────────
                 _sectionLabel('المشاركة '),
                 SharingCard(
                   key: _sharingKey,
@@ -161,6 +195,74 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
       ),
     );
   }
+
+  // ── Smart recommendations row ─────────────────────────────────────────────
+
+  Widget _buildRecommendationsRow() {
+    final cardBg = _isDark ? AppDarkColors.surface : Colors.white;
+    final iconBg =
+        _isDark ? AppDarkColors.fieldBorder : const Color(0xFFE8F3FF);
+    final iconColor = const Color(0xFF1F8EFA);
+    final textColor =
+        _isDark ? AppDarkColors.textPrimary : const Color(0xFF1C1C1E);
+    final arrowColor =
+        _isDark ? AppDarkColors.placeholder : const Color(0xFFB2B2B8);
+
+    return GestureDetector(
+      onTap: _openRecommendations,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(_isDark ? 0.22 : 0.06),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.auto_awesome_rounded,
+                size: 18,
+                color: iconColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'اقتراحات توكي',
+                textDirection: TextDirection.rtl,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: arrowColor,
+              size: 22,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Header ────────────────────────────────────────────────────────────────
 
   Widget _buildHeader() {
     return Padding(

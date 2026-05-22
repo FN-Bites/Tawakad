@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
-import 'package:tawakad_app/features/onboarding/ui/animation/mascot_rive.dart';
-import 'package:tawakad_app/features/onboarding/ui/widgets/mascot_with_bubble.dart';
+import 'package:tawakad_app/core/widgets/animation/mascot_rive.dart';
+import 'package:tawakad_app/core/widgets/mascot_with_bubble.dart';
 import 'onboarding_progress_bar.dart';
 import 'onboarding_progress_text.dart';
 

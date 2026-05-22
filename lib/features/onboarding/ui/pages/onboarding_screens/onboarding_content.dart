@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/features/onboarding/ui/animation/logo_glitter_rive.dart';
 import 'package:tawakad_app/features/onboarding/ui/animation/lists_rive.dart';
-import 'package:tawakad_app/features/onboarding/ui/animation/mascot_rive.dart';
+import 'package:tawakad_app/core/widgets/animation/mascot_rive.dart';
 import 'package:tawakad_app/core/widgets/animation/scanning_rive.dart';
 import 'onboarding_data.dart';
 

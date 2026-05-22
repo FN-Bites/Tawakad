@@ -63,6 +63,14 @@ class ItemsCardState extends State<ItemsCard> {
     );
   }
 
+  void addItemByName(String name) {
+    if (widget.listId != null) {
+      context.read<PackListProvider>().addItem(widget.listId!, name);
+    } else {
+      setState(() => _localItems.add(name));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

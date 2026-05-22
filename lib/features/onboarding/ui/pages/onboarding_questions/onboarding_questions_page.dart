@@ -8,7 +8,7 @@ import 'gender_page.dart';
 import 'status_page.dart';
 import 'medication_page.dart';
 import 'package:tawakad_app/core/widgets/entry_bottom_action_text.dart';
-import 'package:tawakad_app/features/onboarding/ui/animation/mascot_rive.dart';
+import 'package:tawakad_app/core/widgets/animation/mascot_rive.dart';
 
 class OnboardingQuestionsPage extends StatefulWidget {
   const OnboardingQuestionsPage({super.key});
