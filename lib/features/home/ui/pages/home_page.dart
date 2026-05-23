@@ -13,6 +13,8 @@ import 'package:tawakad_app/features/settings/ui/pages/profile_page.dart';
 
 enum FilterOption { today, favorites, all }
 
+const double _kNavBarHeight = 96.0 + 16.0;
+
 class HomePage extends StatefulWidget {
   final String searchQuery;
 
@@ -42,6 +44,8 @@ class _HomeState extends State<HomePage> {
     final theme = Theme.of(context);
     final allLists = context.watch<PackListProvider>().lists;
     final today = DateTime.now();
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    final navSpacing = _kNavBarHeight + safeBottom;
 
     final afterFilter = allLists.where((p) {
       switch (_activeFilter) {
@@ -65,21 +69,22 @@ class _HomeState extends State<HomePage> {
                 .contains(widget.searchQuery.toLowerCase()))
             .toList();
 
-    Widget mainContent = const Padding(
-      padding: EdgeInsets.only(bottom: 200),
-      child: Center(child: HomeEmptyState()),
+    Widget mainContent = Padding(
+      padding: EdgeInsets.only(bottom: navSpacing),
+      child: const Center(child: HomeEmptyState()),
     );
 
     if (filtered.isNotEmpty) {
       mainContent = PackListCard(lists: filtered);
     } else if (widget.searchQuery.isNotEmpty && filtered.isEmpty) {
-      mainContent = const Padding(
-        padding: EdgeInsets.only(bottom: 200),
-        child: Center(child: SearchEmptyState()),
+      mainContent = Padding(
+        padding: EdgeInsets.only(bottom: navSpacing),
+        child: const Center(child: SearchEmptyState()),
       );
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
@@ -111,33 +116,35 @@ class _HomeState extends State<HomePage> {
           const SizedBox(width: 24),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 24, right: 24),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: AppFilterBar(
-                labels: const [
-                  'قوائم اليوم',
-                  'القوائم المفضلة',
-                  'جميع القوائم',
-                ],
-                chipWidth: 115.0,
-                initialIndex: 0,
-                onFilterChanged: (index) {
-                  setState(() => _activeFilter = FilterOption.values[index]);
-                },
+      body: ClipRect(
+        child: Padding(
+          padding: const EdgeInsets.only(left: 24, right: 24),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.topRight,
+                child: AppFilterBar(
+                  labels: const [
+                    'قوائم اليوم',
+                    'القوائم المفضلة',
+                    'جميع القوائم',
+                  ],
+                  chipWidth: 115.0,
+                  initialIndex: 0,
+                  onFilterChanged: (index) {
+                    setState(() => _activeFilter = FilterOption.values[index]);
+                  },
+                ),
               ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 40),
-                child: mainContent,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: mainContent,
+                ),
               ),
-            ),
-            const SizedBox(height: 100),
-          ],
+              SizedBox(height: navSpacing),
+            ],
+          ),
         ),
       ),
     );

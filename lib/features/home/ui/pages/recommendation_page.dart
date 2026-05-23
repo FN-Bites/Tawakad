@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tawakad_app/features/home/model/item_sections.dart';
 import 'package:tawakad_app/core/services/recommendation_service.dart';
+import 'package:tawakad_app/core/services/weather_service.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
 
@@ -13,14 +17,18 @@ class RecommendationPage extends StatefulWidget {
   final String listName;
   final String event;
   final void Function(String arabicItem) onAddItem;
+  final void Function(String arabicItem)? onRemoveItem;
   final List<String> existingItems;
+  final DateTime? eventDate;
 
   const RecommendationPage({
     super.key,
     required this.listName,
     required this.event,
     required this.onAddItem,
+    this.onRemoveItem,
     this.existingItems = const [],
+    this.eventDate,
   });
 
   @override
@@ -28,9 +36,16 @@ class RecommendationPage extends StatefulWidget {
 }
 
 class _RecommendationPageState extends State<RecommendationPage> {
-  static const String _period = 'morning';
-  static const String _weather = 'sunny';
-  static const String _gender = 'female';
+  String _gender = 'male';
+  String _userStatus = '';
+  String _weather = 'sunny';
+
+  static String _getCurrentPeriod() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 18) return 'afternoon';
+    return 'night';
+  }
 
   String get _role {
     final location = widget.listName.trim().toLowerCase();
@@ -39,6 +54,8 @@ class _RecommendationPageState extends State<RecommendationPage> {
         location == 'masjid al haram' ||
         location == 'haram') return 'pilgrim';
     if (location == 'travel') return 'traveler';
+    if (_userStatus == 'student') return 'student';
+    if (_userStatus == 'employee') return 'professor';
     if (location == 'university') return 'student';
     return 'student';
   }
@@ -56,7 +73,41 @@ class _RecommendationPageState extends State<RecommendationPage> {
   void initState() {
     super.initState();
     _addedThisSession.addAll(widget.existingItems);
-    _fetchFuture = _fetch();
+    _fetchFuture = _loadProfileThenFetch();
+  }
+
+  Future<void> _loadProfileThenFetch() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid != null) {
+        final doc =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        if (doc.exists && mounted) {
+          final data = doc.data()!;
+          final gender = (data['gender'] as String?)?.toLowerCase();
+          final status = (data['status'] as String?)?.toLowerCase();
+          final answers = List<String>.from(data['answers'] ?? []);
+          setState(() {
+            _gender = gender ??
+                (answers.isNotEmpty ? answers[0].toLowerCase() : 'male');
+            _userStatus =
+                status ?? (answers.length > 1 ? answers[1].toLowerCase() : '');
+          });
+        }
+      }
+    } catch (_) {}
+    try {
+      final targetDate = widget.eventDate ?? DateTime.now();
+      final fetchedWeather =
+          await WeatherService.instance.getWeatherForDate(targetDate);
+      if (mounted) setState(() => _weather = fetchedWeather);
+    } catch (_) {}
+    if (_getCurrentPeriod() == 'night' && _weather == 'sunny') {
+      _weather = 'warm';
+    }
+
+    await _fetch();
   }
 
   Future<void> _fetch() async {
@@ -69,7 +120,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
     final results = await RecommendationService.instance.getRecommendations(
       listName: widget.listName,
       event: widget.event,
-      period: _period,
+      period: _getCurrentPeriod(),
       weather: _weather,
       gender: _gender,
       role: _role,
@@ -95,6 +146,12 @@ class _RecommendationPageState extends State<RecommendationPage> {
     if (_addedThisSession.contains(item.arabic)) return;
     setState(() => _addedThisSession.add(item.arabic));
     widget.onAddItem(item.arabic);
+  }
+
+  void _handleRemove(RecommendedItem item) {
+    if (!_addedThisSession.contains(item.arabic)) return;
+    setState(() => _addedThisSession.remove(item.arabic));
+    widget.onRemoveItem?.call(item.arabic);
   }
 
   List<String> _prioritySections() {
@@ -309,6 +366,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
               alreadyAdded: _addedThisSession.contains(sectionItems[i].arabic),
               isDark: _isDark,
               onAdd: () => _handleAdd(sectionItems[i]),
+              onRemove: () => _handleRemove(sectionItems[i]),
             ),
             if (i < sectionItems.length - 1)
               Divider(

@@ -7,6 +7,7 @@ class RecommendationRow extends StatelessWidget {
   final bool alreadyAdded;
   final bool isDark;
   final VoidCallback onAdd;
+  final VoidCallback onRemove;
 
   const RecommendationRow({
     super.key,
@@ -14,6 +15,7 @@ class RecommendationRow extends StatelessWidget {
     required this.alreadyAdded,
     required this.isDark,
     required this.onAdd,
+    required this.onRemove,
   });
 
   @override
@@ -77,23 +79,21 @@ class RecommendationRow extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: alreadyAdded ? null : onAdd,
+            onTap: alreadyAdded ? onRemove : onAdd,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: 32,
               height: 32,
               decoration: BoxDecoration(
                 color: alreadyAdded
-                    ? (isDark
-                        ? AppDarkColors.fieldBorder
-                        : const Color(0xFFEFEFF4))
+                    ? const Color(0xFFFF3B30).withOpacity(0.12)
                     : const Color(0xFF1F8EFA),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                alreadyAdded ? Icons.check_rounded : Icons.add_rounded,
+                alreadyAdded ? Icons.remove_rounded : Icons.add_rounded,
                 size: 18,
-                color: alreadyAdded ? addedColor : Colors.white,
+                color: alreadyAdded ? const Color(0xFFFF3B30) : Colors.white,
               ),
             ),
           ),

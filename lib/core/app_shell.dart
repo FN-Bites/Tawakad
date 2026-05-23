@@ -64,6 +64,9 @@ class _AppShellState extends State<AppShell>
 
   @override
   Widget build(BuildContext context) {
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final navBottomOffset = keyboardHeight > 0 ? keyboardHeight : 0.0;
+
     final page = switch (_index) {
       0 => HomePage(searchQuery: _searchQuery),
       1 => const CalendarPage(),
@@ -75,19 +78,31 @@ class _AppShellState extends State<AppShell>
     };
 
     return Scaffold(
-      extendBody: true,
-      body: page,
-      bottomNavigationBar: _SearchNavRow(
-        navSlide: _navSlide,
-        currentIndex: _index,
-        items: _items,
-        onNavTap: (i) => setState(() {
-          _index = i;
-          _searchQuery = '';
-        }),
-        onSearchOpened: () => _navCtrl.forward(),
-        onSearchClosed: () => _navCtrl.reverse(),
-        onSearchChanged: (q) => setState(() => _searchQuery = q),
+      extendBody: false,
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: page,
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: navBottomOffset,
+            child: _SearchNavRow(
+              navSlide: _navSlide,
+              currentIndex: _index,
+              items: _items,
+              onNavTap: (i) => setState(() {
+                _index = i;
+                _searchQuery = '';
+              }),
+              onSearchOpened: () => _navCtrl.forward(),
+              onSearchClosed: () => _navCtrl.reverse(),
+              onSearchChanged: (q) => setState(() => _searchQuery = q),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -119,7 +134,6 @@ class _SearchNavRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).padding.bottom;
     final screenW = MediaQuery.of(context).size.width;
     const searchCollapsedW = 64.0;
     final navW = screenW - _sidePad * 2 - searchCollapsedW - _rowGap;
@@ -127,12 +141,12 @@ class _SearchNavRow extends StatelessWidget {
     final hintText = currentIndex == 2 ? 'ابحث عن غرض' : 'ابحث عن قائمة';
 
     return SizedBox(
-      height: _rowHeight + _bottomPad + bottomInset,
+      height: _rowHeight + _bottomPad,
       child: Padding(
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           left: _sidePad,
           right: _sidePad,
-          bottom: _bottomPad + bottomInset,
+          bottom: _bottomPad,
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,

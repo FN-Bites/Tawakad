@@ -2,6 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
+//To run
+//1- open terminal
+//Write - cd toki_backend
+// paste - uvicorn app:app --reload --host 0.0.0.0 --port 8000
+
 class LocationResult {
   final String? canonical;
   final bool matched;
@@ -36,7 +41,7 @@ class RecommendedItem {
 }
 
 class RecommendationService {
-  static const String _base = 'http://127.0.0.1:8000';
+  static const String _base = 'http://192.168.8.165:8000';
 
   RecommendationService._();
   static final RecommendationService instance = RecommendationService._();
