@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/services/firestore_service.dart';
+import 'package:tawakad_app/core/services/notification_service.dart';
 import 'package:tawakad_app/features/rewards/provider/reward_provider.dart';
 import '../model/pack_list.dart';
 
@@ -79,10 +80,22 @@ class PackListProvider extends ChangeNotifier {
 
     await _service.createList(data);
     await fetchLists();
+
+    // ── Schedule notifications for the newly created list ────────────────
+    if (time != null && date != null) {
+      final created = _lists.lastWhere(
+        (l) => l.title == title && l.userId == (_service.userId ?? ''),
+        orElse: () => _lists.last,
+      );
+      await NotificationService.instance.syncNotifications(created);
+    }
   }
 
   // ───────── DELETE ─────────
   Future<void> removeList(String id) async {
+    // ── Cancel notifications before deleting ────────────────────────────
+    await NotificationService.instance.cancelForList(id);
+
     await _service.removeList(id);
     _lists.removeWhere((l) => l.id == id);
     notifyListeners();
@@ -133,6 +146,9 @@ class PackListProvider extends ChangeNotifier {
       );
       notifyListeners();
       onTimeChanged?.call(id, time, date);
+
+      // ── Reschedule notifications with updated time/date ─────────────
+      await NotificationService.instance.syncNotifications(_lists[index]);
     }
   }
 
@@ -223,7 +239,6 @@ class PackListProvider extends ChangeNotifier {
     if (list.items.isNotEmpty && updated.length == list.items.length) {
       rewardProvider?.onListCompleted();
     }
-    // ─────────────────────────────────────────────────────────────────────
 
     notifyListeners();
   }

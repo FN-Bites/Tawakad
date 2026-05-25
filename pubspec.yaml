@@ -58,6 +58,8 @@ dependencies:
   rive: ^0.14.0-dev.6
   device_calendar: ^4.3.3
   hijri: ^3.0.0
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
 
 dev_dependencies:
   flutter_test:

@@ -1,12 +1,11 @@
-import 'package:device_calendar/device_calendar.dart';
 import 'package:flutter/material.dart';
-
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart' hide TextDirection;
-import 'package:tawakad_app/features/calender/services/device_calendar_service.dart';
+import 'package:provider/provider.dart';
 
-/// Calendar UI for Android (and other platforms without the native iOS view).
-/// Mirrors the week strip + date header + hourly timeline from iOS `CalendarView`.
+import '../../../home/provider/pack_list_provider.dart';
+import '../../../home/model/pack_list.dart';
+
 class FlutterDeviceCalendarView extends StatefulWidget {
   const FlutterDeviceCalendarView({super.key});
 
@@ -15,83 +14,44 @@ class FlutterDeviceCalendarView extends StatefulWidget {
       _FlutterDeviceCalendarViewState();
 }
 
-class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
-  final DeviceCalendarService _calendarService = DeviceCalendarService();
-
+class _FlutterDeviceCalendarViewState
+    extends State<FlutterDeviceCalendarView> {
   DateTime _selectedDate = DateTime.now();
-  List<Event> _events = [];
-  bool _isLoading = true;
-  bool _permissionDenied = false;
 
   @override
   void initState() {
     super.initState();
     HijriCalendar.setLocal('ar');
-    _load();
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _isLoading = true;
-      _permissionDenied = false;
-    });
-
-    final granted = await _calendarService.ensurePermission();
-    if (!mounted) return;
-
-    if (!granted) {
-      setState(() {
-        _permissionDenied = true;
-        _events = [];
-        _isLoading = false;
-      });
-      return;
-    }
-
-    final events = await _calendarService.fetchEventsForDay(_selectedDate);
-    if (!mounted) return;
-
-    setState(() {
-      _events = events;
-      _isLoading = false;
-    });
+  bool _sameDay(DateTime a, DateTime b) {
+    return a.year == b.year &&
+        a.month == b.month &&
+        a.day == b.day;
   }
 
   void _selectDate(DateTime date) {
-    final normalized = DateTime(date.year, date.month, date.day);
-    if (_sameDay(normalized, _selectedDate)) return;
-    setState(() => _selectedDate = normalized);
-    _load();
+    setState(() {
+      _selectedDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+      );
+    });
   }
-
-  bool _sameDay(DateTime a, DateTime b) =>
-      a.year == b.year && a.month == b.month && a.day == b.day;
 
   List<DateTime> get _weekDates {
-    // Week starting Saturday (common in Arabic locales).
-    final daysFromSaturday = (_selectedDate.weekday + 1) % 7;
-    final start = _selectedDate.subtract(Duration(days: daysFromSaturday));
-    return List.generate(7, (i) => start.add(Duration(days: i)));
-  }
+    final daysFromSaturday =
+        (_selectedDate.weekday + 1) % 7;
 
-  List<Event> _eventsForHour(int hour) {
-    final startOfDay =
-        DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
-    final slotStart = startOfDay.add(Duration(hours: hour));
-    final slotEnd = slotStart.add(const Duration(hours: 1));
+    final start = _selectedDate.subtract(
+      Duration(days: daysFromSaturday),
+    );
 
-    return _events.where((event) {
-      if (event.allDay == true) return false;
-      final start = event.start?.toLocal();
-      final end = event.end?.toLocal();
-      if (start == null || end == null) return false;
-      return start.isBefore(slotEnd) && end.isAfter(slotStart);
-    }).toList()
-      ..sort((a, b) {
-        final aStart = a.start?.toLocal() ?? DateTime(0);
-        final bStart = b.start?.toLocal() ?? DateTime(0);
-        return aStart.compareTo(bStart);
-      });
+    return List.generate(
+      7,
+      (i) => start.add(Duration(days: i)),
+    );
   }
 
   String _arabicDigits(int value) {
@@ -105,307 +65,350 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
   }
 
   String _gregorianHeader() {
-    return DateFormat('EEEE d MMMM yyyy', 'ar').format(_selectedDate);
+    return DateFormat(
+      'EEEE d MMMM yyyy',
+      'ar',
+    ).format(_selectedDate);
   }
 
   String _hijriHeader() {
     final h = HijriCalendar.fromDate(_selectedDate);
-    return '${_arabicDigits(h.hDay)} ${h.getLongMonthName()} ${_arabicDigits(h.hYear)}';
+
+    return '${_arabicDigits(h.hDay)} '
+        '${h.getLongMonthName()} '
+        '${_arabicDigits(h.hYear)}';
   }
 
   String _hourLabel(int hour) {
     final time = DateTime(2000, 1, 1, hour);
-    return DateFormat('HH:mm', 'ar').format(time);
+
+    return DateFormat(
+      'HH:mm',
+      'ar',
+    ).format(time);
   }
 
-  String _eventTimeRange(Event event) {
-    final start = event.start?.toLocal();
-    final end = event.end?.toLocal();
-    if (start == null || end == null) return '';
-    final fmt = DateFormat('HH:mm', 'ar');
-    return '${fmt.format(start)} - ${fmt.format(end)}';
+  List<PackList> _listsForDay(
+    List<PackList> lists,
+    DateTime day,
+  ) {
+    return lists.where((list) {
+      if (list.date == null) return false;
+
+      return _sameDay(
+        list.date!,
+        day,
+      );
+    }).toList();
+  }
+
+  List<PackList> _listsForHour(
+    List<PackList> lists,
+    int hour,
+  ) {
+    return lists.where((list) {
+      if (list.date == null) return false;
+
+      return list.date!.hour == hour;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        Provider.of<PackListProvider>(context);
+
+    final allLists = provider.lists;
+
+    final selectedDayLists =
+        _listsForDay(allLists, _selectedDate);
+
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final selectedColor = Colors.red;
-    final chipBg = isDark ? const Color(0xFF2A2F38) : const Color(0xFFF0F2F5);
+
+    final isDark =
+        theme.brightness == Brightness.dark;
+
+    final chipBg = isDark
+        ? const Color(0xFF2A2F38)
+        : const Color(0xFFF0F2F5);
 
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: ColoredBox(
-        color: theme.scaffoldBackgroundColor,
-        child: Column(
-          children: [
-            _WeekStrip(
-              weekDates: _weekDates,
-              selectedDate: _selectedDate,
-              selectedColor: selectedColor,
-              arabicDigits: _arabicDigits,
-              shortWeekday: _shortWeekday,
-              hijriDay: (d) => HijriCalendar.fromDate(d).hDay,
-              onSelect: _selectDate,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 10,
             ),
-            Divider(color: theme.dividerColor, height: 1),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Column(
-                children: [
-                  Text(
-                    _gregorianHeader(),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${_hijriHeader()} هـ',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            Divider(color: theme.dividerColor, height: 1),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
-                children: [
-                  if (_isLoading)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Center(
-                        child: Text(
-                          'جاري تحميل الأحداث...',
-                          style: theme.textTheme.titleSmall,
-                        ),
-                      ),
-                    ),
-                  if (_permissionDenied)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        'يرجى السماح بالوصول للتقويم من إعدادات الجهاز',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  if (!_isLoading &&
-                      !_permissionDenied &&
-                      _events.where((e) => e.allDay != true).isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        'لا توجد أحداث في هذا اليوم',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  for (var hour = 0; hour <= 23; hour++) ...[
-                    SizedBox(
-                      height: 90,
-                      child: Stack(
-                        clipBehavior: Clip.none,
+            child: Row(
+              children: [
+                for (final date in _weekDates)
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => _selectDate(date),
+                      child: Column(
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 76,
-                                child: Text(
-                                  _hourLabel(hour),
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: theme.colorScheme.onSurface
-                                        .withValues(alpha: 0.6),
-                                  ),
-                                  textAlign: TextAlign.end,
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 12,
-                                    top: 44,
-                                  ),
-                                  child: Divider(
-                                    height: 1,
-                                    color: theme.dividerColor,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          Text(
+                            _shortWeekday(date),
+                            style: theme
+                                .textTheme.titleSmall
+                                ?.copyWith(
+                              fontWeight:
+                                  FontWeight.w600,
+                            ),
                           ),
-                          Positioned(
-                            left: 90,
-                            right: 0,
-                            top: 10,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                for (final event in _eventsForHour(hour))
-                                  _EventChip(
-                                    title: (event.title ?? '').isEmpty
-                                        ? 'بدون عنوان'
-                                        : event.title!,
-                                    timeRange: _eventTimeRange(event),
-                                    backgroundColor: chipBg,
-                                  ),
-                              ],
+
+                          const SizedBox(height: 4),
+
+                          Container(
+                            width: 46,
+                            height: 46,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _sameDay(
+                                date,
+                                _selectedDate,
+                              )
+                                  ? Colors.red
+                                  : Colors.transparent,
+                            ),
+                            child: Text(
+                              _arabicDigits(
+                                date.day,
+                              ),
+                              style: theme
+                                  .textTheme.headlineSmall
+                                  ?.copyWith(
+                                fontWeight:
+                                    FontWeight.bold,
+                                color: _sameDay(
+                                  date,
+                                  _selectedDate,
+                                )
+                                    ? Colors.white
+                                    : theme.colorScheme
+                                        .onSurface,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: _listsForDay(
+                                allLists,
+                                date,
+                              ).isNotEmpty
+                                  ? Colors.red
+                                  : Colors.transparent,
+                            ),
+                          ),
+
+                          const SizedBox(height: 4),
+
+                          Text(
+                            _arabicDigits(
+                              HijriCalendar
+                                  .fromDate(date)
+                                  .hDay,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ],
-              ),
+                  ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+          ),
 
-class _WeekStrip extends StatelessWidget {
-  const _WeekStrip({
-    required this.weekDates,
-    required this.selectedDate,
-    required this.selectedColor,
-    required this.arabicDigits,
-    required this.shortWeekday,
-    required this.hijriDay,
-    required this.onSelect,
-  });
+          Divider(
+            color: theme.dividerColor,
+            height: 1,
+          ),
 
-  final List<DateTime> weekDates;
-  final DateTime selectedDate;
-  final Color selectedColor;
-  final String Function(int) arabicDigits;
-  final String Function(DateTime) shortWeekday;
-  final int Function(DateTime) hijriDay;
-  final ValueChanged<DateTime> onSelect;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      child: Row(
-        children: [
-          for (final date in weekDates)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onSelect(date),
-                behavior: HitTestBehavior.opaque,
-                child: Column(
-                  children: [
-                    Text(
-                      shortWeekday(date),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: date.year == selectedDate.year &&
-                                date.month == selectedDate.month &&
-                                date.day == selectedDate.day
-                            ? selectedColor
-                            : Colors.transparent,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        arabicDigits(date.day),
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: date.year == selectedDate.year &&
-                                  date.month == selectedDate.month &&
-                                  date.day == selectedDate.day
-                              ? Colors.white
-                              : theme.colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      arabicDigits(hijriDay(date)),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(
+              vertical: 14,
             ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EventChip extends StatelessWidget {
-  const _EventChip({
-    required this.title,
-    required this.timeRange,
-    required this.backgroundColor,
-  });
-
-  final String title;
-  final String timeRange;
-  final Color backgroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 6),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(radius: 4, backgroundColor: Colors.red),
-          const SizedBox(width: 8),
-          Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  _gregorianHeader(),
+                  style: theme
+                      .textTheme.headlineMedium
+                      ?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+
+                const SizedBox(height: 4),
+
                 Text(
-                  timeRange,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  '${_hijriHeader()} هـ',
+                  style: theme
+                      .textTheme.titleLarge
+                      ?.copyWith(
+                    color: theme
+                        .colorScheme.onSurface
+                        .withValues(alpha: 0.6),
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          Divider(
+            color: theme.dividerColor,
+            height: 1,
+          ),
+
+          Expanded(
+            child: ListView(
+              padding:
+                  const EdgeInsets.fromLTRB(
+                10,
+                0,
+                10,
+                20,
+              ),
+              children: [
+                if (selectedDayLists.isEmpty)
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(
+                      vertical: 16,
+                    ),
+                    child: Text(
+                      'لا توجد قوائم في هذا اليوم',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                for (var hour = 0;
+                    hour <= 23;
+                    hour++) ...[
+                  SizedBox(
+                    height: 90,
+                    child: Stack(
+                      children: [
+                        Row(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 76,
+                              child: Text(
+                                _hourLabel(hour),
+                                textAlign:
+                                    TextAlign.end,
+                              ),
+                            ),
+
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets
+                                        .only(
+                                  left: 12,
+                                  top: 44,
+                                ),
+                                child: Divider(
+                                  height: 1,
+                                  color: theme
+                                      .dividerColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        Positioned(
+                          left: 90,
+                          right: 0,
+                          top: 10,
+                          child: Column(
+                            children: [
+                              for (final list
+                                  in _listsForHour(
+                                selectedDayLists,
+                                hour,
+                              ))
+                                Container(
+                                  margin:
+                                      const EdgeInsets
+                                          .only(
+                                    bottom: 6,
+                                  ),
+                                  padding:
+                                      const EdgeInsets
+                                          .symmetric(
+                                    horizontal: 10,
+                                    vertical: 8,
+                                  ),
+                                  decoration:
+                                      BoxDecoration(
+                                    color: chipBg,
+                                    borderRadius:
+                                        BorderRadius
+                                            .circular(
+                                      10,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 4,
+                                        backgroundColor:
+                                            list.color,
+                                      ),
+
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment
+                                                  .start,
+                                          children: [
+                                            Text(
+                                              list.title,
+                                              style: theme
+                                                  .textTheme
+                                                  .titleSmall
+                                                  ?.copyWith(
+                                                fontWeight:
+                                                    FontWeight
+                                                        .w600,
+                                              ),
+                                            ),
+
+                                            if (list.time !=
+                                                null)
+                                              Text(
+                                                list.time!,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

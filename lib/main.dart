@@ -7,7 +7,7 @@ import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes.dart';
 import 'package:tawakad_app/core/app_shell.dart';
-
+import 'package:tawakad_app/core/services/notification_service.dart';
 import 'features/onboarding/providers/onboarding_flow_provider.dart';
 import 'features/signUp/providers/signup_flow_provider.dart';
 import 'features/signUp/providers/verifyEmail_flow_provider.dart';
@@ -26,6 +26,9 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await NotificationService.instance.init();
+  await NotificationService.instance.requestExactAlarmPermission();
+  await NotificationService.instance.requestIgnoreBatteryOptimization();
 
   runApp(
     MultiProvider(

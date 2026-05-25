@@ -9,7 +9,7 @@ class NotificationSettingsService {
 
   Future<bool> isAppEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_appEnabledKey) ?? false;
+    return prefs.getBool(_appEnabledKey) ?? true;
   }
 
   Future<void> setAppEnabled(bool value) async {

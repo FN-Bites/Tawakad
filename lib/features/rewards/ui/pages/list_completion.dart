@@ -178,7 +178,7 @@ class _ListCompletionPageState extends State<ListCompletionPage>
                       padding: const EdgeInsets.symmetric(vertical: 18),
                     ),
                     child: const Text(
-                      'العودة للمنزل',
+                      'العودة للصفحة الرئيسية',
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
