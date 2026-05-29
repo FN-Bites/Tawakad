@@ -197,7 +197,6 @@ const Map<String, String> itemSections = {
   'underwear': 'ملابس وإكسسوارات',
   'watch': 'ملابس وإكسسوارات',
   'smartwatch': 'ملابس وإكسسوارات',
-  'wallet': 'ملابس وإكسسوارات',
   'purse': 'ملابس وإكسسوارات',
   'clothes': 'ملابس وإكسسوارات',
   'sheet set': 'ملابس وإكسسوارات',
@@ -230,13 +229,8 @@ const Map<String, String> itemSections = {
 
   // ── Travel / movement
   'boarding ticket': 'السفر والتنقل',
-  'car keys': 'السفر والتنقل',
   'compass': 'السفر والتنقل',
-  'keys': 'السفر والتنقل',
-  'lock': 'السفر والتنقل',
-  'locker lock': 'السفر والتنقل',
   'neck pillow': 'السفر والتنقل',
-  'padlock': 'السفر والتنقل',
   'passport': 'السفر والتنقل',
 
   // ── Health / safety
@@ -246,4 +240,12 @@ const Map<String, String> itemSections = {
   'muscle ointment': 'الصحة والسلامة',
   'sleep mask': 'الصحة والسلامة',
   'stress ball': 'الصحة والسلامة',
+
+  // ── Daily essentials
+  'wallet': 'الأساسيات اليومية',
+  'padlock': 'الأساسيات اليومية',
+  'car keys': 'الأساسيات اليومية',
+  'keys': 'الأساسيات اليومية',
+  'lock': 'الأساسيات اليومية',
+  'locker lock': 'الأساسيات اليومية',
 };

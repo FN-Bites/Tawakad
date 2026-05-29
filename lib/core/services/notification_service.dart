@@ -8,6 +8,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import 'notification_settings_service.dart';
 import '../../features/home/model/pack_list.dart';
+import 'package:flutter/foundation.dart';
 
 class NotificationService {
   NotificationService._();
@@ -45,6 +46,9 @@ class NotificationService {
   }
 
   Future<void> requestIgnoreBatteryOptimization() async {
+    if (kIsWeb) {
+      return;
+    }
     if (!Platform.isAndroid) return;
     try {
       await _channel.invokeMethod('ignoreBatteryOptimization');

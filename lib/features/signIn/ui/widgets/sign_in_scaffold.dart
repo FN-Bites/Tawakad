@@ -65,7 +65,6 @@ class _SignInScaffoldState extends State<SignInScaffold> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // ── Back button ───────────────────────────────────────────
               SizedBox(
                 height: 40,
                 child: Align(
@@ -74,7 +73,6 @@ class _SignInScaffoldState extends State<SignInScaffold> {
                 ),
               ),
 
-              // ── Title: collapses when keyboard opens ──────────────────
               AnimatedSize(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
@@ -93,7 +91,6 @@ class _SignInScaffoldState extends State<SignInScaffold> {
                       ),
               ),
 
-              // ── All fields scroll freely ───────────────────────────────
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
@@ -115,14 +112,12 @@ class _SignInScaffoldState extends State<SignInScaffold> {
                 ),
               ),
 
-              // ── Primary button: always pinned at bottom ───────────────
               const SizedBox(height: 16),
               AppLiquidButtons.primary(
                 label: widget.primaryButtonText,
                 onPressed: widget.onPrimaryPressed,
               ),
 
-              // ── Google + sign-up link: only when keyboard is closed ───
               AnimatedSize(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,

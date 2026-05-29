@@ -6,10 +6,7 @@ class RewardProvider extends ChangeNotifier {
   int _completedLists = 0;
   final Set<BadgeTier> _earnedTiers = {};
 
-  /// Non-null while there is an unacknowledged completion to show.
-  /// - [BadgeCompletion] → show badge unlock screen
-  /// - [DefaultCompletion] → show plain checkmark screen
-  /// - null → nothing pending
+
   CompletionEvent? _pendingCompletion;
 
   int get completedLists => _completedLists;

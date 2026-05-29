@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 //1- open terminal
 //Write - cd toki_backend
 // paste - uvicorn app:app --reload --host 0.0.0.0 --port 8000
+// Important: Physical device and laptop should be connected to the same Wifi connection
 
 class LocationResult {
   final String? canonical;

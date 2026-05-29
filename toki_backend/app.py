@@ -9,10 +9,10 @@ from pathlib import Path
 
 app = FastAPI()
 
-# Required for Flutter Web / Chrome
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # okay for testing
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -278,9 +278,9 @@ def normalize_location_endpoint(req: LocationRequest):
         "canonical": canonical,
         "matched": canonical is not None,
         "arabic_location": LOCATION_ARABIC.get(canonical, canonical) if canonical else None,
-        # Flat list of English strings kept for backwards-compatibility
+
         "events": [e["english"] for e in events],
-        # New: full list with Arabic labels
+
         "events_localized": events,
     }
 
@@ -292,9 +292,9 @@ def events_for_location(req: LocationRequest):
 
     return {
         "matched": canonical is not None,
-        # Flat list of English strings kept for backwards-compatibility
+
         "events": [e["english"] for e in events],
-        # New: full list with Arabic labels
+
         "events_localized": events,
     }
 
@@ -320,9 +320,6 @@ def recommend(request: RecommendationRequest):
         "score": scores,
     })
 
-    # ── Score threshold: drop items the model isn't confident about.
-    #    This prevents low-signal items (e.g. "eraser" in a yoga list)
-    #    from leaking into the top-N results.
     SCORE_THRESHOLD = 0.15
 
     score_df = score_df[score_df["score"] >= SCORE_THRESHOLD]

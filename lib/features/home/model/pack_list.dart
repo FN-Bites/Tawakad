@@ -42,7 +42,7 @@ class PackList {
   int get itemCount => items.length;
   Color get color => Color(colorValue);
   bool get isCompleted =>
-      items.isNotEmpty && checkedIndices.length == items.length; // 👈
+      items.isNotEmpty && checkedIndices.length == items.length;
 
   @override
   bool operator ==(Object other) =>

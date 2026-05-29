@@ -48,15 +48,15 @@ class _RecommendationPageState extends State<RecommendationPage> {
   }
 
   String get _role {
-    final location = widget.listName.trim().toLowerCase();
+    final location = widget.listName;
     if (location == 'gym') return 'gym_user';
-    if (location == 'masjid_al_haram' ||
-        location == 'masjid al haram' ||
-        location == 'haram') return 'pilgrim';
+    if (location == 'masjid_al_haram') return 'pilgrim';
     if (location == 'travel') return 'traveler';
-    if (_userStatus == 'student') return 'student';
-    if (_userStatus == 'employee') return 'professor';
-    if (location == 'university') return 'student';
+    if (location == 'university') {
+      if (_userStatus == 'student') return 'student';
+      if (_userStatus == 'employee') return 'professor';
+      return 'student';
+    }
     return 'student';
   }
 
@@ -90,19 +90,21 @@ class _RecommendationPageState extends State<RecommendationPage> {
           final answers = List<String>.from(data['answers'] ?? []);
           setState(() {
             _gender = gender ??
-                (answers.isNotEmpty ? answers[0].toLowerCase() : 'male');
+                (answers.length > 2 ? answers[2].toLowerCase() : 'male');
             _userStatus =
-                status ?? (answers.length > 1 ? answers[1].toLowerCase() : '');
+                status ?? (answers.length > 3 ? answers[3].toLowerCase() : '');
           });
         }
       }
     } catch (_) {}
+
     try {
       final targetDate = widget.eventDate ?? DateTime.now();
       final fetchedWeather =
           await WeatherService.instance.getWeatherForDate(targetDate);
       if (mounted) setState(() => _weather = fetchedWeather);
     } catch (_) {}
+
     if (_getCurrentPeriod() == 'night' && _weather == 'sunny') {
       _weather = 'warm';
     }

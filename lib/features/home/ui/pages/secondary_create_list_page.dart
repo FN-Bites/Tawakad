@@ -98,6 +98,8 @@ class _SecondaryCreateListPageState extends State<SecondaryCreateListPage> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => RecommendationPage(
+          // canonicalLocation is already normalized (e.g. 'masjid_al_haram')
+          // so _role and getRecommendations will both work correctly
           listName: widget.canonicalLocation!,
           event: widget.event!,
           existingItems: _itemsKey.currentState?.items.toList() ?? [],
