@@ -168,6 +168,12 @@ flutter:
     - assets/icons/icon_picker/key.png
     - assets/icons/icon_picker/ipad.png
     - assets/icons/icon_picker/id.png
+    - assets/badges/bronze.png
+    - assets/badges/diamond.png
+    - assets/badges/gold.png
+    - assets/badges/platinum.png
+    - assets/badges/silver.png
+    - assets/badges/unlocked.png
   fonts:
     - family: Montserrat
       fonts:
