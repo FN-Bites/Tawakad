@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
+/// Loads and displays the Rive animation for the onboarding lists screen,
 class LogoGlitterRive extends StatefulWidget {
   const LogoGlitterRive({super.key});
 

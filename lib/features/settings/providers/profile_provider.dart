@@ -3,7 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/services/notification_settings_service.dart';
-import 'package:tawakad_app/core/services/user_service.dart';
+import 'package:tawakad_app/core/services/auth/user_service.dart';
 import 'package:tawakad_app/features/settings/models/user_profile.dart';
 
 class ProfileProvider extends ChangeNotifier {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
+/// Loads and displays the Rive animation for the onboarding lists screen,
 class PhoneRive extends StatefulWidget {
   const PhoneRive({
     super.key,

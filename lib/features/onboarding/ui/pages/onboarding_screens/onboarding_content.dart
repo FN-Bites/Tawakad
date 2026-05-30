@@ -4,7 +4,7 @@ import 'package:tawakad_app/features/onboarding/ui/animation/logo_glitter_rive.d
 import 'package:tawakad_app/features/onboarding/ui/animation/lists_rive.dart';
 import 'package:tawakad_app/core/widgets/animation/mascot_rive.dart';
 import 'package:tawakad_app/core/widgets/animation/scanning_rive.dart';
-import 'onboarding_data.dart';
+import '../../../model/onboarding_model.dart';
 
 class OnboardingContent extends StatelessWidget {
   final OnboardingStep step;

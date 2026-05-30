@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/services/auth/email_auth_service.dart';
 import '../../../core/services/auth/google_auth_service.dart';
-import '../../../core/services/user_service.dart';
+import '../../../core/services/auth/user_service.dart';
 
 class SignupFlowProvider extends ChangeNotifier {
   final EmailAuthService _emailAuthService = EmailAuthService();
