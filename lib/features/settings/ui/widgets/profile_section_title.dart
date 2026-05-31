@@ -1,7 +1,7 @@
 // 📌 profile_section_title.dart — عنوان قسم في الملف الشخصي
 
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/features/settings&/ui/widgets/settings_ui.dart';
+import 'package:tawakad_app/features/settings/ui/widgets/settings_ui.dart';
 
 class ProfileSectionTitle extends StatelessWidget {
   const ProfileSectionTitle({super.key, required this.title});

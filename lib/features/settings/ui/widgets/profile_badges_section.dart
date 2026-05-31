@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
-import 'package:tawakad_app/features/settings&/ui/widgets/profile_section_title.dart';
-import 'package:tawakad_app/features/settings&/ui/widgets/settings_ui.dart';
+import 'package:tawakad_app/features/settings/ui/widgets/profile_section_title.dart';
+import 'package:tawakad_app/features/settings/ui/widgets/settings_ui.dart';
 
 class ProfileBadgesSection extends StatelessWidget {
   const ProfileBadgesSection({
