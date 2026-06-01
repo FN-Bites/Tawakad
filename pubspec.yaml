@@ -60,11 +60,13 @@ dependencies:
   hijri: ^3.0.0
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
+  flutter_blue_plus_winrt: ^0.0.20
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  integration_test:
+    sdk: flutter
   flutter_launcher_icons: ^0.13.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
