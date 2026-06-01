@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tawakad_app/core/services/firestore_service.dart';
+import 'package:tawakad_app/features/home/service/firestore_service.dart';
 import 'package:tawakad_app/core/services/notification_service.dart';
 import 'package:tawakad_app/features/rewards/provider/reward_provider.dart';
 import '../model/pack_list.dart';

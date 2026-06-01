@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
+// Shared UUID generator used to create unique IDs for new pack lists
 const _uuid = Uuid();
 
+// Data model that represents a user's packing list
 class PackList {
   final String id;
   final String userId;
@@ -39,11 +41,13 @@ class PackList {
     this.isFavorite = false,
   });
 
+// Helper getters for item count, color conversion, and completion status
   int get itemCount => items.length;
   Color get color => Color(colorValue);
   bool get isCompleted =>
       items.isNotEmpty && checkedIndices.length == items.length;
 
+// Equality is based on the list ID to compare PackList objects correctly
   @override
   bool operator ==(Object other) =>
       identical(this, other) || (other is PackList && other.id == id);
@@ -51,6 +55,7 @@ class PackList {
   @override
   int get hashCode => id.hashCode;
 
+// Factory constructor used when creating a new pack list inside the app
   factory PackList.create({
     required String userId,
     required String title,
@@ -85,7 +90,7 @@ class PackList {
       isFavorite: isFavorite,
     );
   }
-
+// Creates an updated copy of the current pack list without changing the original object
   PackList copyWith({
     String? title,
     String? iconPath,
@@ -119,6 +124,7 @@ class PackList {
     );
   }
 
+// Converts the PackList object into a map format suitable for Firestore storage
   Map<String, dynamic> toMap() {
     return {
       'id': id,

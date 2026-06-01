@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:tawakad_app/core/services/ble_firestore_service.dart';
+import 'package:tawakad_app/features/ble_scanning/service/ble_firestore_service.dart';
 import '../model/ble_item.dart';
 import 'ble_provider.dart';
 import 'package:tawakad_app/features/home/model/pack_list.dart';
@@ -144,7 +144,7 @@ class BleItemProvider extends ChangeNotifier {
     _mappings.remove(updated.name);
     notifyListeners();
   }
- 
+
   Future<void> removeSavedItem(String bleIdentifier) async {
     final item = _findByDeviceId(bleIdentifier);
     if (item == null) return;
@@ -177,7 +177,7 @@ class BleItemProvider extends ChangeNotifier {
   }
 
   // ── Multi-list helpers ────────────────────────────────────────────────
- 
+
   Future<void> addListToItem(String deviceId, String listId) async {
     final item = _findByDeviceId(deviceId);
     if (item == null) return;
@@ -432,7 +432,7 @@ class BleItemProvider extends ChangeNotifier {
     return fire;
   }
 
-void _restoreSchedulesFromSavedItems() {
+  void _restoreSchedulesFromSavedItems() {
     for (final entry in _schedules.values) {
       entry.timer?.cancel();
     }
@@ -491,5 +491,4 @@ void _restoreSchedulesFromSavedItems() {
     _schedules.clear();
     notifyListeners();
   }
-
 }

@@ -14,8 +14,9 @@ class BleFirestoreService {
 
     return _db.collection('users').doc(uid).collection('ble_items');
   }
-  
-  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> fetchBleItems() async {
+
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
+      fetchBleItems() async {
     final snapshot = await _bleItemsRef().get();
     return snapshot.docs;
   }
@@ -73,8 +74,12 @@ class BleFirestoreService {
     });
   }
 
-  Future<QueryDocumentSnapshot<Map<String, dynamic>>> _findByDeviceId(String deviceId) async {
-    final snapshot = await _bleItemsRef().where('deviceId', isEqualTo: deviceId).limit(1).get();
+  Future<QueryDocumentSnapshot<Map<String, dynamic>>> _findByDeviceId(
+      String deviceId) async {
+    final snapshot = await _bleItemsRef()
+        .where('deviceId', isEqualTo: deviceId)
+        .limit(1)
+        .get();
     if (snapshot.docs.isEmpty) {
       throw Exception('BLE item not found for deviceId: $deviceId');
     }

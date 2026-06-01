@@ -6,7 +6,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../model/ble_item.dart';
-import '../../../core/services/ble_background_service.dart';
+import '../service/ble_background_service.dart';
 
 class BleProvider extends ChangeNotifier with WidgetsBindingObserver {
   final Map<String, BleItem> _devices = {};

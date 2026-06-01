@@ -51,7 +51,7 @@ class SuccessSheet extends StatelessWidget {
                     color: Colors.grey[600],
                     height: 1.5,
                   ),
-              children: [
+              children: const [
                 TextSpan(
                   text: 'إذا كان البريد الإلكتروني مسجلًا لدينا\n',
                   style: TextStyle(
