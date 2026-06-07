@@ -42,7 +42,7 @@ class RecommendedItem {
 }
 
 class RecommendationService {
-  static const String _base =  'http://127.0.0.1:8000';
+  static const String _base = 'http://192.168.8.165:8000';
 
   RecommendationService._();
   static final RecommendationService instance = RecommendationService._();

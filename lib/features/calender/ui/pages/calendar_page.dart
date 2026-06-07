@@ -36,7 +36,6 @@ class _CalendarPageState extends State<CalendarPage> {
 
   @override
   Widget build(BuildContext context) {
-    // iOS — native calendar (EventKit / CalendarKit). Do not modify this branch.
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       return UiKitView(
         viewType: 'calendar-view',
@@ -47,7 +46,6 @@ class _CalendarPageState extends State<CalendarPage> {
       );
     }
 
-    // Android — Flutter calendar that reads the device calendar.
     if (defaultTargetPlatform == TargetPlatform.android) {
       return const FlutterDeviceCalendarView();
     }

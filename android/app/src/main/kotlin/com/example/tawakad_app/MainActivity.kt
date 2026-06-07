@@ -39,35 +39,72 @@ class AlarmReceiver : BroadcastReceiver() {
 
                         if (items.isEmpty()) return@addOnSuccessListener
 
-                        if (checked.size >= items.size) {
-                            // ✅ All items checked — celebratory notification
-                            showNotification(
-                                context, id,
-                                "🎉 ${title.removeSuffix(" ⚠️ ")} جاهز!",
-                                "أحسنت! جميع عناصر القائمة جاهزة."
-                            )
-                        } else {
-                            // ⚠️ Some items unchecked
-                            val checkedSet = checked.map { (it as? Long)?.toInt() ?: it as Int }.toSet()
-                            val uncheckedItems = items.filterIndexed { index, _ -> index !in checkedSet }
-
-                            val bodyText = if (uncheckedItems.size == 1) {
-                                // Only one missing — name it
-                                "لم تقم بتجهيز \"${uncheckedItems.first()}\" بعد!"
-                            } else {
-                                // Multiple missing — just the count
-                                "لديك ${uncheckedItems.size} عناصر لم يتم تجهيزها بعد!"
+                        val checkedSet = checked.mapNotNull { entry ->
+                            when (entry) {
+                                is Long -> entry.toInt()
+                                is Int  -> entry
+                                else    -> null
                             }
+                        }.toSet()
 
-                            showNotification(context, id, title, bodyText)
+                        val uncheckedItems = items.filterIndexed { index, _ -> index !in checkedSet }
+
+                        when {
+                            uncheckedItems.isEmpty() -> {
+                                showNotification(
+                                    context, id,
+                                    "🎉 ${title.removeSuffix(" ⚠️ ")} جاهز!",
+                                    "أحسنت! جميع أغراض القائمة جاهزة."
+                                )
+                            }
+                            uncheckedItems.size == 1 -> {
+                                showNotification(
+                                    context, id, title,
+                                    "لم تقم بتجهيز \"${uncheckedItems.first()}\" بعد!"
+                                )
+                            }
+                            uncheckedItems.size == 2 -> {
+                                showNotification(
+                                    context, id, title,
+                                    "لديك غرضان لم يتم تجهيزهما بعد!"
+                                )
+                            }
+                            uncheckedItems.size <= 10 -> {
+                                // 3–10: Arabic-Indic count + أغراض
+                                val arabicCount = uncheckedItems.size.toString()
+                                    .map { ch ->
+                                        when (ch) {
+                                            '0' -> '٠'; '1' -> '١'; '2' -> '٢'; '3' -> '٣'
+                                            '4' -> '٤'; '5' -> '٥'; '6' -> '٦'; '7' -> '٧'
+                                            '8' -> '٨'; '9' -> '٩'; else -> ch
+                                        }
+                                    }.joinToString("")
+                                showNotification(
+                                    context, id, title,
+                                    "لديك $arabicCount أغراض لم يتم تجهيزها بعد!"
+                                )
+                            }
+                            else -> {
+                                // 11+: Arabic-Indic count + غرض
+                                val arabicCount = uncheckedItems.size.toString()
+                                    .map { ch ->
+                                        when (ch) {
+                                            '0' -> '٠'; '1' -> '١'; '2' -> '٢'; '3' -> '٣'
+                                            '4' -> '٤'; '5' -> '٥'; '6' -> '٦'; '7' -> '٧'
+                                            '8' -> '٨'; '9' -> '٩'; else -> ch
+                                        }
+                                    }.joinToString("")
+                                showNotification(
+                                    context, id, title,
+                                    "لديك $arabicCount غرضًا لم يتم تجهيزها بعد!"
+                                )
+                            }
                         }
                     } else {
-                        // Document not found — show notification as fallback
                         showNotification(context, id, title, body)
                     }
                 }
                 .addOnFailureListener {
-                    // On Firestore error — show notification as fallback
                     showNotification(context, id, title, body)
                 }
         } else {

@@ -67,10 +67,14 @@ class FirestoreService {
 
   Future<void> toggleItemChecked(
     String listId,
-    List currentChecked,
     int index,
   ) async {
-    final updated = Set.from(currentChecked);
+    final ref = _listsRef().doc(listId);
+    final doc = await ref.get();
+    if (!doc.exists) return;
+
+    final raw = doc.data()?['checkedIndices'] as List? ?? [];
+    final updated = Set<int>.from(raw.map((e) => (e as num).toInt()));
 
     if (updated.contains(index)) {
       updated.remove(index);
@@ -78,6 +82,6 @@ class FirestoreService {
       updated.add(index);
     }
 
-    await _listsRef().doc(listId).update({'checkedIndices': updated.toList()});
+    await ref.update({'checkedIndices': updated.toList()});
   }
 }

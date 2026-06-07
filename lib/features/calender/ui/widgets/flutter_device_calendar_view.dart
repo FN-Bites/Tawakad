@@ -58,7 +58,6 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
     return '${_arabicDigits(h.hDay)} ${h.getLongMonthName()} ${_arabicDigits(h.hYear)}';
   }
 
-  /// Hour label with Arabic-Indic digits e.g. ٠٣:٠٠
   String _hourLabel(int hour) {
     const en = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
     const ar = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -69,7 +68,6 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
     });
   }
 
-  /// Minutes component from "HH:mm" string for vertical positioning
   int _minutesFromTimeString(String? time) {
     if (time == null) return 0;
     final parts = time.split(':');
@@ -84,8 +82,6 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
     }).toList();
   }
 
-  /// Parse hour from the "HH:mm" time string, NOT from date.hour
-  /// because date is stored as midnight and time is a separate field.
   int _hourFromTimeString(String? time) {
     if (time == null) return 0;
     final parts = time.split(':');
@@ -106,12 +102,12 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
     final allLists = provider.lists;
     final selectedDayLists = _listsForDay(allLists, _selectedDate);
     final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Column(
         children: [
-          // ── Week strip ──────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             child: Row(
@@ -126,6 +122,7 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                             _shortWeekday(date),
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
+                              color: onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -145,7 +142,7 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                                 fontWeight: FontWeight.bold,
                                 color: _sameDay(date, _selectedDate)
                                     ? Colors.white
-                                    : theme.colorScheme.onSurface,
+                                    : onSurface,
                               ),
                             ),
                           ),
@@ -163,6 +160,9 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                           const SizedBox(height: 4),
                           Text(
                             _arabicDigits(HijriCalendar.fromDate(date).hDay),
+                            style: TextStyle(
+                              color: onSurface,
+                            ),
                           ),
                         ],
                       ),
@@ -172,7 +172,6 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
             ),
           ),
           Divider(color: theme.dividerColor, height: 1),
-          // ── Selected day header ─────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 14),
             child: Column(
@@ -181,20 +180,20 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                   _gregorianHeader(),
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${_hijriHeader()} هـ',
                   style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ],
             ),
           ),
           Divider(color: theme.dividerColor, height: 1),
-          // ── Hourly timeline ─────────────────────────────────────────
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
@@ -205,6 +204,7 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                     child: Text(
                       'لا توجد قوائم في هذا اليوم',
                       textAlign: TextAlign.center,
+                      style: TextStyle(color: onSurface),
                     ),
                   ),
                 for (var hour = 0; hour <= 23; hour++)
@@ -213,7 +213,6 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                     child: Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        // ── Hour label + divider ───────────────────
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -222,6 +221,7 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                               child: Text(
                                 _hourLabel(hour),
                                 textAlign: TextAlign.end,
+                                style: TextStyle(color: onSurface),
                               ),
                             ),
                             Expanded(
@@ -238,7 +238,6 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
                             ),
                           ],
                         ),
-                        // ── Events positioned by minute offset ─────
                         Positioned(
                           left: 90,
                           right: 0,
@@ -274,7 +273,6 @@ class _FlutterDeviceCalendarViewState extends State<FlutterDeviceCalendarView> {
   }
 }
 
-/// Event card with full list.color background tint, no English time.
 class _EventCard extends StatelessWidget {
   const _EventCard({required this.list});
 
@@ -284,11 +282,8 @@ class _EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Full card background = list color at 25% opacity
     final cardColor = list.color.withValues(alpha: 0.25);
-    // Left accent bar = list color at full opacity
     final barColor = list.color;
-    // Text color: use the list color darkened for legibility
     final textColor = list.color.withValues(alpha: 1.0);
 
     return Container(
@@ -302,12 +297,10 @@ class _EventCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Solid colour bar on the right (RTL layout) ──────────
             Container(
               width: 5,
               color: barColor,
             ),
-            // ── Title only — no time text ────────────────────────────
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(

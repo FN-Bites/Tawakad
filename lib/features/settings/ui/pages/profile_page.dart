@@ -105,6 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final profile = context.watch<ProfileProvider>();
     final rewards = context.watch<RewardProvider>();
     final isDark = settingsIsDark(context);
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
     final completedLists = rewards.completedLists;
     final highestTier = _highestEarnedTier(completedLists);
@@ -138,9 +139,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 24),
                       _buildProfileSection(
-                          context, profile, isDark, highestTier),
+                          context, profile, isDark, highestTier, onSurface),
                       const SizedBox(height: 28),
-                      _sectionTitle(context, 'جوائزي'),
+                      _sectionTitle(context, 'جوائزي', onSurface),
                       const SizedBox(height: 14),
                       _buildBadgesCard(context, isDark, earnedTiers),
                     ],
@@ -156,6 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
     ProfileProvider profile,
     bool isDark,
     BadgeTier? highestTier,
+    Color onSurface,
   ) {
     final displayName = profile.profile?.displayName ?? 'اسم المستخدم';
     final email = profile.profile?.email ?? '';
@@ -189,16 +191,19 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ],
             ),
-            child:
-                const Icon(Icons.person_rounded, size: 56, color: Colors.white),
+            child: const Icon(
+              Icons.person_rounded,
+              size: 56,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 20),
           Text(
             displayName,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: onSurface, // ✅ fixed
+                ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -215,8 +220,9 @@ class _ProfilePageState extends State<ProfilePage> {
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(100),
-                gradient:
-                    LinearGradient(colors: [bannerPrimary, bannerSecondary]),
+                gradient: LinearGradient(
+                  colors: [bannerPrimary, bannerSecondary],
+                ),
               ),
               child: Text(
                 highestBadge.name,
@@ -307,15 +313,15 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _sectionTitle(BuildContext context, String title) {
+  Widget _sectionTitle(BuildContext context, String title, Color onSurface) {
     return Align(
       alignment: Alignment.centerRight,
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium
-            ?.copyWith(fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: onSurface, // ✅ fixed
+            ),
       ),
     );
   }

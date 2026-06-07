@@ -41,13 +41,13 @@ class PackList {
     this.isFavorite = false,
   });
 
-// Helper getters for item count, color conversion, and completion status
+  // Helper getters for item count, color conversion, and completion status
   int get itemCount => items.length;
   Color get color => Color(colorValue);
   bool get isCompleted =>
       items.isNotEmpty && checkedIndices.length == items.length;
 
-// Equality is based on the list ID to compare PackList objects correctly
+  // Equality is based on the list ID to compare PackList objects correctly
   @override
   bool operator ==(Object other) =>
       identical(this, other) || (other is PackList && other.id == id);
@@ -55,7 +55,7 @@ class PackList {
   @override
   int get hashCode => id.hashCode;
 
-// Factory constructor used when creating a new pack list inside the app
+  // Factory constructor used when creating a new pack list inside the app
   factory PackList.create({
     required String userId,
     required String title,
@@ -90,7 +90,8 @@ class PackList {
       isFavorite: isFavorite,
     );
   }
-// Creates an updated copy of the current pack list without changing the original object
+
+  // Creates an updated copy of the current pack list without changing the original object
   PackList copyWith({
     String? title,
     String? iconPath,
@@ -124,7 +125,7 @@ class PackList {
     );
   }
 
-// Converts the PackList object into a map format suitable for Firestore storage
+  // Converts the PackList object into a map format suitable for Firestore storage
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -162,14 +163,16 @@ class PackList {
       items:
           map['items'] != null ? List<String>.from(map['items'] as List) : [],
       checkedIndices: map['checkedIndices'] != null
-          ? Set<int>.from(map['checkedIndices'] as List)
+          ? Set<int>.from(
+              (map['checkedIndices'] as List).map((e) => (e as num).toInt()))
           : {},
       date: parseDate(map['date']),
       time: map['time'] as String?,
       event: map['event'] as String?,
       repeat: map['repeat'] as bool? ?? false,
       repeatDays: map['repeatDays'] != null
-          ? List<int>.from(map['repeatDays'] as List)
+          ? List<int>.from(
+              (map['repeatDays'] as List).map((e) => (e as num).toInt()))
           : [],
       isShared: map['isShared'] as bool? ?? false,
       createdAt: parseDate(map['createdAt']) ?? DateTime.now(),

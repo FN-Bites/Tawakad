@@ -1,15 +1,15 @@
-// ⚙️ settings_page.dart — شاشة الإعدادات (حفظ، خروج، أدوية)
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tawakad_app/core/routes.dart';
+import 'package:tawakad_app/core/widgets/glass_elements/app_liquid_buttons.dart';
 import 'package:tawakad_app/features/settings/providers/profile_provider.dart';
 import 'package:tawakad_app/features/settings/profile_labels.dart';
 import 'package:tawakad_app/features/settings/ui/pages/medication_page.dart';
-import 'package:tawakad_app/features/settings/ui/pages/notifications_settings_page.dart';
+import 'package:tawakad_app/core/services/notification_settings_service.dart';
 import 'package:tawakad_app/features/settings/ui/pages/privacy_policy_page.dart';
 import 'package:tawakad_app/features/settings/ui/widgets/personal_info_sheets.dart';
 import 'package:tawakad_app/features/settings/ui/widgets/settings_ui.dart';
+import 'package:tawakad_app/core/widgets/toggle_button.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -62,6 +62,12 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Future<void> _onNotificationsChanged(bool value) async {
+    final profile = context.read<ProfileProvider>();
+    profile.setNotificationsEnabled(value);
+    await NotificationSettingsService().setAppEnabled(value);
+  }
+
   Future<void> _signOut() async {
     await context.read<ProfileProvider>().signOut();
     if (!mounted) return;
@@ -85,9 +91,13 @@ class _SettingsPageState extends State<SettingsPage> {
               : SingleChildScrollView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // ── Header ──────────────────────────────────────────
                       const SettingsPageHeader(title: 'الإعدادات'),
                       const SizedBox(height: 26),
+
+                      // ── Personal info ────────────────────────────────────
                       const SettingsSectionTitle(title: 'معلومات شخصية'),
                       SettingsCard(
                         children: [
@@ -130,13 +140,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         ],
                       ),
                       const SizedBox(height: 24),
+
+                      // ── Medication ───────────────────────────────────────
                       const SettingsSectionTitle(title: 'الدواء'),
                       SettingsCard(
                         children: [
                           SettingsNavigationTile(
                             title: 'إدارة الأدوية',
                             subtitle: 'إضافة وتنظيم الأدوية',
-                            icon: Icons.medication_rounded,
                             onTap: () {
                               Navigator.push(
                                 context,
@@ -146,51 +157,32 @@ class _SettingsPageState extends State<SettingsPage> {
                               );
                             },
                           ),
-                          const SettingsDivider(),
-                          SettingsNavigationTile(
-                            title: 'أوقات التناول',
-                            subtitle: 'إدارة أوقات الأدوية',
-                            onTap: () {},
-                          ),
-                          const SettingsDivider(),
-                          SettingsNavigationTile(
-                            title: 'التذكيرات',
-                            subtitle: 'تنبيهات تناول الدواء',
-                            onTap: () {},
-                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
+
+                      // ── General ──────────────────────────────────────────
                       const SettingsSectionTitle(title: 'عام'),
                       SettingsCard(
                         children: [
                           const SettingsLanguageTile(),
                           const SettingsDivider(),
-                          SettingsSwitchTile(
-                            title: 'مظهر داكن',
+                          ToggleRowWidget(
+                            label: 'مظهر داكن',
                             value: profile.darkMode,
                             onChanged: profile.setDarkMode,
                           ),
-                          const SettingsDivider(),
-                          SettingsNavigationTile(
-                            title: 'الإشعارات',
-                            subtitle: profile.notificationsEnabled
-                                ? 'مفعّلة'
-                                : 'غير مفعّلة',
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (_) =>
-                                      const NotificationsSettingsPage(),
-                                ),
-                              );
-                              if (mounted) setState(() {});
+                          ToggleRowWidget(
+                            label: 'الإشعارات',
+                            value: profile.notificationsEnabled,
+                            onChanged: (v) async {
+                              await _onNotificationsChanged(v);
                             },
                           ),
                         ],
                       ),
                       const SizedBox(height: 24),
+
                       const SettingsSectionTitle(title: 'حول توكّد'),
                       SettingsCard(
                         children: [
@@ -210,36 +202,56 @@ class _SettingsPageState extends State<SettingsPage> {
                               );
                             },
                           ),
-                          const SettingsDivider(),
-                          SettingsSwitchTile(
-                            title: 'مشاركة البيانات',
-                            value: profile.shareData,
-                            onChanged: profile.setShareData,
-                          ),
                         ],
                       ),
                       const SizedBox(height: 28),
-                      SettingsActionButton(
-                        text: profile.isSaving
+
+                      AppLiquidButtons.primary(
+                        label: profile.isSaving
                             ? 'جاري الحفظ...'
                             : 'حفظ التغييرات',
-                        color: const Color(0xFF1F8EFA),
-                        textColor: Colors.white,
-                        onTap: profile.isSaving ? () {} : _save,
+                        onPressed: profile.isSaving ? null : _save,
                       ),
-                      const SizedBox(height: 14),
-                      SettingsActionButton(
-                        text: 'تسجيل خروج',
-                        color: settingsCardColor(context),
-                        textColor: Colors.red,
-                        onTap: _signOut,
+                      const SizedBox(height: 12),
+
+                      AppLiquidButtons.iconWithLabel(
+                        icon: Icons.logout_rounded,
+                        label: 'تسجيل خروج',
+                        onPressed: _signOut,
+                        iconColor: Colors.red,
+                        textStyle: const TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.red,
+                        ),
+                        shadows: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.08),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 14),
-                      SettingsActionButton(
-                        text: 'حذف الحساب',
-                        color: settingsCardColor(context),
-                        textColor: Colors.red,
-                        onTap: () {},
+                      const SizedBox(height: 12),
+                      AppLiquidButtons.iconWithLabel(
+                        icon: Icons.delete_outline_rounded,
+                        label: 'حذف الحساب',
+                        onPressed: () {},
+                        iconColor: Colors.red,
+                        textStyle: const TextStyle(
+                          fontFamily: 'Montserrat',
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.red,
+                        ),
+                        shadows: [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.08),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                       ),
                     ],
                   ),

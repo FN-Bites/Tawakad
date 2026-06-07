@@ -1,5 +1,3 @@
-// 🧩 settings_ui.dart — ويدجت مشتركة (بطاقات، صفوف، أزرار، لغة)
-
 import 'package:flutter/material.dart';
 import 'package:tawakad_app/core/theme/app_colors.dart';
 import 'package:tawakad_app/core/widgets/glass_elements/glass_back_button.dart';
@@ -22,7 +20,6 @@ Color _settingsMutedText(BuildContext context) => settingsIsDark(context)
 Color _settingsPrimaryText(BuildContext context) =>
     settingsIsDark(context) ? AppDarkColors.textPrimary : AppColors.textPrimary;
 
-/// أحجام خط موحّدة لشاشة الإعدادات وما يشابهها.
 abstract final class SettingsTextStyles {
   static const String _fontFamily = 'Montserrat';
 
@@ -131,8 +128,6 @@ class SettingsPageHeader extends StatelessWidget {
   });
 
   final String title;
-
-  /// زر أو عنصر على **اليسار** (مثل الإعدادات أو إضافة دواء).
   final Widget? action;
 
   @Deprecated('Use action instead')
@@ -267,6 +262,8 @@ class SettingsSwitchTile extends StatelessWidget {
       ),
       activeThumbColor: Colors.white,
       activeTrackColor: const Color(0xFF1F8EFA),
+      inactiveThumbColor: Colors.white,
+      inactiveTrackColor: const Color(0xFFE5E5EA),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
     );
   }
@@ -299,11 +296,6 @@ class SettingsLanguageTile extends StatelessWidget {
             ),
           ],
         ),
-      ),
-      trailing: const Icon(
-        Icons.arrow_forward_ios_rounded,
-        size: 18,
-        color: Color(0xFFB0B0B0),
       ),
       onTap: () {
         ScaffoldMessenger.of(context).showSnackBar(

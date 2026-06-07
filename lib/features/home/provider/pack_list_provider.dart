@@ -221,22 +221,23 @@ class PackListProvider extends ChangeNotifier {
     final index = _lists.indexWhere((l) => l.id == listId);
     if (index == -1) return;
 
-    final currentChecked = _lists[index].checkedIndices;
-    await _service.toggleItemChecked(
-        listId, currentChecked.toList(), itemIndex);
+    // FIX: no longer pass local checkedIndices to the service — the service
+    // now reads fresh from Firestore directly to avoid stale/corrupted state.
+    await _service.toggleItemChecked(listId, itemIndex);
 
-    final updated = Set<int>.from(currentChecked);
-    if (updated.contains(itemIndex)) {
-      updated.remove(itemIndex);
+    // Update local state optimistically so the UI responds immediately
+    final currentChecked = Set<int>.from(_lists[index].checkedIndices);
+    if (currentChecked.contains(itemIndex)) {
+      currentChecked.remove(itemIndex);
     } else {
-      updated.add(itemIndex);
+      currentChecked.add(itemIndex);
     }
 
-    _lists[index] = _lists[index].copyWith(checkedIndices: updated);
+    _lists[index] = _lists[index].copyWith(checkedIndices: currentChecked);
 
     // ── Reward hook ───────────────────────────────────────────────────────
     final list = _lists[index];
-    if (list.items.isNotEmpty && updated.length == list.items.length) {
+    if (list.items.isNotEmpty && currentChecked.length == list.items.length) {
       rewardProvider?.onListCompleted();
     }
 
@@ -277,8 +278,7 @@ class PackListProvider extends ChangeNotifier {
     }
 
     currentChecked.add(itemIndex);
-    await _service.toggleItemChecked(
-        listId, currentChecked.toList(), itemIndex);
+    await _service.toggleItemChecked(listId, itemIndex);
 
     _lists[listIndex] =
         _lists[listIndex].copyWith(checkedIndices: currentChecked);
