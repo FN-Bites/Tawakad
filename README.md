@@ -1,124 +1,189 @@
 # Tawakad (توكد)
 
-تطبيق Flutter متعدد المنصات (Android / iOS) لإدارة قوائم تجهيز الأغراض مع تدفقات تسجيل دخول وتهيئة مستخدم، وربط **Firebase Authentication** و**Cloud Firestore** لمستندات المستخدم. هذا المستند يعكس **هيكلة فصل التنفيذ والتحقق** في الأطروحة مع مطابقة ما هو منفّذ فعلياً في المستودع.
+Tawakad is a cross-platform Flutter mobile app that helps users prepare for different destinations by creating packing lists, receiving smart item suggestions, scanning BLE-tagged belongings, viewing scheduled lists in a calendar, and earning rewards for completed lists.
 
-**LaTeX (فصل موسّع ومتوافق مع الكود):** `thesis/SYSTEM_IMPLEMENTATION_AND_VALIDATION.tex`
+The app is built with Flutter, Firebase, BLE scanning, and a FastAPI AI backend.
 
 ---
 
-## متطلبات التشغيل
+## Run Instructions
 
-- Flutter SDK (المشروع يستهدف `sdk: ^3.5.1` — راجع `pubspec.yaml`)
-- مشروع Firebase مضبوط مع `lib/firebase_options.dart`
-- Xcode (للبناء على iOS) / Android Studio أو SDK (للبناء على Android)
+### 1. Install Flutter packages
+
+From the main project folder:
 
 ```bash
 flutter pub get
+```
+
+### 2. Start the AI backend
+
+Open a terminal in the project folder, then run:
+
+```bash
+cd toki_backend
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+```
+
+The backend must stay running while testing AI recommendations.
+
+### 3. Choose the correct backend URL
+
+| Device           | Backend URL                  |
+| ---------------- | ---------------------------- |
+| Chrome           | `http://127.0.0.1:8000`      |
+| Android Emulator | `http://10.0.2.2:8000`       |
+| Physical Phone   | `http://YOUR_LAPTOP_IP:8000` |
+
+For a physical phone, the phone and laptop must be connected to the same Wi-Fi.
+
+To find your laptop IP on Windows:
+
+```bash
+ipconfig
+```
+
+Use the IPv4 address from the Wi-Fi adapter.
+
+### 4. Run the Flutter app
+
+```bash
 flutter run
 ```
 
----
+For Chrome testing:
 
-## هيكلة المستودع (معرّفة تقنياً)
+```bash
+flutter run -d chrome
+```
 
-| المسار | الدور |
-|--------|--------|
-| `lib/` | منطق الواجهة والخدمات المشتركة (Dart) |
-| `lib/core/` | ثيم، مسارات، `AppShell`، عناصر واجهة مشتركة |
-| `lib/features/onboarding/` | شاشات التهيئة والأسئلة |
-| `lib/features/signIn/` · `signUp/` | تسجيل الدخول، التسجيل، التحقق من البريد، نسيان كلمة المرور |
-| `lib/features/home/` | الرئيسية، القوائم (`PackList`)، البحث، التصفية، إنشاء/تعديل القائمة |
-| `android/` · `ios/` | إعدادات المنصة؛ على iOS: **عرض تقويم أصلي** (EventKit) عبر `UiKitView` |
-| `thesis/` | وثائق الأطروحة (مثل فصل التنفيذ والتحقق) |
-
-**اعتماديات رئيسية:** `firebase_core`, `firebase_auth`, `cloud_firestore`, `google_sign_in`, `provider`, `uuid`, `share_plus`, واجهات `intl` / `flutter_localizations`.
+Chrome is useful for UI testing, but a physical phone is needed for BLE scanning and full mobile behavior.
 
 ---
 
-## نظرة على التنفيذ (مطابقة فصل الأطروحة)
+## Device Requirements
 
-الفقرات أدناه تتبع هيكل `\chapter{SYSTEM IMPLEMENTATION AND VALIDATION}`: مقدمة، تنفيذ حسب السبرنتات، ثم التحقق والاختبار.
+A physical Android or iOS phone is recommended because these features need real mobile hardware:
 
-### Introduction
-
-- التطبيق يُبنى بشكل تكراري (مناسب لوصف عملية Agile-Scrum في الأطروحة).
-- **الواجهة:** Flutter في `lib/` مع تصميم عربي (RTL) في أجزاء كبيرة من التدفق.
-- **الخدمات السحابية:** Firebase Auth + Firestore لمستند المستخدم عند التسجيل (إجابات التهيئة، بيانات الحساب، تاريخ كلمات مرور مجزأة للسياسات).
-- **التوصيات الذكية:** مذكورة في تجربة المنتج (مثلاً نص التهيئة حول «اقتراحات ذكية»)؛ **لا يوجد** في `pubspec.yaml` حزمة تعلم آلي أو خادم توصية مدمج — الجزء «الذكي» في الكود الحالي يقتصر على **تخزين أساس بيانات** (إجابات التهيئة) و**خارطة طريق** يمكن وصفها في الأطروحة كعمل مستقبلي.
-
-### Implementation by Sprints
-
-#### Sprint 1: Authentication Module
-
-**Frontend (منفّذ):**
-
-- واجهات تسجيل الدخول والتسجيل، التحقق من البريد، نسيان كلمة المرور.
-- التحقق من الحقول وأخطاء الخادم، قوة كلمة المرور عند التسجيل، إظهار/إخفاء كلمة المرور حيث ينطبق.
-- تنقل بين شاشات المصادقة (`lib/core/routes.dart`).
-- **Firebase Authentication** (بريد/كلمة مرور + **Google Sign-In** عبر `GoogleAuthService`).
-
-**Backend / Cloud (منفّذ):**
-
-- إنشاء الحساب، إرسال بريد التحقق، منع الدخول ببريد غير مُفعّل (للمسار البريدي)، إعادة تعيين كلمة المرور.
-- جلسة المستخدم تدار عبر SDK Firebase على الجهاز.
-- كتابة مستند `users/{uid}` في Firestore بعد التسجيل (`UserService`).
-
-#### Sprint 2: Home Dashboard Module
-
-**Frontend (منفّذ):**
-
-- لوحة رئيسية، بطاقات القوائم، شريط تصفية (اليوم / المفضلة / الكل)، مؤشر المفضلة، بحث من `AppShell`.
-- إدارة الحالة عبر `PackListProvider` (`ChangeNotifier`).
-- تدفق إنشاء/تعديل قائمة مع تاريخ/وقت/تكرار/مشاركة (حقول النموذج).
-
-**ملاحظة:** لا يوجد في الكود الحالي **إيماءات سحب (swipe)** مخصصة لإجراءات سريعة على البطاقات (لم يُعثر على `Dismissible` / `Slidable` في مسار الرئيسية).
-
-**Backend / Cloud (الواقع الحالي مقابل نص الأطروحة العام):**
-
-- **Firestore:** مستخدم لـ **مستند المستخدم** وليس لـ CRUD قوائم التذكير في السحابة في هذا الإصدار.
-- **القوائم (`PackList`):** تُخزَّن **في الذاكرة** أثناء تشغيل التطبيق (`PackListProvider`)؛ لا توجد مزامنة فورية لقوائم على Firestore في الكود الحالي.
-- جدولة التذكيرات: الحقول الزمنية مُعرَّفة على النموذج؛ **لا** توجد `firebase_messaging` أو إشعارات محلية في `pubspec.yaml` لجدولة دفع آلية.
-
-#### Sprint 3: Settings and Profile Module
-
-**الواقع في المستودع:** لا يوجد مجلد «إعدادات» كامل بشاشات لغة/إشعارات/ملف شخصي قابل للتعديل كما في قائمة الأطروحة المثالية.
-
-**ما هو منفّذ بدلاً من ذلك:**
-
-- إعدادات **عامة للتطبيق** في `main.dart`: ثيم فاتح/داكن و`ThemeMode.system`، `locale` افتراضي عربي مع `supportedLocales` تشمل الإنجليزية (تبديل لغة من واجهة مخصصة غير مبرهن هنا).
-- **غلاف التطبيق** `AppShell`: شريط تنقل سفلي، بحث، تبويب التقويم، تبويب placeholder للمسح.
-- أيقونة مستخدم زخرفية في شريط الرئيسية دون مسار ملف شخصي كامل.
-
-**Backend:** مزامنة «تفضيلات المستخدم» على Firestore لإعدادات UI **غير منفذة** في هذا النطاق؛ البيانات السحابية للمستخدم تقتصر على ما يُكتب عند التسجيل/تسجيل الدخول كما في Sprint 1.
-
-#### Sprint 4: AI Recommendation Module
-
-**جمع البيانات (منفّذ جزئياً):**
-
-- إجابات استبيان التهيئة تُحفظ في Firestore مع المستخدم.
-
-**غير منفّذ كمنطق تطبيق في `lib/`:**
-
-- تاريخ التذكيرات كمدخلات لنموذج، أحداث تقويم مجمّعة لـ ML، طقس، أنماط سلوكية لتحليل آلي — يمكن اعتبارها **متطلبات مستقبلية** أو تكاملات لاحقة.
-- معالجة أولية، مقارنة نماذج، نموذج نهائي مختار، ومقاييس Accuracy/Precision/Recall/F1 **لا توجد** كأنابيب كود في المشروع؛ تناسب وصفها في الأطروحة كمرحلة **تصميم/بحث** أو عمل لاحق.
+- BLE scanning
+- BLE tag mapping
+- Nearby/missing item detection
+- Bluetooth and location permissions
+- Calendar-related mobile behavior
 
 ---
 
-## Validation and Testing
+## Main Features
 
-ما ينطبق على النسخة الحالية من المشروع:
-
-| المجال | أمثلة تحقق واقعية |
-|--------|-------------------|
-| **واجهة** | اتساق الشاشات، RTL، التنقل بين المصادقة والـ shell |
-| **Firebase** | التسجيل، التحقق، الدخول، Google، إعادة التعيين، كتابة `users` |
-| **تكامل** | iOS: `UiKitView` + قنوات أصلية للتقويم (`ios/Runner/PlatformViews/`)؛ Android: واجهة placeholder للتقويم في المسار المربوط بـ `AppShell` |
-| **وظيفي** | إنشاء/تعديل قائمة، تصفية، مفضلة، بحث ضمن الجلسة |
-
-**اختبارات آلية:** يوجد `flutter_test` في `dev_dependencies`؛ يُنصح بتوسيع `test/` حسب خطة الجودة في الأطروحة.
+- User sign-up, sign-in, email verification, password reset, and Google Sign-In.
+- User onboarding for personalization.
+- Destination-based packing lists.
+- Add, edit, check, and organize list items.
+- AI smart suggestions based on list context.
+- BLE tag linking and scanning.
+- Calendar view for scheduled lists.
+- Rewards and badges after completing lists.
+- Arabic-first interface with RTL support.
 
 ---
 
-## ملخص
+## Screenshots
 
-المشروع يطبّق بقوة **مسار المصادقة السحابي** و**تجربة الرئيسية والقوائم** على العميل، مع **تأسيس بيانات المستخدم** في Firestore. أجزاء الأطروحة المتعلقة بـ **مزامنة قوائم سحابية، إعدادات كاملة، إشعارات، ونموذج توصية مُدرَّب** يجب أن تُعرَض إما كـ **عمل مستقبلي** أو تُحدَّث بعد تنفيذها في الكود ليبقى المستندان (README والأطروحة) متسقين مع المستودع.
+Add the screenshots inside:
+
+```text
+docs/screenshots/
+```
+
+Then use these image links:
+
+| Feature            | Screenshot                                                 |
+| ------------------ | ---------------------------------------------------------- |
+| Smart Suggestions  | ![Smart Suggestions](docs/screenshots/ai-suggestions.jpeg) |
+| Rewards            | ![Rewards](docs/screenshots/rewards.jpeg)                  |
+| BLE Signal Mapping | ![BLE Signal Mapping](docs/screenshots/ble-signal.jpeg)    |
+| List View          | ![List View](docs/screenshots/list-view.jpeg)              |
+| Calendar           | ![Calendar](docs/screenshots/calendar.jpeg)                |
+| Create List        | ![Create List](docs/screenshots/create-list.jpeg)          |
+
+---
+
+## AI Recommendation Feature
+
+The AI backend suggests items based on the list context, such as destination, event type, role, gender, time period, and weather.
+
+Example: for a gym list, the app may suggest items such as a water bottle, towel, athletic shoes, snack, and deodorant.
+
+---
+
+## BLE Scanning Feature
+
+Tawakad can connect personal items to BLE tags. After mapping a tag to an item, the app can scan nearby BLE signals and help detect whether the tagged item is nearby or missing.
+
+To test BLE:
+
+1. Use a physical phone.
+2. Turn on Bluetooth.
+3. Allow Bluetooth and location permissions.
+4. Keep the BLE tag nearby.
+5. Run the app on the phone.
+6. Open the BLE mapping/scanning feature.
+
+---
+
+## Firebase
+
+The project uses Firebase for authentication and user data storage.
+
+Required Firebase setup:
+
+- Firebase Authentication enabled.
+- Email/password provider enabled.
+- Google provider enabled if Google Sign-In is used.
+- Cloud Firestore enabled.
+- `lib/firebase_options.dart` generated using FlutterFire CLI.
+
+Do not place private keys, passwords, or personal configuration IDs inside the README.
+
+---
+
+## Common Issues
+
+### Backend works on Chrome but not on phone
+
+Check that:
+
+- The backend is running with `--host 0.0.0.0`.
+- The phone and laptop are on the same Wi-Fi.
+- The app uses the laptop IP address, not `127.0.0.1`.
+- Firewall is not blocking port `8000`.
+
+### BLE devices do not appear
+
+Check that:
+
+- You are using a real phone.
+- Bluetooth is enabled.
+- Required permissions are allowed.
+- The BLE tag is powered on and close to the phone.
+
+---
+
+## Demo Flow
+
+1. Start the AI backend.
+2. Run the app on a physical phone.
+3. Sign up or sign in.
+4. Complete onboarding.
+5. Create a list.
+6. Open smart suggestions.
+7. Map a BLE tag to an item.
+8. Scan nearby BLE signals.
+9. View scheduled lists in the calendar.
+10. Complete the list and show the reward badge.
+
+---
+
+## Summary
+
+Tawakad combines smart packing lists, AI recommendations, BLE item scanning, calendar organization, and rewards to help users leave prepared and avoid forgetting important belongings.
